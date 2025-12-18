@@ -1,6 +1,6 @@
 module github.com/DSACMS/verification-service-api
 
-go 1.25.5
+go 1.25
 
 require (
 	github.com/gofiber/contrib/otelfiber/v2 v2.2.3
