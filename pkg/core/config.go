@@ -25,12 +25,30 @@ type CognitoConfig struct {
 	AppClientID string
 }
 
+// Values needed to connect to the national student clearing house
+// see:
+//   - https://docs.studentclearinghouse.org/vs/insights-json/verification-services-request
+//
+// - https://docs.studentclearinghouse.org/vs/verification-services/oauth
+type NSCConfig struct {
+	// Endpoint for the insights API
+	Endpoint string
+	// Client ID for NSC API
+	ClientID string
+	// Client Secret for NSC API
+	ClientSecret string
+	// Access Token URL for NSC API
+	AccessTokenURL string
+}
+
 type Config struct {
 	Cognito     CognitoConfig
 	Environment string
 	Otel        OtelConfig
 	Port        int
 	SkipAuth    bool
+	// Configuration for connecting to NSC
+	NSCConfig NSCConfig
 }
 
 func WithEnvironment(environment string) func(*Config) {
@@ -97,6 +115,30 @@ func WithCognitoAppClientID(appClientID string) func(*Config) {
 	}
 }
 
+func WithNSCEndpoint(endpoint string) func(*Config) {
+	return func(c *Config) {
+		c.NSCConfig.Endpoint = endpoint
+	}
+}
+
+func WithNSCClientID(clientID string) func(*Config) {
+	return func(c *Config) {
+		c.NSCConfig.ClientID = clientID
+	}
+}
+
+func WithNSCClientSecret(clientSecret string) func(*Config) {
+	return func(c *Config) {
+		c.NSCConfig.ClientID = clientSecret
+	}
+}
+
+func WithNSCAccessTokenURL(accessTokenURL string) func(*Config) {
+	return func(c *Config) {
+		c.NSCConfig.ClientID = accessTokenURL
+	}
+}
+
 func DefaultConfig() Config {
 	return Config{
 		Environment: "development",
@@ -113,6 +155,12 @@ func DefaultConfig() Config {
 			Region:      "us-east-1",
 			UserPoolID:  "UNSET",
 			AppClientID: "UNSET",
+		},
+		NSCConfig: NSCConfig{
+			Endpoint:       "UNSET",
+			ClientID:       "UNSET",
+			ClientSecret:   "UNSET",
+			AccessTokenURL: "UNSET",
 		},
 	}
 }
