@@ -1,4 +1,4 @@
-# Feature: Education Verification
+# Feature: NSC Education
 
 ## Feature Overview
 Provides education verification through NSC by submitting a structured JSON request with OAuth2 client-credentials authentication.

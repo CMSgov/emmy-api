@@ -1,4 +1,4 @@
-# Feature: Authentication Middleware
+# Feature: Cognito Auth
 
 ## Feature Overview
 Validates AWS Cognito access tokens for incoming requests when auth is enabled.

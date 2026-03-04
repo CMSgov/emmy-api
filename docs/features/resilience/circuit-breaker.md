@@ -1,4 +1,4 @@
-# Feature: Redis Circuit Breaker
+# Feature: Circuit Breaker
 
 ## Feature Overview
 Currently provides endpoint admission gating based on Redis-stored breaker state.

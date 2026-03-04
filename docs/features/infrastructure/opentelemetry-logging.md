@@ -1,4 +1,4 @@
-# Feature: Observability and Logging
+# Feature: OpenTelemetry Logging
 
 ## Feature Overview
 Implements trace/metric export and structured logging with optional OpenTelemetry log fanout.

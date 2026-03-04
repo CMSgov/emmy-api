@@ -67,6 +67,8 @@ Current wiring caveat on `main`: `/status` is registered in `api.New` using `api
 - [Planning](planning/)
 - [Questions](questions/)
 
+Feature docs are categorized by domain under `features/core`, `features/infrastructure`, `features/security`, and `features/resilience`.
+
 ## Naming Note
 Initial requirements referenced `/docs/planing`; this repo standardizes on `/docs/planning`.
 

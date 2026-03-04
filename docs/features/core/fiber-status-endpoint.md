@@ -1,4 +1,4 @@
-# Feature: Health Status Endpoint
+# Feature: Fiber Status Endpoint
 
 ## Feature Overview
 Intended behavior is a lightweight Redis-backed health endpoint at `GET /status`.
