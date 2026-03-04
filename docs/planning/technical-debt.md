@@ -11,6 +11,7 @@
 - Respect `cfg.Port` in server listen address.
 - Integrate breaker transition hooks around downstream call outcomes.
 - Add hermetic integration test setup for Redis.
+- Standardized Docker Compose container naming to concise `emmy-*` values (`emmy-api`, `emmy-jaeger`, `emmy-otel-collector`, `emmy-prometheus`).
 
 ## Implementation Steps
 1. Correct docs/sample env and add config consistency test.
