@@ -1,13 +1,17 @@
 # Feature: Health Status Endpoint
 
 ## Feature Overview
-Provides a lightweight Redis-backed health endpoint at `GET /status`.
+Intended behavior is a lightweight Redis-backed health endpoint at `GET /status`.
+Current `main` wiring has a known caveat: `/status` is registered via `api.New` using `api.Config.Redis`, but `main` does not inject that field.
 
 ## Business Logic
-- Wrap endpoint with circuit breaker middleware.
-- Create request-scoped context with 2-second timeout.
-- Execute Redis `PING` through shared redis helper.
-- Return `200 OK` on success; propagate error through Fiber handler chain on failure.
+- Intended route behavior:
+  - Wrap endpoint with circuit breaker middleware.
+  - Create request-scoped context with 2-second timeout.
+  - Execute Redis `PING` through shared redis helper.
+  - Return `200 OK` on success; propagate error through Fiber handler chain on failure.
+- Current caveat:
+  - Route wiring path in `main` currently passes nil Redis into status route setup.
 
 ## Package Location
 - `api/routes/status_router.go`
@@ -34,13 +38,14 @@ return c.SendStatus(fiber.StatusOK)
 
 ## Edge Cases Handled Today
 - Timeout-bound ping prevents indefinite blocking.
-- Redis failures bubble to Fiber error handling.
-- Circuit breaker may return `503` before ping is attempted.
+- Redis failures from handler path bubble to Fiber error handling (`500` by default).
+- Circuit breaker may return `503` before ping is attempted when breaker denies.
+- `/status` is auth-gated when `SKIP_AUTH=false` (global Cognito middleware).
 
 ## Performance and Operational Considerations
 - Endpoint is cheap but still network-bound on Redis.
 - Suitable for dependency-aware health checks, not pure process liveness.
-- Circuit breaker wrapping can mask direct Redis error semantics with uniform `503`.
+- Failure semantics differ by path: breaker deny returns `503`, while handler Redis ping errors resolve through Fiber global error handler (`500` for non-`fiber.Error`).
 
 ## Future Improvements
 - Split `/live` (process-only) and `/ready` (dependency-aware) semantics.

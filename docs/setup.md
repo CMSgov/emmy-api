@@ -2,7 +2,7 @@
 
 ## Requirements
 - Go `1.25.x` (`go.mod` sets `go 1.25`).
-- Docker and Docker Compose (for telemetry and optional Redis stack).
+- Docker and Docker Compose (current committed compose file provides API + observability services only).
 - Local Redis at `localhost:6379` for runtime health checks and several tests.
 
 ## Environment Variables
@@ -15,6 +15,8 @@
 | Cognito | `COGNITO_REGION`, `COGNITO_USER_POOL_ID`, `COGNITO_APP_CLIENT_ID` | `us-east-1`, `UNSET`, `UNSET` |
 | Redis | `REDIS_ADDR`, `REDIS_PASSWORD`, `REDIS_DB` | `localhost:6379`, empty, `0` |
 | NSC | `NSC_SUBMIT_URL`, `NSC_TOKEN_URL`, `NSC_CLIENT_SECRET`, `NSC_CLIENT_ID`, `NSC_ACCOUNT_ID` | empty |
+
+`PORT` is parsed from env, but the current `main` listener is still hardcoded to `:8000`.
 
 ### `.env.example` Caveat
 `.env.example` currently uses `Port` and `Environment` (mixed case), while code expects `PORT` and `ENVIRONMENT`.
@@ -29,11 +31,21 @@ go run .
 ```
 
 ### 3) Run with live reload (Air)
+Air is a development watcher that rebuilds and restarts the app when Go files change, so you can iterate without re-running `go run .` manually.
+
+Install Air (Go toolchain install):
+```bash
+go install github.com/air-verse/air@latest
+```
+
+If `air` is not found after install, add your Go bin directory to `PATH` (commonly `$(go env GOPATH)/bin`).
+
+Run:
 ```bash
 air
 ```
 
-Air config is in `.air.toml` and builds with:
+`air` is optional. This repo includes `.air.toml` with build command:
 ```bash
 go build -o ./tmp/main -ldflags "-X verification-service-api/pkg/core.ServiceVersion=local" .
 ```
@@ -49,11 +61,15 @@ Services:
 - Jaeger UI (`:16686`)
 - Prometheus (`:9090`)
 
-### App + Observability + Redis
+Important: this stack does not include Redis. The API process currently pings Redis during startup and exits if Redis is unreachable.
+
+### App + Observability + Redis (current workaround)
+Start the compose stack, then run Redis separately:
 ```bash
-docker compose -f docker-compose-with-redis.yml up --build
+docker compose up --build
+docker run --rm -p 6379:6379 redis:7
 ```
-Adds Redis (`:6379`) for local circuit-breaker/status behavior.
+This provides Redis (`:6379`) for local circuit-breaker/status behavior.
 
 ## Build
 ```bash

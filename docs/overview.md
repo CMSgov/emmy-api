@@ -56,6 +56,8 @@ flowchart TD
     K -.-> O
 ```
 
+Current wiring caveat on `main`: `/status` is registered in `api.New` using `api.Config.Redis`, but `main` currently builds `api.Config` without a Redis client. Treat the `/status` flow above as intended behavior pending that wiring fix.
+
 ## Documentation Map
 - [Architecture](architecture.md)
 - [Setup](setup.md)

@@ -51,7 +51,7 @@ app.Use(slogfiber.NewWithConfig(
 ## Future Improvements
 - Add log sampling strategy for high-throughput scenarios.
 - Add custom business metrics around NSC calls and breaker state.
-- Align environment key naming for OTLP endpoint consistency across compose and app config.
+- Align environment key naming for OTLP endpoint consistency across compose and app config (compose currently uses `OTEL_EXPORTER_OTLP_ENDPOINT`, while app config loader reads `OTEL_OTLP_EXPORTER_ENDPOINT`).
 
 ## Assumptions
 - **High confidence:** Current stack is sufficient for local observability validation but needs production hardening around metrics and SLO-driven instrumentation.

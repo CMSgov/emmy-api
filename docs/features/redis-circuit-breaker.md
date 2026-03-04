@@ -1,7 +1,8 @@
 # Feature: Redis Circuit Breaker
 
 ## Feature Overview
-Protects endpoints from repeated downstream failures by gating requests based on Redis-stored breaker state.
+Currently provides endpoint admission gating based on Redis-stored breaker state.
+Transition hooks (`OnFailure`/`OnSuccess`) exist in the breaker implementation but are not yet called in middleware request flow.
 
 ## Business Logic
 - Middleware computes breaker key per endpoint (`METHOD + route path`).
@@ -9,8 +10,7 @@ Protects endpoints from repeated downstream failures by gating requests based on
 - `Allow` reads Redis state key:
   - no key => closed (allow)
   - future half-open timestamp => open (deny)
-- `OnFailure` increments failure counter and opens breaker when threshold reached.
-- `OnSuccess` clears breaker and failure keys.
+- `OnFailure` and `OnSuccess` behavior exists in `RedisBreaker`, but current middleware does not invoke these methods around handler outcomes.
 
 ## Package Location
 - `pkg/circuitbreaker/circuitbreaker.go`
@@ -52,4 +52,4 @@ if int(fails) >= b.opts.FailureThreshold {
 - Emit breaker state transition metrics.
 
 ## Assumptions
-- **Medium confidence:** Current middleware only enforces `Allow`; transition hooks are expected to be integrated later for full circuit behavior.
+- **High confidence:** Current middleware only enforces `Allow`; transition hooks are expected to be integrated later for full circuit behavior.
