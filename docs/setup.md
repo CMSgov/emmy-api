@@ -2,7 +2,7 @@
 
 ## Requirements
 - Go `1.25.x` (`go.mod` sets `go 1.25`).
-- Docker and Docker Compose (current committed compose file provides API + observability services only).
+- [ ] (TODO) Docker and Docker Compose (current committed compose file provides API + observability services only).
 - Local Redis at `localhost:6379` for runtime health checks and several tests.
 
 ## Environment Variables
@@ -16,14 +16,14 @@
 | Redis | `REDIS_ADDR`, `REDIS_PASSWORD`, `REDIS_DB` | `localhost:6379`, empty, `0` |
 | NSC | `NSC_SUBMIT_URL`, `NSC_TOKEN_URL`, `NSC_CLIENT_SECRET`, `NSC_CLIENT_ID`, `NSC_ACCOUNT_ID` | empty |
 
-`PORT` is parsed from env, but the current `main` listener is still hardcoded to `:8000`.
-
-### `.env.example` Caveat
-`.env.example` currently uses `Port` and `Environment` (mixed case), while code expects `PORT` and `ENVIRONMENT`.
+- [ ] (FIX) `PORT` is parsed from `.env`, but the current `main` listener is still hardcoded to `:8000`.
+- [ ] (FIX) `SKIP_AUTH` does not work
+- [ ] (FIX) `.env.example` currently uses `Port` and `Environment` (mixed case), while code expects `PORT` and `ENVIRONMENT`.
+- [ ] (TODO) add mentioned ENV to the `.env.example`
 
 ## Local Run
 ### 1) Configure env
-Use `.env.local` and/or `.env` with uppercase keys expected by the app.
+Create `.env.local` and/or `.env` from `.env.example`. Adjust variables to your preferred values.
 
 ### 2) Run service directly
 ```bash
