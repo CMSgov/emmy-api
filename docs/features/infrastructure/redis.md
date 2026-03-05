@@ -67,3 +67,23 @@ if err := redisotel.InstrumentMetrics(rdb); err != nil {
 ## Assumptions
 - **High confidence:** Redis is an operational dependency for current startup and status-check behavior.
 - **High confidence:** There is an active wiring caveat on `main` where status route setup may receive nil Redis via `api.New` config path until Redis injection is corrected there.
+
+---
+
+## Local Dev Notes
+
+### Docs
+
+https://redis.io/docs/latest/get-started/
+
+### Installation
+
+#### Mac / Linux
+
+`brew install redis`
+
+### Running
+
+`redis-server`
+
+- [ ] Replace with docker container option 
