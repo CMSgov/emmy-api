@@ -84,7 +84,7 @@ EduVerificationResponse:
   properties:
     requestId:
       type: string
-      description: Proxy-generated request identifier for audit and support.
+      description: EDU service-generated request identifier for audit and support.
       example: req_20251223_114232_828374364
     status:
       $ref: "#/VerificationStatus"
@@ -94,7 +94,7 @@ EduVerificationResponse:
       $ref: "#/TransactionMetadata"
     schools:
       type: array
-      description: Matching schools and enrollment snapshots returned by the provider.
+      description: Matching schools and enrollment snapshots returned by the service.
       items:
         $ref: "#/SchoolSummary"
 
@@ -127,7 +127,7 @@ VerificationResult:
   additionalProperties: false
   required:
     - verified
-    - nscHit
+    - matchFound
     - hasEnrollmentRecords
     - matchedSchoolCount
   properties:
@@ -135,9 +135,9 @@ VerificationResult:
       type: boolean
       description: True when verification is confirmed with at least one returned value.
       example: true
-    nscHit:
+    matchFound:
       type: boolean
-      description: Whether a matching student record was located by NSC.
+      description: Whether a matching student record was located.
       example: true
     hasEnrollmentRecords:
       type: boolean
@@ -162,11 +162,11 @@ TransactionMetadata:
   properties:
     transactionId:
       type: string
-      description: Provider transaction identifier.
+      description: Dependency transaction identifier recorded by the EDU service.
       example: "828374364"
     orderId:
       type: string
-      description: Provider order identifier.
+      description: Dependency order identifier recorded by the EDU service.
       example: "114694166"
     transactionStatus:
       type: string
@@ -179,12 +179,12 @@ TransactionMetadata:
     requestedAt:
       type: string
       format: date-time
-      description: Time when the provider request was recorded.
+      description: Time when the dependency request was recorded.
       example: "2025-12-23T11:42:32.636Z"
     respondedAt:
       type: string
       format: date-time
-      description: Time when the provider response was recorded.
+      description: Time when the dependency response was recorded.
       example: "2025-12-23T11:42:32.636Z"
     charges:
       $ref: "#/TransactionCharges"
@@ -241,7 +241,7 @@ SchoolSummary:
       example: Trident University International
     currentEnrollmentStatus:
       type: string
-      description: Current NSC enrollment status code.
+      description: Current enrollment status code.
       example: CC
     enrollmentRecords:
       type: array
@@ -327,4 +327,3 @@ ProblemDetails:
       type: string
       format: uri-reference
       example: /v1/edu/requests/req_20251223_114232_828374364
-

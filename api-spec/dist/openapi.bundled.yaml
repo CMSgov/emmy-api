@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
-  title: Verification Service API - Education Proxy
+  title: Verification Service API - Education
   version: 1.0.0
   summary: Minimal public API contract for education verification.
   description: |
-    Public proxy contract for education verification requests. This contract intentionally hides provider-specific request complexity while preserving consent/compliance attestation requirements.
+    Public EDU service contract for education verification requests. This contract intentionally abstracts dependency-specific integration complexity while preserving consent/compliance attestation requirements.
 servers:
   - url: https://api.example.gov
     description: Production placeholder
@@ -147,7 +147,7 @@ components:
       properties:
         requestId:
           type: string
-          description: Proxy-generated request identifier for audit and support.
+          description: EDU service-generated request identifier for audit and support.
           example: req_20251223_114232_828374364
         status:
           $ref: '#/components/schemas/VerificationStatus'
@@ -157,7 +157,7 @@ components:
           $ref: '#/components/schemas/TransactionMetadata'
         schools:
           type: array
-          description: Matching schools and enrollment snapshots returned by the provider.
+          description: Matching schools and enrollment snapshots returned by the service.
           items:
             $ref: '#/components/schemas/SchoolSummary'
     VerificationStatus:
@@ -188,7 +188,7 @@ components:
       additionalProperties: false
       required:
         - verified
-        - nscHit
+        - matchFound
         - hasEnrollmentRecords
         - matchedSchoolCount
       properties:
@@ -196,9 +196,9 @@ components:
           type: boolean
           description: True when verification is confirmed with at least one returned value.
           example: true
-        nscHit:
+        matchFound:
           type: boolean
-          description: Whether a matching student record was located by NSC.
+          description: Whether a matching student record was located.
           example: true
         hasEnrollmentRecords:
           type: boolean
@@ -222,11 +222,11 @@ components:
       properties:
         transactionId:
           type: string
-          description: Provider transaction identifier.
+          description: Dependency transaction identifier recorded by the EDU service.
           example: '828374364'
         orderId:
           type: string
-          description: Provider order identifier.
+          description: Dependency order identifier recorded by the EDU service.
           example: '114694166'
         transactionStatus:
           type: string
@@ -239,12 +239,12 @@ components:
         requestedAt:
           type: string
           format: date-time
-          description: Time when the provider request was recorded.
+          description: Time when the dependency request was recorded.
           example: '2025-12-23T11:42:32.636Z'
         respondedAt:
           type: string
           format: date-time
-          description: Time when the provider response was recorded.
+          description: Time when the dependency response was recorded.
           example: '2025-12-23T11:42:32.636Z'
         charges:
           $ref: '#/components/schemas/TransactionCharges'
@@ -299,7 +299,7 @@ components:
           example: Trident University International
         currentEnrollmentStatus:
           type: string
-          description: Current NSC enrollment status code.
+          description: Current enrollment status code.
           example: CC
         enrollmentRecords:
           type: array
@@ -420,7 +420,7 @@ components:
             tooManyRequests:
               $ref: '#/components/examples/TooManyRequestsProblemExample'
     BadGatewayProblem:
-      description: Upstream education provider failed to process request.
+      description: A downstream dependency failed to process the request.
       content:
         application/problem+json:
           schema:
@@ -461,7 +461,7 @@ components:
           message: Successful
         result:
           verified: true
-          nscHit: true
+          matchFound: true
           hasEnrollmentRecords: true
           matchedSchoolCount: 1
         transaction:
@@ -518,12 +518,12 @@ components:
         status: 429
         detail: Too many requests were received. Retry later.
     BadGatewayProblemExample:
-      summary: Upstream provider error.
+      summary: Downstream dependency error.
       value:
-        type: https://api.example.gov/problems/upstream-failure
+        type: https://api.example.gov/problems/dependency-failure
         title: Bad Gateway
         status: 502
-        detail: The education verification provider returned an invalid response.
+        detail: A downstream dependency returned an invalid response.
     ServiceUnavailableProblemExample:
       summary: Service protection controls are open/unavailable.
       value:

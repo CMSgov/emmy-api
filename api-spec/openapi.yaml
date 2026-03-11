@@ -1,11 +1,11 @@
 openapi: 3.1.0
 info:
-  title: Verification Service API - Education Proxy
+  title: Verification Service API - Education
   version: 1.0.0
   summary: Minimal public API contract for education verification.
   description: >
-    Public proxy contract for education verification requests. This contract
-    intentionally hides provider-specific request complexity while preserving
+    Public EDU service contract for education verification requests. This contract
+    intentionally abstracts dependency-specific integration complexity while preserving
     consent/compliance attestation requirements.
 servers:
   - url: https://api.example.gov
@@ -79,4 +79,3 @@ components:
       $ref: ./components/examples.yaml#/ServiceUnavailableProblemExample
 security:
   - BearerAuth: []
-

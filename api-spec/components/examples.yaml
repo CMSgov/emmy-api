@@ -22,7 +22,7 @@ EduVerificationResponseExample:
       message: Successful
     result:
       verified: true
-      nscHit: true
+      matchFound: true
       hasEnrollmentRecords: true
       matchedSchoolCount: 1
     transaction:
@@ -84,12 +84,12 @@ TooManyRequestsProblemExample:
     detail: Too many requests were received. Retry later.
 
 BadGatewayProblemExample:
-  summary: Upstream provider error.
+  summary: Downstream dependency error.
   value:
-    type: https://api.example.gov/problems/upstream-failure
+    type: https://api.example.gov/problems/dependency-failure
     title: Bad Gateway
     status: 502
-    detail: The education verification provider returned an invalid response.
+    detail: A downstream dependency returned an invalid response.
 
 ServiceUnavailableProblemExample:
   summary: Service protection controls are open/unavailable.
@@ -98,4 +98,3 @@ ServiceUnavailableProblemExample:
     title: Service Unavailable
     status: 503
     detail: Education verification is temporarily unavailable.
-

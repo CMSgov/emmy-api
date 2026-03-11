@@ -1,9 +1,9 @@
-# Education Proxy OpenAPI 3.1 Contract
+# Education Verification OpenAPI 3.1 Contract
 
 ## Intent
 
-This feature introduces a design-first OpenAPI 3.1 contract for a public
-education verification proxy endpoint, `POST /v1/edu`.
+This feature introduces a design-first OpenAPI 3.1 contract for the public
+education verification service endpoint, `POST /v1/edu`.
 
 The contract is intentionally minimal and user friendly while preserving
 compliance and consent attestation requirements.
@@ -22,29 +22,21 @@ compliance and consent attestation requirements.
 - Canonical response shape:
   - `requestId`
   - `status` (`code`, `severity`, `message`)
-  - `result` (`verified`, `nscHit`, `hasEnrollmentRecords`,
+  - `result` (`verified`, `matchFound`, `hasEnrollmentRecords`,
     `matchedSchoolCount`)
   - `transaction` metadata and charges
   - `schools` with enrollment snapshots
 - Error envelope for non-2xx responses:
   - RFC 7807 `application/problem+json`
 
-## Mapping Rationale (Canonical -> Provider)
+## Service Ownership and Boundary
 
-The proxy maps user-friendly canonical fields to provider payload fields and
-keeps provider-owned fields internal.
+The EDU service defines and owns the public API contract. Consumers integrate to
+this contract directly.
 
-Selected mapping examples:
-
-- `applicant.firstName` -> NSC `firstName`
-- `applicant.lastName` -> NSC `lastName`
-- `applicant.dateOfBirth` -> NSC `dateOfBirth`
-- `applicant.ssnLast4` -> NSC `ssn` (last-4 handling policy is implemented by proxy)
-- `consent.attested=true` -> NSC `terms="y"` (internal mapping)
-- `clientReferenceId` -> NSC `caseReferenceId` (when provided)
-
-Provider account and routing controls such as `accountId`, `endClient`, and
-other service options are not public contract fields in v1.
+Dependency-specific request/response formats, routing controls, and integration
+mechanics are internal implementation details and are not part of the public
+contract.
 
 ## Compliance Fields
 
@@ -60,10 +52,10 @@ minimal.
 ## Sample Flow
 
 1. Client sends `POST /v1/edu` with canonical identity and consent payload.
-1. Proxy validates schema, auth, and consent fields.
-1. Proxy maps canonical payload to provider request format.
-1. Proxy returns normalized education verification result and enrollment summary.
-1. If request/auth/upstream errors occur, proxy returns RFC 7807 problem details.
+1. EDU service validates schema, auth, and consent fields.
+1. EDU service executes verification through internal dependency orchestration.
+1. EDU service returns normalized education verification results and enrollment summary.
+1. If validation/auth/dependency errors occur, EDU service returns RFC 7807 problem details.
 
 ## Spec and Governance Files
 
@@ -73,4 +65,3 @@ minimal.
 - `api-spec/dist/openapi.bundled.yaml`
 - `api-spec/dist/openapi.bundled.json`
 - `.spectral.yaml`
-

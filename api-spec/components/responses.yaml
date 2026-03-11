@@ -39,7 +39,7 @@ TooManyRequestsProblem:
           $ref: ./examples.yaml#/TooManyRequestsProblemExample
 
 BadGatewayProblem:
-  description: Upstream education provider failed to process request.
+  description: A downstream dependency failed to process the request.
   content:
     application/problem+json:
       schema:
@@ -57,4 +57,3 @@ ServiceUnavailableProblem:
       examples:
         serviceUnavailable:
           $ref: ./examples.yaml#/ServiceUnavailableProblemExample
-
