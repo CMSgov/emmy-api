@@ -1,0 +1,42 @@
+post:
+  tags:
+    - Education
+  summary: Submit an education verification request
+  description: >
+    Accepts a minimal, canonical education verification payload and returns a
+    normalized response with verification status and school enrollment summary.
+  operationId: submitEducationVerification
+  security:
+    - BearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas.yaml#/EduVerificationRequest
+        examples:
+          standard:
+            $ref: ../components/examples.yaml#/EduVerificationRequestExample
+  responses:
+    "200":
+      description: Education verification completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas.yaml#/EduVerificationResponse
+          examples:
+            verified:
+              $ref: ../components/examples.yaml#/EduVerificationResponseExample
+    "400":
+      $ref: ../components/responses.yaml#/BadRequestProblem
+    "401":
+      $ref: ../components/responses.yaml#/UnauthorizedProblem
+    "403":
+      $ref: ../components/responses.yaml#/ForbiddenProblem
+    "429":
+      $ref: ../components/responses.yaml#/TooManyRequestsProblem
+    "502":
+      $ref: ../components/responses.yaml#/BadGatewayProblem
+    "503":
+      $ref: ../components/responses.yaml#/ServiceUnavailableProblem
+

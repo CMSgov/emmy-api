@@ -1,0 +1,533 @@
+openapi: 3.1.0
+info:
+  title: Verification Service API - Education Proxy
+  version: 1.0.0
+  summary: Minimal public API contract for education verification.
+  description: |
+    Public proxy contract for education verification requests. This contract intentionally hides provider-specific request complexity while preserving consent/compliance attestation requirements.
+servers:
+  - url: https://api.example.gov
+    description: Production placeholder
+  - url: http://localhost:8000
+    description: Local development
+security:
+  - BearerAuth: []
+tags:
+  - name: Education
+    description: Education verification operations
+paths:
+  /v1/edu:
+    post:
+      tags:
+        - Education
+      summary: Submit an education verification request
+      description: |
+        Accepts a minimal, canonical education verification payload and returns a normalized response with verification status and school enrollment summary.
+      operationId: submitEducationVerification
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EduVerificationRequest'
+            examples:
+              standard:
+                $ref: '#/components/examples/EduVerificationRequestExample'
+      responses:
+        '200':
+          description: Education verification completed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EduVerificationResponse'
+              examples:
+                verified:
+                  $ref: '#/components/examples/EduVerificationResponseExample'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '403':
+          $ref: '#/components/responses/ForbiddenProblem'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsProblem'
+        '502':
+          $ref: '#/components/responses/BadGatewayProblem'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableProblem'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    EduVerificationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - applicant
+        - consent
+      properties:
+        clientReferenceId:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Caller-supplied identifier for correlation and reconciliation.
+          example: ext-2025-12-23-0001
+        applicant:
+          $ref: '#/components/schemas/Applicant'
+        consent:
+          $ref: '#/components/schemas/ConsentAttestation'
+    Applicant:
+      type: object
+      additionalProperties: false
+      required:
+        - firstName
+        - lastName
+        - dateOfBirth
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 80
+          description: Applicant legal first name.
+          example: Lynette
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 80
+          description: Applicant legal last name.
+          example: Oyola
+        dateOfBirth:
+          type: string
+          format: date
+          description: Applicant date of birth in ISO 8601 date format.
+          example: '1988-10-24'
+        ssnLast4:
+          type: string
+          pattern: ^[0-9]{4}$
+          description: Last four digits of SSN when available.
+          example: '4321'
+    ConsentAttestation:
+      type: object
+      additionalProperties: false
+      required:
+        - attested
+        - attestedAt
+        - purpose
+      properties:
+        attested:
+          type: boolean
+          const: true
+          description: Must be true to indicate user consent/authorization is on file.
+          example: true
+        attestedAt:
+          type: string
+          format: date-time
+          description: Timestamp when consent was attested by the caller.
+          example: '2025-12-23T11:42:21Z'
+        purpose:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Business/legal purpose for the request.
+          example: Medicaid eligibility verification
+    EduVerificationResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - requestId
+        - status
+        - result
+        - transaction
+        - schools
+      properties:
+        requestId:
+          type: string
+          description: Proxy-generated request identifier for audit and support.
+          example: req_20251223_114232_828374364
+        status:
+          $ref: '#/components/schemas/VerificationStatus'
+        result:
+          $ref: '#/components/schemas/VerificationResult'
+        transaction:
+          $ref: '#/components/schemas/TransactionMetadata'
+        schools:
+          type: array
+          description: Matching schools and enrollment snapshots returned by the provider.
+          items:
+            $ref: '#/components/schemas/SchoolSummary'
+    VerificationStatus:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - severity
+        - message
+      properties:
+        code:
+          type: string
+          description: Provider status code; "0" indicates successful processing.
+          example: '0'
+        severity:
+          type: string
+          enum:
+            - info
+            - error
+          description: Normalized status severity.
+          example: info
+        message:
+          type: string
+          description: Human-readable status message.
+          example: Successful
+    VerificationResult:
+      type: object
+      additionalProperties: false
+      required:
+        - verified
+        - nscHit
+        - hasEnrollmentRecords
+        - matchedSchoolCount
+      properties:
+        verified:
+          type: boolean
+          description: True when verification is confirmed with at least one returned value.
+          example: true
+        nscHit:
+          type: boolean
+          description: Whether a matching student record was located by NSC.
+          example: true
+        hasEnrollmentRecords:
+          type: boolean
+          description: Whether enrollment details are present in the response.
+          example: true
+        matchedSchoolCount:
+          type: integer
+          minimum: 0
+          description: Number of schools returned in the normalized response.
+          example: 1
+    TransactionMetadata:
+      type: object
+      additionalProperties: false
+      required:
+        - transactionId
+        - orderId
+        - transactionStatus
+        - requestedAt
+        - respondedAt
+        - charges
+      properties:
+        transactionId:
+          type: string
+          description: Provider transaction identifier.
+          example: '828374364'
+        orderId:
+          type: string
+          description: Provider order identifier.
+          example: '114694166'
+        transactionStatus:
+          type: string
+          enum:
+            - confirmed
+            - unable_to_confirm
+            - pending
+          description: Normalized transaction disposition.
+          example: confirmed
+        requestedAt:
+          type: string
+          format: date-time
+          description: Time when the provider request was recorded.
+          example: '2025-12-23T11:42:32.636Z'
+        respondedAt:
+          type: string
+          format: date-time
+          description: Time when the provider response was recorded.
+          example: '2025-12-23T11:42:32.636Z'
+        charges:
+          $ref: '#/components/schemas/TransactionCharges'
+    TransactionCharges:
+      type: object
+      additionalProperties: false
+      required:
+        - transactionFee
+        - salesTax
+        - total
+        - currency
+      properties:
+        transactionFee:
+          type: number
+          format: double
+          minimum: 0
+          description: Fee charged for the verification transaction.
+          example: 0
+        salesTax:
+          type: number
+          format: double
+          minimum: 0
+          description: Tax charged for the verification transaction.
+          example: 0
+        total:
+          type: number
+          format: double
+          minimum: 0
+          description: Total amount charged for the transaction.
+          example: 0
+        currency:
+          type: string
+          pattern: ^[A-Z]{3}$
+          description: ISO 4217 currency code.
+          example: USD
+    SchoolSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - schoolCode
+        - officialSchoolName
+        - currentEnrollmentStatus
+        - enrollmentRecords
+      properties:
+        schoolCode:
+          type: string
+          description: Institution code.
+          example: '041279'
+        officialSchoolName:
+          type: string
+          description: Official institution name.
+          example: Trident University International
+        currentEnrollmentStatus:
+          type: string
+          description: Current NSC enrollment status code.
+          example: CC
+        enrollmentRecords:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentRecord'
+    EnrollmentRecord:
+      type: object
+      additionalProperties: false
+      required:
+        - enrollmentStatus
+        - termBeginDate
+        - termEndDate
+      properties:
+        enrollmentStatus:
+          type: string
+          description: Enrollment status for the term record.
+          example: 'Y'
+        termBeginDate:
+          type: string
+          format: date
+          example: '2024-05-31'
+        termEndDate:
+          type: string
+          format: date
+          example: '2024-11-19'
+        schoolCertifiedOnDate:
+          type: string
+          format: date
+          description: Date the school certified the term details.
+          example: '2024-07-16'
+        anticipatedGraduationDate:
+          type: string
+          format: date
+          description: Reported anticipated graduation date.
+          example: '2025-12-30'
+        majorCoursesOfStudy:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseOfStudy'
+    CourseOfStudy:
+      type: object
+      additionalProperties: false
+      required:
+        - course
+      properties:
+        course:
+          type: string
+          description: Course or major title.
+          example: Business Administration
+        ncesCipCode:
+          type: string
+          description: NCES Classification of Instructional Programs code.
+          example: '450724'
+    ProblemDetails:
+      type: object
+      description: RFC 7807 problem details envelope.
+      additionalProperties: true
+      required:
+        - type
+        - title
+        - status
+        - detail
+      properties:
+        type:
+          type: string
+          format: uri-reference
+          example: https://api.example.gov/problems/invalid-edu-request
+        title:
+          type: string
+          example: Invalid Request
+        status:
+          type: integer
+          minimum: 100
+          maximum: 599
+          example: 400
+        detail:
+          type: string
+          example: applicant.dateOfBirth must be an ISO 8601 date.
+        instance:
+          type: string
+          format: uri-reference
+          example: /v1/edu/requests/req_20251223_114232_828374364
+  responses:
+    BadRequestProblem:
+      description: Invalid education verification request.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          examples:
+            invalidRequest:
+              $ref: '#/components/examples/BadRequestProblemExample'
+    UnauthorizedProblem:
+      description: Authentication failed.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          examples:
+            unauthorized:
+              $ref: '#/components/examples/UnauthorizedProblemExample'
+    ForbiddenProblem:
+      description: Caller is authenticated but not authorized for this resource.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          examples:
+            forbidden:
+              $ref: '#/components/examples/ForbiddenProblemExample'
+    TooManyRequestsProblem:
+      description: Request rejected due to throttling or protection controls.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          examples:
+            tooManyRequests:
+              $ref: '#/components/examples/TooManyRequestsProblemExample'
+    BadGatewayProblem:
+      description: Upstream education provider failed to process request.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          examples:
+            badGateway:
+              $ref: '#/components/examples/BadGatewayProblemExample'
+    ServiceUnavailableProblem:
+      description: Education verification service is temporarily unavailable.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          examples:
+            serviceUnavailable:
+              $ref: '#/components/examples/ServiceUnavailableProblemExample'
+  examples:
+    EduVerificationRequestExample:
+      summary: Minimal canonical request with required consent.
+      value:
+        clientReferenceId: ext-2025-12-23-0001
+        applicant:
+          firstName: Lynette
+          lastName: Oyola
+          dateOfBirth: '1988-10-24'
+          ssnLast4: '4321'
+        consent:
+          attested: true
+          attestedAt: '2025-12-23T11:42:21Z'
+          purpose: Medicaid eligibility verification
+    EduVerificationResponseExample:
+      summary: Confirmed verification with one matched school.
+      value:
+        requestId: req_20251223_114232_828374364
+        status:
+          code: '0'
+          severity: info
+          message: Successful
+        result:
+          verified: true
+          nscHit: true
+          hasEnrollmentRecords: true
+          matchedSchoolCount: 1
+        transaction:
+          transactionId: '828374364'
+          orderId: '114694166'
+          transactionStatus: confirmed
+          requestedAt: '2025-12-23T11:42:32.636Z'
+          respondedAt: '2025-12-23T11:42:32.636Z'
+          charges:
+            transactionFee: 0
+            salesTax: 0
+            total: 0
+            currency: USD
+        schools:
+          - schoolCode: '041279'
+            officialSchoolName: Trident University International
+            currentEnrollmentStatus: CC
+            enrollmentRecords:
+              - enrollmentStatus: 'Y'
+                termBeginDate: '2024-05-31'
+                termEndDate: '2024-11-19'
+                schoolCertifiedOnDate: '2024-07-16'
+                anticipatedGraduationDate: '2025-12-30'
+                majorCoursesOfStudy:
+                  - course: Business Administration
+                    ncesCipCode: '450724'
+    BadRequestProblemExample:
+      summary: Request schema validation failed.
+      value:
+        type: https://api.example.gov/problems/invalid-edu-request
+        title: Invalid Request
+        status: 400
+        detail: applicant.dateOfBirth must be an ISO 8601 date.
+        instance: /v1/edu/requests/req_20251223_114232_828374364
+    UnauthorizedProblemExample:
+      summary: Missing or invalid bearer token.
+      value:
+        type: https://api.example.gov/problems/unauthorized
+        title: Unauthorized
+        status: 401
+        detail: Authentication credentials were missing or invalid.
+    ForbiddenProblemExample:
+      summary: Authenticated but not allowed to call endpoint.
+      value:
+        type: https://api.example.gov/problems/forbidden
+        title: Forbidden
+        status: 403
+        detail: The authenticated principal lacks access to this resource.
+    TooManyRequestsProblemExample:
+      summary: Request rejected by rate limiting or safety controls.
+      value:
+        type: https://api.example.gov/problems/rate-limited
+        title: Too Many Requests
+        status: 429
+        detail: Too many requests were received. Retry later.
+    BadGatewayProblemExample:
+      summary: Upstream provider error.
+      value:
+        type: https://api.example.gov/problems/upstream-failure
+        title: Bad Gateway
+        status: 502
+        detail: The education verification provider returned an invalid response.
+    ServiceUnavailableProblemExample:
+      summary: Service protection controls are open/unavailable.
+      value:
+        type: https://api.example.gov/problems/service-unavailable
+        title: Service Unavailable
+        status: 503
+        detail: Education verification is temporarily unavailable.

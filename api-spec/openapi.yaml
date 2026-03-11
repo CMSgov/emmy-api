@@ -1,0 +1,82 @@
+openapi: 3.1.0
+info:
+  title: Verification Service API - Education Proxy
+  version: 1.0.0
+  summary: Minimal public API contract for education verification.
+  description: >
+    Public proxy contract for education verification requests. This contract
+    intentionally hides provider-specific request complexity while preserving
+    consent/compliance attestation requirements.
+servers:
+  - url: https://api.example.gov
+    description: Production placeholder
+  - url: http://localhost:8000
+    description: Local development
+tags:
+  - name: Education
+    description: Education verification operations
+paths:
+  /v1/edu:
+    $ref: ./paths/edu.yaml
+components:
+  securitySchemes:
+    BearerAuth:
+      $ref: ./components/security-schemes.yaml#/BearerAuth
+  schemas:
+    EduVerificationRequest:
+      $ref: ./components/schemas.yaml#/EduVerificationRequest
+    Applicant:
+      $ref: ./components/schemas.yaml#/Applicant
+    ConsentAttestation:
+      $ref: ./components/schemas.yaml#/ConsentAttestation
+    EduVerificationResponse:
+      $ref: ./components/schemas.yaml#/EduVerificationResponse
+    VerificationStatus:
+      $ref: ./components/schemas.yaml#/VerificationStatus
+    VerificationResult:
+      $ref: ./components/schemas.yaml#/VerificationResult
+    TransactionMetadata:
+      $ref: ./components/schemas.yaml#/TransactionMetadata
+    TransactionCharges:
+      $ref: ./components/schemas.yaml#/TransactionCharges
+    SchoolSummary:
+      $ref: ./components/schemas.yaml#/SchoolSummary
+    EnrollmentRecord:
+      $ref: ./components/schemas.yaml#/EnrollmentRecord
+    CourseOfStudy:
+      $ref: ./components/schemas.yaml#/CourseOfStudy
+    ProblemDetails:
+      $ref: ./components/schemas.yaml#/ProblemDetails
+  responses:
+    BadRequestProblem:
+      $ref: ./components/responses.yaml#/BadRequestProblem
+    UnauthorizedProblem:
+      $ref: ./components/responses.yaml#/UnauthorizedProblem
+    ForbiddenProblem:
+      $ref: ./components/responses.yaml#/ForbiddenProblem
+    TooManyRequestsProblem:
+      $ref: ./components/responses.yaml#/TooManyRequestsProblem
+    BadGatewayProblem:
+      $ref: ./components/responses.yaml#/BadGatewayProblem
+    ServiceUnavailableProblem:
+      $ref: ./components/responses.yaml#/ServiceUnavailableProblem
+  examples:
+    EduVerificationRequestExample:
+      $ref: ./components/examples.yaml#/EduVerificationRequestExample
+    EduVerificationResponseExample:
+      $ref: ./components/examples.yaml#/EduVerificationResponseExample
+    BadRequestProblemExample:
+      $ref: ./components/examples.yaml#/BadRequestProblemExample
+    UnauthorizedProblemExample:
+      $ref: ./components/examples.yaml#/UnauthorizedProblemExample
+    ForbiddenProblemExample:
+      $ref: ./components/examples.yaml#/ForbiddenProblemExample
+    TooManyRequestsProblemExample:
+      $ref: ./components/examples.yaml#/TooManyRequestsProblemExample
+    BadGatewayProblemExample:
+      $ref: ./components/examples.yaml#/BadGatewayProblemExample
+    ServiceUnavailableProblemExample:
+      $ref: ./components/examples.yaml#/ServiceUnavailableProblemExample
+security:
+  - BearerAuth: []
+
