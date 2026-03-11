@@ -8,6 +8,14 @@ post:
   operationId: submitEducationVerification
   security:
     - BearerAuth: []
+  parameters:
+    - name: X-EMMY-Consent-Token
+      in: header
+      required: true
+      description: Consent token required for user-data verification requests.
+      schema:
+        type: string
+        minLength: 1
   requestBody:
     required: true
     content:
@@ -39,4 +47,3 @@ post:
       $ref: ../components/responses.yaml#/BadGatewayProblem
     "503":
       $ref: ../components/responses.yaml#/ServiceUnavailableProblem
-

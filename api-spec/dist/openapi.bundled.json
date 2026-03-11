@@ -4,7 +4,7 @@
     "title": "Verification Service API - Education",
     "version": "1.0.0",
     "summary": "Minimal public API contract for education verification.",
-    "description": "Public EDU service contract for education verification requests. This contract intentionally abstracts dependency-specific integration complexity while preserving consent/compliance attestation requirements.\n"
+    "description": "Public EDU service contract for education verification requests. This contract intentionally abstracts dependency-specific integration complexity while preserving authorization and consent-token requirements.\n"
   },
   "servers": [
     {
@@ -39,6 +39,18 @@
         "security": [
           {
             "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-EMMY-Consent-Token",
+            "in": "header",
+            "required": true,
+            "description": "Consent token required for user-data verification requests.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
           }
         ],
         "requestBody": {
@@ -107,8 +119,7 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "applicant",
-          "consent"
+          "applicant"
         ],
         "properties": {
           "clientReferenceId": {
@@ -120,9 +131,6 @@
           },
           "applicant": {
             "$ref": "#/components/schemas/Applicant"
-          },
-          "consent": {
-            "$ref": "#/components/schemas/ConsentAttestation"
           }
         }
       },
@@ -160,36 +168,6 @@
             "pattern": "^[0-9]{4}$",
             "description": "Last four digits of SSN when available.",
             "example": "4321"
-          }
-        }
-      },
-      "ConsentAttestation": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "attested",
-          "attestedAt",
-          "purpose"
-        ],
-        "properties": {
-          "attested": {
-            "type": "boolean",
-            "const": true,
-            "description": "Must be true to indicate user consent/authorization is on file.",
-            "example": true
-          },
-          "attestedAt": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Timestamp when consent was attested by the caller.",
-            "example": "2025-12-23T11:42:21Z"
-          },
-          "purpose": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 200,
-            "description": "Business/legal purpose for the request.",
-            "example": "Medicaid eligibility verification"
           }
         }
       },
@@ -606,7 +584,7 @@
     },
     "examples": {
       "EduVerificationRequestExample": {
-        "summary": "Minimal canonical request with required consent.",
+        "summary": "Minimal canonical request with required consent token header.",
         "value": {
           "clientReferenceId": "ext-2025-12-23-0001",
           "applicant": {
@@ -614,11 +592,6 @@
             "lastName": "Oyola",
             "dateOfBirth": "1988-10-24",
             "ssnLast4": "4321"
-          },
-          "consent": {
-            "attested": true,
-            "attestedAt": "2025-12-23T11:42:21Z",
-            "purpose": "Medicaid eligibility verification"
           }
         }
       },
@@ -675,12 +648,12 @@
         }
       },
       "BadRequestProblemExample": {
-        "summary": "Request schema validation failed.",
+        "summary": "Request validation failed.",
         "value": {
           "type": "https://api.example.gov/problems/invalid-edu-request",
           "title": "Invalid Request",
           "status": 400,
-          "detail": "applicant.dateOfBirth must be an ISO 8601 date.",
+          "detail": "X-EMMY-Consent-Token header is required.",
           "instance": "/v1/edu/requests/req_20251223_114232_828374364"
         }
       },

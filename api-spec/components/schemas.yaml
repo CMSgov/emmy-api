@@ -3,7 +3,6 @@ EduVerificationRequest:
   additionalProperties: false
   required:
     - applicant
-    - consent
   properties:
     clientReferenceId:
       type: string
@@ -13,8 +12,6 @@ EduVerificationRequest:
       example: ext-2025-12-23-0001
     applicant:
       $ref: "#/Applicant"
-    consent:
-      $ref: "#/ConsentAttestation"
 
 Applicant:
   type: object
@@ -46,31 +43,6 @@ Applicant:
       pattern: "^[0-9]{4}$"
       description: Last four digits of SSN when available.
       example: "4321"
-
-ConsentAttestation:
-  type: object
-  additionalProperties: false
-  required:
-    - attested
-    - attestedAt
-    - purpose
-  properties:
-    attested:
-      type: boolean
-      const: true
-      description: Must be true to indicate user consent/authorization is on file.
-      example: true
-    attestedAt:
-      type: string
-      format: date-time
-      description: Timestamp when consent was attested by the caller.
-      example: "2025-12-23T11:42:21Z"
-    purpose:
-      type: string
-      minLength: 1
-      maxLength: 200
-      description: Business/legal purpose for the request.
-      example: Medicaid eligibility verification
 
 EduVerificationResponse:
   type: object

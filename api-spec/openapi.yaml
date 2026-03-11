@@ -6,7 +6,7 @@ info:
   description: >
     Public EDU service contract for education verification requests. This contract
     intentionally abstracts dependency-specific integration complexity while preserving
-    consent/compliance attestation requirements.
+    authorization and consent-token requirements.
 servers:
   - url: https://api.example.gov
     description: Production placeholder
@@ -27,8 +27,6 @@ components:
       $ref: ./components/schemas.yaml#/EduVerificationRequest
     Applicant:
       $ref: ./components/schemas.yaml#/Applicant
-    ConsentAttestation:
-      $ref: ./components/schemas.yaml#/ConsentAttestation
     EduVerificationResponse:
       $ref: ./components/schemas.yaml#/EduVerificationResponse
     VerificationStatus:

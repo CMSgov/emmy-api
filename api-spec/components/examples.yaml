@@ -1,5 +1,5 @@
 EduVerificationRequestExample:
-  summary: Minimal canonical request with required consent.
+  summary: Minimal canonical request with required consent token header.
   value:
     clientReferenceId: ext-2025-12-23-0001
     applicant:
@@ -7,10 +7,6 @@ EduVerificationRequestExample:
       lastName: Oyola
       dateOfBirth: "1988-10-24"
       ssnLast4: "4321"
-    consent:
-      attested: true
-      attestedAt: "2025-12-23T11:42:21Z"
-      purpose: Medicaid eligibility verification
 
 EduVerificationResponseExample:
   summary: Confirmed verification with one matched school.
@@ -51,12 +47,12 @@ EduVerificationResponseExample:
                 ncesCipCode: "450724"
 
 BadRequestProblemExample:
-  summary: Request schema validation failed.
+  summary: Request validation failed.
   value:
     type: https://api.example.gov/problems/invalid-edu-request
     title: Invalid Request
     status: 400
-    detail: applicant.dateOfBirth must be an ISO 8601 date.
+    detail: X-EMMY-Consent-Token header is required.
     instance: /v1/edu/requests/req_20251223_114232_828374364
 
 UnauthorizedProblemExample:
