@@ -70,6 +70,16 @@ func NewConfig(options ...func(*Config)) Config {
 	return cfg
 }
 
+// NewConfigFromEnv builds Config from DefaultConfig and selected environment variables.
+// Supported keys:
+// - ENVIRONMENT, PORT, SKIP_AUTH
+// - OTEL_DISABLE, OTEL_OTLP_EXPORTER_ENDPOINT, OTEL_OTLP_EXPORTER_INSECURE
+// - COGNITO_REGION, COGNITO_USER_POOL_ID, COGNITO_APP_CLIENT_ID
+// - REDIS_ADDR, REDIS_PASSWORD, REDIS_DB
+// - NSC_SUBMIT_URL, NSC_TOKEN_URL, NSC_CLIENT_SECRET, NSC_CLIENT_ID, NSC_ACCOUNT_ID
+//
+// Any provided options are applied after env loading and therefore override
+// both defaults and environment-derived values.
 func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
 	cfg := DefaultConfig()
 

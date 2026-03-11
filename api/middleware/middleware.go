@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -27,6 +28,17 @@ type CognitoVerifier struct {
 	client  *http.Client
 	cfg     CognitoConfig
 }
+
+const (
+	skipAuthHeaderSub      = "x-skip-auth-sub"
+	skipAuthHeaderUsername = "x-skip-auth-username"
+	skipAuthHeaderScope    = "x-skip-auth-scope"
+	skipAuthHeaderGroups   = "x-skip-auth-groups"
+
+	defaultSkipAuthSub   = "skip-auth-user"
+	defaultSkipAuthScope = "local"
+	defaultSkipAuthGroup = "local-dev"
+)
 
 func NewCognitoVerifier(cfg CognitoConfig) (*CognitoVerifier, error) {
 	if cfg.Region == "" {
@@ -135,6 +147,62 @@ func (v *CognitoVerifier) FiberMiddleware() fiber.Handler {
 
 		return c.Next()
 	}
+}
+
+// SkipAuthMiddleware injects a stable local identity when auth is disabled.
+// Optional override headers:
+//   - x-skip-auth-sub
+//   - x-skip-auth-username
+//   - x-skip-auth-scope
+//   - x-skip-auth-groups (comma-separated)
+func SkipAuthMiddleware() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		sub := c.Get(skipAuthHeaderSub)
+		if sub == "" {
+			sub = defaultSkipAuthSub
+		}
+
+		username := c.Get(skipAuthHeaderUsername)
+		if username == "" {
+			username = sub
+		}
+
+		scope := c.Get(skipAuthHeaderScope)
+		if scope == "" {
+			scope = defaultSkipAuthScope
+		}
+
+		groupsHeader := c.Get(skipAuthHeaderGroups)
+		groups := []string{defaultSkipAuthGroup}
+		if groupsHeader != "" {
+			parsed := parseGroups(groupsHeader)
+			if len(parsed) > 0 {
+				groups = parsed
+			}
+		}
+
+		c.Locals("sub", sub)
+		c.Locals("username", username)
+		c.Locals("scope", scope)
+		c.Locals("groups", groups)
+
+		return c.Next()
+	}
+}
+
+func parseGroups(value string) []string {
+	parts := strings.Split(value, ",")
+	groups := make([]string, 0, len(parts))
+
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed == "" {
+			continue
+		}
+		groups = append(groups, trimmed)
+	}
+
+	return groups
 }
 
 // wraps another handler and runs before c.Next

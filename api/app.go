@@ -103,7 +103,9 @@ func New(cfg *Config) (*fiber.App, error) {
 		},
 	))
 
-	if !cfg.Core.SkipAuth {
+	if cfg.Core.SkipAuth {
+		app.Use(middleware.SkipAuthMiddleware())
+	} else {
 		verifier, err := middleware.NewCognitoVerifier(middleware.CognitoConfig{
 			Region:     cfg.Core.Cognito.Region,
 			UserPoolID: cfg.Core.Cognito.UserPoolID,
