@@ -11,7 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func TestEducationHandler(cfg *core.Config, edu education.EducationService, logger *slog.Logger) fiber.Handler {
+func EducationHandler(cfg *core.Config, edu education.EducationService, logger *slog.Logger) fiber.Handler {
 	const contextTimeout time.Duration = 5 * time.Second
 
 	if logger == nil {
