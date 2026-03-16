@@ -37,5 +37,5 @@ func RegisterRoutes(app fiber.Router, cfg *core.Config, rdb *redis.Client, logge
 		)
 	})
 
-	api.Get("/edu", withCB(handlers.TestEducationHandler(cfg, edu, logger)))
+	api.Get("/edu", withCB(handlers.EducationHandler(cfg, edu, logger)))
 }
