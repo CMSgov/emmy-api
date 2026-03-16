@@ -52,6 +52,7 @@ func run() error {
 
 	logger.Info("config loaded",
 		"env", cfg.Environment,
+		"port", cfg.Port,
 		"skip_auth", cfg.SkipAuth,
 	)
 
@@ -108,7 +109,18 @@ func run() error {
 
 	routes.RegisterRoutes(app, &cfg, rdb, logger)
 
-	err = runServer(ctx, app, ":8000")
+	addr, err := listenAddr(cfg.Port)
+	if err != nil {
+		logger.ErrorContext(
+			ctx,
+			"Invalid server port",
+			"port", cfg.Port,
+			"err", err,
+		)
+		return ErrRunFailed
+	}
+
+	err = runServer(ctx, app, addr)
 	if err != nil {
 		logger.ErrorContext(
 			ctx,
@@ -119,6 +131,14 @@ func run() error {
 	}
 
 	return nil
+}
+
+func listenAddr(port int) (string, error) {
+	if port < 1 || port > 65535 {
+		return "", fmt.Errorf("port out of range: %d", port)
+	}
+
+	return fmt.Sprintf(":%d", port), nil
 }
 
 func runServer(ctx context.Context, app *fiber.App, addr string) error {
