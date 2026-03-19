@@ -16,7 +16,7 @@ on:
 jobs:
   unit:
     name: test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Fetch Repository
         uses: actions/checkout@v6
@@ -31,7 +31,7 @@ jobs:
 
   golangci:
     name: lint
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
 
@@ -46,11 +46,11 @@ jobs:
           version: v2.5.0
           install-mode: goinstall
 
-    build:
-      name: build
-      runs-on: ubuntu-latest
-      steps:
-        - name: Fetch Repository
-          uses: actions/checkout@v6
-        - name: Docker Build
-          run: docker build .
+  build:
+    name: build
+    runs-on: self-hosted
+    steps:
+      - name: Fetch Repository
+        uses: actions/checkout@v6
+      - name: Docker Build
+        run: docker build .

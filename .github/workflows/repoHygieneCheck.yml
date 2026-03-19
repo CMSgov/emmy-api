@@ -8,7 +8,7 @@ on:
 jobs:
   check-first-run:
     name: Check For First Run
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       {% raw %}
       should_run: ${{ steps.check.outputs.should_run }}
@@ -59,7 +59,7 @@ jobs:
     {% raw %}
     if: needs.check-first-run.outputs.should_run == 'true'
     {% endraw %}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: write
       pull-requests: write

@@ -15,7 +15,7 @@ jobs:
   markdownlint:
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Fetch Repository
         uses: actions/checkout@v6
