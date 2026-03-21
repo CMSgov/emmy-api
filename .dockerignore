@@ -1,0 +1,5 @@
+dist
+.git
+.envrc
+node_modules
+
