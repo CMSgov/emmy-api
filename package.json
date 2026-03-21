@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "node build.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [],
   "author": "",
@@ -29,7 +30,10 @@
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.5.0",
     "esbuild": "^0.27.4",
+    "fast-check": "^4.6.0",
+    "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.0"
   }
 }
