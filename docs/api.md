@@ -2,44 +2,39 @@
 
 ## Overview
 
-The server listens on port `8000` by default and currently exposes a small set
-of implementation-oriented routes plus a bundled OpenAPI JSON artifact route.
+Base server runs on port `8000` by default. Current routes are small and implementation-focused.
 
 ## Authentication Behavior
 
-- When `SKIP_AUTH=false`, Cognito middleware is enabled globally for the Fiber app.
-- Middleware reads the access token from header `x-amzn-oidc-accesstoken`.
-- Token validation checks:
-  - valid signature via JWKS
-  - issuer match
-  - `token_use=access`
-  - `client_id` claim equals the configured app client ID
-- When `SKIP_AUTH=true`, local identity values are injected through the skip-auth middleware instead.
+- When `SKIP_AUTH=false`, Cognito middleware is enabled globally.
+- Middleware reads access token from header: `x-amzn-oidc-accesstoken`.
+- Token checks include:
+    - valid signature via JWKS
+    - issuer match
+    - `token_use=access`
+    - `client_id` claim equals configured app client ID
 
-If auth fails, the response is `401 Unauthorized`.
-This global behavior applies to `/status`, `/api-spec/v1/verify`, and `/api/edu` when auth is enabled.
+If auth fails, response is `401 Unauthorized`.
+This applies to both `/status` and `/api/edu` when auth is enabled.
 
 ## Circuit Breaker Behavior
 
 `/status` and `/api/edu` are wrapped by Redis-backed circuit breaker middleware.
 
-- On breaker deny/open state: `503 Service Unavailable`
-- On Redis state read failures with fail-open behavior: request is allowed to continue
-
-`/api-spec/v1/verify` is not wrapped by the circuit breaker.
+- On breaker deny/open state: `503 Service Unavailable`.
+- On Redis state read failures with fail-open (default): request is allowed.
 
 ## Endpoints
 
-| Method | Path                  | Description                        | Success     | Notes                                                                                         |
-| ------ | --------------------- | ---------------------------------- | ----------- | --------------------------------------------------------------------------------------------- |
-| `GET`  | `/`                   | Liveness string                    | `200` text  | Returns `Backend running!`                                                                    |
-| `GET`  | `/status`             | Redis health check                 | `200` empty | Auth required unless `SKIP_AUTH=true`; uses 2s Redis ping timeout; wrapped by circuit breaker |
-| `GET`  | `/api-spec/v1/verify` | Bundled OpenAPI JSON artifact      | `200` JSON  | Returns `api-spec/dist/openapi.bundled.json`; auth required unless `SKIP_AUTH=true`           |
-| `GET`  | `/api/edu`            | Education verification passthrough | `200` JSON  | Uses hardcoded request payload in handler; wrapped by circuit breaker                         |
+| Method | Path       | Description                            | Success     | Notes                                                              |
+| ------ | ---------- | -------------------------------------- | ----------- | ------------------------------------------------------------------ |
+| `GET`  | `/`        | Liveness string                        | `200` text  | Returns `Backend running!`                                         |
+| `GET`  | `/status`  | Redis health check                     | `200` empty | Auth required unless `SKIP_AUTH=true`; pings Redis with 2s timeout |
+| `GET`  | `/api/edu` | NSC education verification passthrough | `200` JSON  | Uses hardcoded request payload in handler                          |
 
-## Request and Response Models
+## Request/Response Models
 
-### Education verify request sent to NSC (`pkg/education/models_request.go`)
+### NSC Submit Request model (`pkg/education/models_request.go`)
 
 ```go
 type Request struct {
@@ -58,7 +53,7 @@ type Request struct {
 }
 ```
 
-### Education verify response returned from NSC (`pkg/education/models_response.go`)
+### NSC Submit Response model (`pkg/education/models_response.go`)
 
 ```go
 type Response struct {
@@ -70,25 +65,15 @@ type Response struct {
 }
 ```
 
-## Examples
-
-### `/status`
+## Example: `/status`
 
 ```bash
 curl -i http://localhost:8000/status
 ```
 
-If `SKIP_AUTH=false`, include `x-amzn-oidc-accesstoken`.
+If `SKIP_AUTH=false`, include `x-amzn-oidc-accesstoken` header.
 
-### `/api-spec/v1/verify`
-
-```bash
-curl -i http://localhost:8000/api-spec/v1/verify
-```
-
-Returns the checked-in bundled OpenAPI JSON artifact with `Content-Type: application/json`.
-
-### `/api/edu` (auth skipped locally)
+## Example: `/api/edu` (auth skipped locally)
 
 ```bash
 curl -i http://localhost:8000/api/edu
@@ -97,11 +82,11 @@ curl -i http://localhost:8000/api/edu
 ## Current-State Caveats
 
 - `/api/edu` currently does not accept caller-provided payload; it submits a hardcoded sample request from handler code.
-- `/api-spec/v1/verify` serves the checked-in artifact from disk and does not rebuild the spec at request time.
+- Current `main` wiring registers `/status` through `api.New` with a nil Redis client (because `main` does not inject `api.Config.Redis`), so runtime behavior can fail/panic until code wiring is corrected.
+- This endpoint should be treated as implementation scaffold unless product/API contract is formalized.
 - Error response bodies come from Fiber error handling and may be plain text.
-- `main.go` currently constructs the app without passing a Redis client into `api.New`, so the `/status` route registered there may not behave correctly until that wiring is aligned.
 
 ## Assumptions
 
-- **High confidence:** `/api-spec/v1/verify` is the most stable machine-readable contract endpoint currently exposed by the app.
-- **Medium confidence:** `/api/edu` contract and HTTP method may change when request binding and public request validation are introduced.
+- **High confidence:** `/status` is the only operationally stable endpoint for external health checking today.
+- **Medium confidence:** `/api/edu` contract and HTTP method may change when request binding/validation is introduced.

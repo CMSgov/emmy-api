@@ -1,0 +1,7 @@
+interface:
+  display_name: "Documentation Audit"
+  short_description: "Generate evidence-backed docs accuracy audits"
+  default_prompt: "Use $docs-audit to audit this repo's docs and produce docs/audit/YYYY-MM-DD.md with Sections A-E."
+
+policy:
+  allow_implicit_invocation: false
