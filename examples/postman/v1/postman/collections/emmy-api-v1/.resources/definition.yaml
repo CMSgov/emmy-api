@@ -1,0 +1,47 @@
+$kind: collection
+name: emmy-api-v1
+scripts:
+  - type: http:beforeRequest
+    code: >-
+      // Check for token expiration and refresh the token if needed.
+
+      const tokenExpiry = pm.environment.get("token_expiry");
+
+      const now = Date.now();
+
+
+      if (!tokenExpiry || now >= parseInt(tokenExpiry)) {
+          const clientId     = pm.environment.get("client_id");
+          const clientSecret = pm.environment.get("client_secret");
+          const authBase     = pm.environment.get("auth_base");
+
+          // Encode client_id:client_secret as Base64 for Basic Auth header
+          const credentials  = btoa(`${clientId}:${clientSecret}`);
+
+          pm.sendRequest({
+              url: `${authBase}`,
+              method: "POST",
+              header: {
+                  "Content-Type":  "application/x-www-form-urlencoded",
+                  "Authorization": `Basic ${credentials}`
+              },
+              body: {
+                  mode: "urlencoded",
+                  urlencoded: [
+                      { key: "grant_type", value: "client_credentials" }
+                  ]
+              }
+          }, (err, res) => {
+              if (!err && res.code === 200) {
+                  const body = res.json();
+                  pm.environment.set("access_token",  body.access_token);
+                  pm.environment.set("token_expiry",  Date.now() + (body.expires_in * 1000));
+              }
+          });
+      }
+auth:
+  - id: d8170ce3-f345-4ef4-9e46-2060790d262a
+    type: bearer
+    name: Bearer Token
+    credentials:
+      token: "{{access_token}}"
