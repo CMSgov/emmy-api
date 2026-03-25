@@ -1,0 +1,7 @@
+ForbiddenProblemExample:
+  summary: Authenticated but not allowed to call endpoint.
+  value:
+    type: https://api.example.gov/problems/forbidden
+    title: Forbidden
+    status: 403
+    detail: The authenticated principal lacks access to this resource.

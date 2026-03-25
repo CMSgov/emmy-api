@@ -3,8 +3,8 @@ post:
     - Education
   summary: Submit an education verification request
   description: >
-    Accepts a minimal, canonical education verification payload and returns a
-    normalized response with verification status and school enrollment summary.
+    Accepts a minimal identity payload and returns the subject's current
+    enrollment indicator and normalized enrollment load code.
   operationId: submitEducationVerification
   security:
     - BearerAuth: []
@@ -21,29 +21,29 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas.yaml#/EduVerificationRequest
+          $ref: ../components/requests/edu-verification-request.yaml#/EduVerificationRequest
         examples:
           standard:
-            $ref: ../components/examples.yaml#/EduVerificationRequestExample
+            $ref: ../components/examples/requests/edu-verification-request.yaml#/EduVerificationRequestExample
   responses:
     "200":
-      description: Education verification completed successfully.
+      description: Education enrollment lookup completed successfully.
       content:
         application/json:
           schema:
-            $ref: ../components/schemas.yaml#/EduVerificationResponse
+            $ref: ../components/models/edu-enrollment.yaml#/EduEnrollment
           examples:
             verified:
-              $ref: ../components/examples.yaml#/EduVerificationResponseExample
+              $ref: ../components/examples/responses/edu-enrollment.yaml#/EduEnrollmentExample
     "400":
-      $ref: ../components/responses.yaml#/BadRequestProblem
+      $ref: ../components/responses/bad-request-problem.yaml#/BadRequestProblem
     "401":
-      $ref: ../components/responses.yaml#/UnauthorizedProblem
+      $ref: ../components/responses/unauthorized-problem.yaml#/UnauthorizedProblem
     "403":
-      $ref: ../components/responses.yaml#/ForbiddenProblem
+      $ref: ../components/responses/forbidden-problem.yaml#/ForbiddenProblem
     "429":
-      $ref: ../components/responses.yaml#/TooManyRequestsProblem
+      $ref: ../components/responses/too-many-requests-problem.yaml#/TooManyRequestsProblem
     "502":
-      $ref: ../components/responses.yaml#/BadGatewayProblem
+      $ref: ../components/responses/bad-gateway-problem.yaml#/BadGatewayProblem
     "503":
-      $ref: ../components/responses.yaml#/ServiceUnavailableProblem
+      $ref: ../components/responses/service-unavailable-problem.yaml#/ServiceUnavailableProblem

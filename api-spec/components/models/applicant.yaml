@@ -1,0 +1,36 @@
+Applicant:
+  type: object
+  additionalProperties: false
+  required:
+    - firstName
+    - lastName
+    - dateOfBirth
+  properties:
+    firstName:
+      type: string
+      minLength: 1
+      maxLength: 80
+      description: Applicant legal first name.
+      example: Lynette
+    lastName:
+      type: string
+      minLength: 1
+      maxLength: 80
+      description: Applicant legal last name.
+      example: Oyola
+    middleName:
+      type: string
+      minLength: 1
+      maxLength: 80
+      description: Applicant legal middle name when available.
+      example: Marie
+    dateOfBirth:
+      type: string
+      format: date
+      description: Applicant date of birth in ISO 8601 date format.
+      example: "1988-10-24"
+    ssn:
+      type: string
+      pattern: "^[0-9]{9}$"
+      description: Full Social Security number when available.
+      example: "123456789"

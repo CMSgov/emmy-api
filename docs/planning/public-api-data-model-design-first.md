@@ -126,6 +126,20 @@ Contract boundary:
 - Include only public API request/response models and public endpoint behavior.
 - Do not include internal DTOs, persistence entities, or internal service payloads unless externally visible.
 
+Current EDU contract conventions in this repo:
+
+- Public path: `POST /v1/edu`
+- OpenAPI version: `3.1.0`
+- Security model: HTTP bearer auth plus required `X-EMMY-Consent-Token` header on the EDU operation
+- Request model style: narrow public request wrapper with reusable component schemas and `additionalProperties: false`
+- Success response model style: normalized business outcome model instead of downstream vendor payload passthrough
+- Error model style: reusable RFC 7807-style `ProblemDetails` schema with shared response components and named examples for each documented failure mode
+- Current documented EDU error responses: `400`, `401`, `403`, `429`, `502`, and `503`
+
+This repo’s recent spec updates reinforce the design-first rule that public docs
+must track the contract as written in reusable OpenAPI components, not internal
+service behavior or superseded response envelopes.
+
 ## Local Usage Instructions
 
 ### 1. Author or Update the Spec
@@ -133,18 +147,31 @@ Contract boundary:
 - Create or update `api-spec/openapi.yaml` (and referenced files).
 - Keep schema components reusable and explicitly named.
 - Prefer explicit `operationId`, `summary`, response schemas, and examples.
+- Define shared error responses as reusable components when the same problem
+  schema is returned across operations.
+- Keep public success payloads normalized and implementation-agnostic.
 
 ### 2. Bundle, Validate, and Lint
 
 ```bash
-# Bundle (required for multi-file refs)
-npx @redocly/cli bundle api-spec/openapi.yaml -o api-spec/dist/openapi.bundled.yaml
+# 1. Bundle the checked-in YAML and JSON artifacts (required for multi-file refs)
+./scripts/bundle-api-spec
 
-# Validate OpenAPI structure
-npx @apidevtools/swagger-cli validate api-spec/dist/openapi.bundled.yaml
+# 2. Validate OpenAPI structure
+./scripts/validate-api-spec
 
-# Lint style and governance rules
-npx @stoplight/spectral-cli lint api-spec/dist/openapi.bundled.yaml --ruleset .spectral.yaml
+# 3. Lint style and governance rules
+./scripts/lint-api-spec
+```
+
+Using `mise`, the same workflow is available as:
+
+```bash
+mise install
+mise run bundle-api-spec
+mise run validate-api-spec
+mise run lint-api-spec
+mise run check-api-spec
 ```
 
 Starter `.spectral.yaml` (commit and version in repo):
@@ -152,8 +179,6 @@ Starter `.spectral.yaml` (commit and version in repo):
 ```yaml
 extends:
   - spectral:oas
-  - https://apistylebook.stoplight.io/docs/url-guidelines/ruleset.yaml
-  - https://apistylebook.stoplight.io/docs/owasp-top-10/ruleset.yaml
 rules:
   operation-summary-required:
     description: Every operation must define a summary.
@@ -277,7 +302,6 @@ Implementation note: use a stable "base spec" artifact from `main` in CI (downlo
 - [Stoplight: The Right Way to API (Design-First rationale)](https://blog.stoplight.io/the-right-way-to-api)
 - [OpenAPI Specification 3.1.0](https://spec.openapis.org/oas/v3.1.0.html)
 - [Spectral (Stoplight) repository and docs](https://github.com/stoplightio/spectral)
-- [API Stylebook rulesets (including OWASP + URL style guides)](https://apistylebook.stoplight.io/)
 - [Redocly CLI `bundle` command](https://redocly.com/docs/cli/commands/bundle)
 - [Prism (Stoplight) repository and CLI usage](https://github.com/stoplightio/prism)
 - [oasdiff (breaking change detection)](https://www.oasdiff.com/)

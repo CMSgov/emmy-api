@@ -1,0 +1,7 @@
+ServiceUnavailableProblemExample:
+  summary: Service protection controls are open/unavailable.
+  value:
+    type: https://api.example.gov/problems/service-unavailable
+    title: Service Unavailable
+    status: 503
+    detail: Education verification is temporarily unavailable.

@@ -1,0 +1,7 @@
+TooManyRequestsProblemExample:
+  summary: Request rejected by rate limiting or safety controls.
+  value:
+    type: https://api.example.gov/problems/rate-limited
+    title: Too Many Requests
+    status: 429
+    detail: Too many requests were received. Retry later.

@@ -1,0 +1,8 @@
+BadRequestProblemExample:
+  summary: Request validation failed.
+  value:
+    type: https://api.example.gov/problems/invalid-edu-request
+    title: Invalid Request
+    status: 400
+    detail: X-EMMY-Consent-Token header is required.
+    instance: /v1/edu/requests/req_20251223_114232_828374364

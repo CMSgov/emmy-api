@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Bundles the multi-file OpenAPI source into the checked-in YAML and JSON artifacts.
+# Run from anywhere in the repo; the script resolves the repo root itself.
+# Exits non-zero if the source spec is missing or the bundle command fails.
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source_spec="$repo_root/api-spec/openapi.yaml"
+bundled_yaml="$repo_root/api-spec/dist/openapi.bundled.yaml"
+bundled_json="$repo_root/api-spec/dist/openapi.bundled.json"
+
+if [[ ! -f "$source_spec" ]]; then
+  echo "error: source spec not found at $source_spec" >&2
+  exit 1
+fi
+
+mkdir -p "$(dirname "$bundled_yaml")"
+
+cd "$repo_root"
+npx @redocly/cli bundle api-spec/openapi.yaml -o api-spec/dist/openapi.bundled.yaml
+npx @redocly/cli bundle api-spec/openapi.yaml -o api-spec/dist/openapi.bundled.json

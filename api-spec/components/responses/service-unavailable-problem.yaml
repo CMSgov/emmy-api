@@ -1,0 +1,9 @@
+ServiceUnavailableProblem:
+  description: Education verification service is temporarily unavailable.
+  content:
+    application/problem+json:
+      schema:
+        $ref: ../models/problem-details.yaml#/ProblemDetails
+      examples:
+        serviceUnavailable:
+          $ref: ../examples/responses/problems/service-unavailable-problem.yaml#/ServiceUnavailableProblemExample

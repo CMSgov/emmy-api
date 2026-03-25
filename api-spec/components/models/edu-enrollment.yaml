@@ -1,0 +1,25 @@
+EduEnrollment:
+  type: object
+  additionalProperties: false
+  required:
+    - currentlyEnrolled
+    - enrollmentStatus
+  properties:
+    currentlyEnrolled:
+      type: string
+      enum:
+        - "Y"
+        - "N"
+      description: Whether the subject is currently enrolled.
+      example: "Y"
+    enrollmentStatus:
+      type: string
+      enum:
+        - F
+        - Q
+        - H
+        - L
+      description: >
+        Enrollment load code where `F` is full-time, `Q` is three-quarter time,
+        `H` is half-time, and `L` is less than half-time.
+      example: F

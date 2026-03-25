@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   summary: Minimal public API contract for education verification.
   description: |
-    Public EDU service contract for education verification requests. This contract intentionally abstracts dependency-specific integration complexity while preserving authorization and consent-token requirements.
+    Public EDU service contract for education verification requests. This contract intentionally exposes only the minimal identity inputs needed for an education enrollment lookup and the normalized enrollment result.
 servers:
   - url: https://api.example.gov
     description: Production placeholder
@@ -22,7 +22,7 @@ paths:
         - Education
       summary: Submit an education verification request
       description: |
-        Accepts a minimal, canonical education verification payload and returns a normalized response with verification status and school enrollment summary.
+        Accepts a minimal identity payload and returns the subject's current enrollment indicator and normalized enrollment load code.
       operationId: submitEducationVerification
       security:
         - BearerAuth: []
@@ -45,14 +45,14 @@ paths:
                 $ref: '#/components/examples/EduVerificationRequestExample'
       responses:
         '200':
-          description: Education verification completed successfully.
+          description: Education enrollment lookup completed successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EduVerificationResponse'
+                $ref: '#/components/schemas/EduEnrollment'
               examples:
                 verified:
-                  $ref: '#/components/examples/EduVerificationResponseExample'
+                  $ref: '#/components/examples/EduEnrollmentExample'
         '400':
           $ref: '#/components/responses/BadRequestProblem'
         '401':
@@ -78,12 +78,6 @@ components:
       required:
         - applicant
       properties:
-        clientReferenceId:
-          type: string
-          minLength: 1
-          maxLength: 100
-          description: Caller-supplied identifier for correlation and reconciliation.
-          example: ext-2025-12-23-0001
         applicant:
           $ref: '#/components/schemas/Applicant'
     Applicant:
@@ -106,247 +100,57 @@ components:
           maxLength: 80
           description: Applicant legal last name.
           example: Oyola
+        middleName:
+          type: string
+          minLength: 1
+          maxLength: 80
+          description: Applicant legal middle name when available.
+          example: Marie
         dateOfBirth:
           type: string
           format: date
           description: Applicant date of birth in ISO 8601 date format.
           example: '1988-10-24'
-        ssnLast4:
+        ssn:
           type: string
-          pattern: ^[0-9]{4}$
-          description: Last four digits of SSN when available.
-          example: '4321'
-    EduVerificationResponse:
+          pattern: ^[0-9]{9}$
+          description: Full Social Security number when available.
+          example: '123456789'
+    EduEnrollment:
       type: object
       additionalProperties: false
       required:
-        - requestId
-        - status
-        - result
-        - transaction
-        - schools
-      properties:
-        requestId:
-          type: string
-          description: EDU service-generated request identifier for audit and support.
-          example: req_20251223_114232_828374364
-        status:
-          $ref: '#/components/schemas/VerificationStatus'
-        result:
-          $ref: '#/components/schemas/VerificationResult'
-        transaction:
-          $ref: '#/components/schemas/TransactionMetadata'
-        schools:
-          type: array
-          description: Matching schools and enrollment snapshots returned by the service.
-          items:
-            $ref: '#/components/schemas/SchoolSummary'
-    VerificationStatus:
-      type: object
-      additionalProperties: false
-      required:
-        - code
-        - severity
-        - message
-      properties:
-        code:
-          type: string
-          description: Provider status code; "0" indicates successful processing.
-          example: '0'
-        severity:
-          type: string
-          enum:
-            - info
-            - error
-          description: Normalized status severity.
-          example: info
-        message:
-          type: string
-          description: Human-readable status message.
-          example: Successful
-    VerificationResult:
-      type: object
-      additionalProperties: false
-      required:
-        - verified
-        - matchFound
-        - hasEnrollmentRecords
-        - matchedSchoolCount
-      properties:
-        verified:
-          type: boolean
-          description: True when verification is confirmed with at least one returned value.
-          example: true
-        matchFound:
-          type: boolean
-          description: Whether a matching student record was located.
-          example: true
-        hasEnrollmentRecords:
-          type: boolean
-          description: Whether enrollment details are present in the response.
-          example: true
-        matchedSchoolCount:
-          type: integer
-          minimum: 0
-          description: Number of schools returned in the normalized response.
-          example: 1
-    TransactionMetadata:
-      type: object
-      additionalProperties: false
-      required:
-        - transactionId
-        - orderId
-        - transactionStatus
-        - requestedAt
-        - respondedAt
-        - charges
-      properties:
-        transactionId:
-          type: string
-          description: Dependency transaction identifier recorded by the EDU service.
-          example: '828374364'
-        orderId:
-          type: string
-          description: Dependency order identifier recorded by the EDU service.
-          example: '114694166'
-        transactionStatus:
-          type: string
-          enum:
-            - confirmed
-            - unable_to_confirm
-            - pending
-          description: Normalized transaction disposition.
-          example: confirmed
-        requestedAt:
-          type: string
-          format: date-time
-          description: Time when the dependency request was recorded.
-          example: '2025-12-23T11:42:32.636Z'
-        respondedAt:
-          type: string
-          format: date-time
-          description: Time when the dependency response was recorded.
-          example: '2025-12-23T11:42:32.636Z'
-        charges:
-          $ref: '#/components/schemas/TransactionCharges'
-    TransactionCharges:
-      type: object
-      additionalProperties: false
-      required:
-        - transactionFee
-        - salesTax
-        - total
-        - currency
-      properties:
-        transactionFee:
-          type: number
-          format: double
-          minimum: 0
-          description: Fee charged for the verification transaction.
-          example: 0
-        salesTax:
-          type: number
-          format: double
-          minimum: 0
-          description: Tax charged for the verification transaction.
-          example: 0
-        total:
-          type: number
-          format: double
-          minimum: 0
-          description: Total amount charged for the transaction.
-          example: 0
-        currency:
-          type: string
-          pattern: ^[A-Z]{3}$
-          description: ISO 4217 currency code.
-          example: USD
-    SchoolSummary:
-      type: object
-      additionalProperties: false
-      required:
-        - schoolCode
-        - officialSchoolName
-        - currentEnrollmentStatus
-        - enrollmentRecords
-      properties:
-        schoolCode:
-          type: string
-          description: Institution code.
-          example: '041279'
-        officialSchoolName:
-          type: string
-          description: Official institution name.
-          example: Trident University International
-        currentEnrollmentStatus:
-          type: string
-          description: Current enrollment status code.
-          example: CC
-        enrollmentRecords:
-          type: array
-          items:
-            $ref: '#/components/schemas/EnrollmentRecord'
-    EnrollmentRecord:
-      type: object
-      additionalProperties: false
-      required:
+        - currentlyEnrolled
         - enrollmentStatus
-        - termBeginDate
-        - termEndDate
       properties:
+        currentlyEnrolled:
+          type: string
+          enum:
+            - 'Y'
+            - 'N'
+          description: Whether the subject is currently enrolled.
+          example: 'Y'
         enrollmentStatus:
           type: string
-          description: Enrollment status for the term record.
-          example: 'Y'
-        termBeginDate:
-          type: string
-          format: date
-          example: '2024-05-31'
-        termEndDate:
-          type: string
-          format: date
-          example: '2024-11-19'
-        schoolCertifiedOnDate:
-          type: string
-          format: date
-          description: Date the school certified the term details.
-          example: '2024-07-16'
-        anticipatedGraduationDate:
-          type: string
-          format: date
-          description: Reported anticipated graduation date.
-          example: '2025-12-30'
-        majorCoursesOfStudy:
-          type: array
-          items:
-            $ref: '#/components/schemas/CourseOfStudy'
-    CourseOfStudy:
-      type: object
-      additionalProperties: false
-      required:
-        - course
-      properties:
-        course:
-          type: string
-          description: Course or major title.
-          example: Business Administration
-        ncesCipCode:
-          type: string
-          description: NCES Classification of Instructional Programs code.
-          example: '450724'
+          enum:
+            - F
+            - Q
+            - H
+            - L
+          description: |
+            Enrollment load code where `F` is full-time, `Q` is three-quarter time, `H` is half-time, and `L` is less than half-time.
+          example: F
     ProblemDetails:
       type: object
-      description: RFC 7807 problem details envelope.
-      additionalProperties: true
+      additionalProperties: false
       required:
         - type
         - title
         - status
-        - detail
       properties:
         type:
           type: string
-          format: uri-reference
+          format: uri
           example: https://api.example.gov/problems/invalid-edu-request
         title:
           type: string
@@ -358,10 +162,9 @@ components:
           example: 400
         detail:
           type: string
-          example: applicant.dateOfBirth must be an ISO 8601 date.
+          example: X-EMMY-Consent-Token header is required.
         instance:
           type: string
-          format: uri-reference
           example: /v1/edu/requests/req_20251223_114232_828374364
   responses:
     BadRequestProblem:
@@ -420,51 +223,19 @@ components:
               $ref: '#/components/examples/ServiceUnavailableProblemExample'
   examples:
     EduVerificationRequestExample:
-      summary: Minimal canonical request with required consent token header.
+      summary: Minimal Education request with required consent token header.
       value:
-        clientReferenceId: ext-2025-12-23-0001
         applicant:
           firstName: Lynette
           lastName: Oyola
+          middleName: Marie
           dateOfBirth: '1988-10-24'
-          ssnLast4: '4321'
-    EduVerificationResponseExample:
-      summary: Confirmed verification with one matched school.
+          ssn: '123456789'
+    EduEnrollmentExample:
+      summary: Subject is currently enrolled full-time.
       value:
-        requestId: req_20251223_114232_828374364
-        status:
-          code: '0'
-          severity: info
-          message: Successful
-        result:
-          verified: true
-          matchFound: true
-          hasEnrollmentRecords: true
-          matchedSchoolCount: 1
-        transaction:
-          transactionId: '828374364'
-          orderId: '114694166'
-          transactionStatus: confirmed
-          requestedAt: '2025-12-23T11:42:32.636Z'
-          respondedAt: '2025-12-23T11:42:32.636Z'
-          charges:
-            transactionFee: 0
-            salesTax: 0
-            total: 0
-            currency: USD
-        schools:
-          - schoolCode: '041279'
-            officialSchoolName: Trident University International
-            currentEnrollmentStatus: CC
-            enrollmentRecords:
-              - enrollmentStatus: 'Y'
-                termBeginDate: '2024-05-31'
-                termEndDate: '2024-11-19'
-                schoolCertifiedOnDate: '2024-07-16'
-                anticipatedGraduationDate: '2025-12-30'
-                majorCoursesOfStudy:
-                  - course: Business Administration
-                    ncesCipCode: '450724'
+        currentlyEnrolled: 'Y'
+        enrollmentStatus: F
     BadRequestProblemExample:
       summary: Request validation failed.
       value:

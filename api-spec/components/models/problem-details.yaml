@@ -1,0 +1,26 @@
+ProblemDetails:
+  type: object
+  additionalProperties: false
+  required:
+    - type
+    - title
+    - status
+  properties:
+    type:
+      type: string
+      format: uri
+      example: https://api.example.gov/problems/invalid-edu-request
+    title:
+      type: string
+      example: Invalid Request
+    status:
+      type: integer
+      minimum: 100
+      maximum: 599
+      example: 400
+    detail:
+      type: string
+      example: X-EMMY-Consent-Token header is required.
+    instance:
+      type: string
+      example: /v1/edu/requests/req_20251223_114232_828374364

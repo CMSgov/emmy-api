@@ -1,0 +1,19 @@
+[tools]
+go = "1.25"
+node = "20"
+
+[tasks.bundle-api-spec]
+description = "Bundle the OpenAPI spec into api-spec/dist/openapi.bundled.yaml"
+run = "./scripts/bundle-api-spec"
+
+[tasks.validate-api-spec]
+description = "Validate the bundled OpenAPI YAML"
+run = "./scripts/validate-api-spec"
+
+[tasks.lint-api-spec]
+description = "Lint the bundled OpenAPI YAML with Spectral"
+run = "./scripts/lint-api-spec"
+
+[tasks.check-api-spec]
+description = "Bundle, validate, and lint the OpenAPI spec"
+depends = ["bundle-api-spec", "validate-api-spec", "lint-api-spec"]

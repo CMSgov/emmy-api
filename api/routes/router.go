@@ -20,6 +20,7 @@ func RegisterRoutes(app fiber.Router, cfg *core.Config, rdb *redis.Client, logge
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Backend running!")
 	})
+	app.Get("/api-spec/v1/verify", handlers.OpenAPISpecHandler())
 
 	api := app.Group("/api")
 

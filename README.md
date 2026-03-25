@@ -20,6 +20,34 @@ This project uses [pre-commit](https://pre-commit.com/ "pre-commit Docs") to reg
 pre-commit install
 ```
 
+For OpenAPI spec maintenance, the repo also includes utility scripts under
+`scripts/`:
+
+```sh
+# 1. Rebuild the bundled YAML and JSON artifacts from the multi-file source spec
+./scripts/bundle-api-spec
+
+# 2. Validate the bundled YAML artifact
+./scripts/validate-api-spec
+
+# 3. Lint the bundled YAML artifact with the repo Spectral ruleset
+./scripts/lint-api-spec
+```
+
+If you use [mise](https://mise.jdx.dev/), install the pinned runtimes from
+`mise.toml` and run:
+
+```sh
+# Install the pinned Go and Node runtimes for this repo
+mise install
+
+# Run the full OpenAPI spec workflow
+mise run check-api-spec
+```
+
+You can also run each step individually with `mise run bundle-api-spec`,
+`mise run validate-api-spec`, and `mise run lint-api-spec`.
+
 ## Policies
 
 ### Open Source Policy

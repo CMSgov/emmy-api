@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Lints the bundled OpenAPI YAML artifact with the repo's Spectral ruleset.
+# Run after bundling; this script requires the bundled spec and .spectral.yaml.
+# Exits non-zero if an input file is missing or Spectral reports lint/config errors.
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+bundled_spec="$repo_root/api-spec/dist/openapi.bundled.yaml"
+ruleset="$repo_root/.spectral.yaml"
+
+if [[ ! -f "$bundled_spec" ]]; then
+  echo "error: bundled spec not found at $bundled_spec; run ./scripts/bundle-api-spec first" >&2
+  exit 1
+fi
+
+if [[ ! -f "$ruleset" ]]; then
+  echo "error: spectral ruleset not found at $ruleset" >&2
+  exit 1
+fi
+
+cd "$repo_root"
+npx @stoplight/spectral-cli lint api-spec/dist/openapi.bundled.yaml --ruleset .spectral.yaml

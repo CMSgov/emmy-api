@@ -1,7 +1,5 @@
 extends:
   - spectral:oas
-  - https://apistylebook.stoplight.io/docs/url-guidelines/ruleset.yaml
-  - https://apistylebook.stoplight.io/docs/owasp-top-10/ruleset.yaml
 rules:
   operation-summary-required:
     description: Every operation must have a summary.
@@ -10,4 +8,3 @@ rules:
     then:
       field: summary
       function: truthy
-

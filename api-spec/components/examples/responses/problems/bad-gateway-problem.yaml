@@ -1,0 +1,7 @@
+BadGatewayProblemExample:
+  summary: Downstream dependency error.
+  value:
+    type: https://api.example.gov/problems/dependency-failure
+    title: Bad Gateway
+    status: 502
+    detail: A downstream dependency returned an invalid response.

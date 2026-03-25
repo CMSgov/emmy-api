@@ -1,0 +1,9 @@
+TooManyRequestsProblem:
+  description: Request rejected due to throttling or protection controls.
+  content:
+    application/problem+json:
+      schema:
+        $ref: ../models/problem-details.yaml#/ProblemDetails
+      examples:
+        tooManyRequests:
+          $ref: ../examples/responses/problems/too-many-requests-problem.yaml#/TooManyRequestsProblemExample

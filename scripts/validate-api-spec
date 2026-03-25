@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Validates the bundled OpenAPI YAML artifact with swagger-cli.
+# Run after bundling; this script requires api-spec/dist/openapi.bundled.yaml.
+# Exits non-zero if the bundle is missing or the validator reports an error.
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+bundled_spec="$repo_root/api-spec/dist/openapi.bundled.yaml"
+
+if [[ ! -f "$bundled_spec" ]]; then
+  echo "error: bundled spec not found at $bundled_spec; run ./scripts/bundle-api-spec first" >&2
+  exit 1
+fi
+
+cd "$repo_root"
+npx @apidevtools/swagger-cli validate api-spec/dist/openapi.bundled.yaml
