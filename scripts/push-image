@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./emmy-common.sh
+source "$script_dir/emmy-common.sh"
+
+emmy_require_cmd docker
+emmy_require_cmd git
+
+context_path="${1:-$(emmy_repo_root)}"
+image_tag="$(emmy_image_tag)"
+image_uri="$(emmy_image_uri "$image_tag")"
+
+echo "Building and pushing $image_uri from $context_path"
+docker buildx build -t "$image_uri" --platform linux/amd64 --push "$context_path"
