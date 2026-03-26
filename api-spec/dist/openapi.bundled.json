@@ -74,7 +74,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EduEnrollment"
+                  "$ref": "#/components/schemas/edu-enrollment.schema"
                 },
                 "examples": {
                   "verified": {
@@ -123,11 +123,15 @@
         ],
         "properties": {
           "applicant": {
-            "$ref": "#/components/schemas/Applicant"
+            "$ref": "#/components/schemas/applicant.schema"
           }
         }
       },
-      "Applicant": {
+      "applicant.schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://github.com/DSACMS/verification-service-api/schema/education/v1/applicant.schema.json",
+        "title": "Applicant",
+        "description": "Minimal applicant identity payload for an education verification request.",
         "type": "object",
         "additionalProperties": false,
         "required": [
@@ -171,7 +175,11 @@
           }
         }
       },
-      "EduEnrollment": {
+      "edu-enrollment.schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://github.com/DSACMS/verification-service-api/schema/education/v1/edu-enrollment.schema.json",
+        "title": "EduEnrollment",
+        "description": "Normalized education enrollment verification result.",
         "type": "object",
         "additionalProperties": false,
         "required": [
@@ -196,12 +204,16 @@
               "H",
               "L"
             ],
-            "description": "Enrollment load code where `F` is full-time, `Q` is three-quarter time, `H` is half-time, and `L` is less than half-time.\n",
+            "description": "Enrollment load code where `F` is full-time, `Q` is three-quarter time, `H` is half-time, and `L` is less than half-time.",
             "example": "F"
           }
         }
       },
-      "ProblemDetails": {
+      "problem-details.schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://github.com/DSACMS/verification-service-api/schema/common/v1/problem-details.schema.json",
+        "title": "ProblemDetails",
+        "description": "RFC 7807-style problem details payload.",
         "type": "object",
         "additionalProperties": false,
         "required": [
@@ -242,7 +254,7 @@
         "content": {
           "application/problem+json": {
             "schema": {
-              "$ref": "#/components/schemas/ProblemDetails"
+              "$ref": "#/components/schemas/problem-details.schema"
             },
             "examples": {
               "invalidRequest": {
@@ -257,7 +269,7 @@
         "content": {
           "application/problem+json": {
             "schema": {
-              "$ref": "#/components/schemas/ProblemDetails"
+              "$ref": "#/components/schemas/problem-details.schema"
             },
             "examples": {
               "unauthorized": {
@@ -272,7 +284,7 @@
         "content": {
           "application/problem+json": {
             "schema": {
-              "$ref": "#/components/schemas/ProblemDetails"
+              "$ref": "#/components/schemas/problem-details.schema"
             },
             "examples": {
               "forbidden": {
@@ -287,7 +299,7 @@
         "content": {
           "application/problem+json": {
             "schema": {
-              "$ref": "#/components/schemas/ProblemDetails"
+              "$ref": "#/components/schemas/problem-details.schema"
             },
             "examples": {
               "tooManyRequests": {
@@ -302,7 +314,7 @@
         "content": {
           "application/problem+json": {
             "schema": {
-              "$ref": "#/components/schemas/ProblemDetails"
+              "$ref": "#/components/schemas/problem-details.schema"
             },
             "examples": {
               "badGateway": {
@@ -317,7 +329,7 @@
         "content": {
           "application/problem+json": {
             "schema": {
-              "$ref": "#/components/schemas/ProblemDetails"
+              "$ref": "#/components/schemas/problem-details.schema"
             },
             "examples": {
               "serviceUnavailable": {

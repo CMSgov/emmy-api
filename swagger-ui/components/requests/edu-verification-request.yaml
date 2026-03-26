@@ -5,4 +5,4 @@ EduVerificationRequest:
     - applicant
   properties:
     applicant:
-      $ref: ../models/applicant.yaml#/Applicant
+      $ref: ../../../schema/education/v1/applicant.schema.json

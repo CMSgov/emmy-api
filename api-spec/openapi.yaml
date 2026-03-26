@@ -17,49 +17,43 @@ tags:
     description: Education verification operations
 paths:
   /v1/edu:
-    $ref: ./paths/edu.yaml
+    $ref: ../swagger-ui/paths/edu.yaml
 components:
   securitySchemes:
     BearerAuth:
-      $ref: ./components/security-schemes.yaml#/BearerAuth
+      $ref: ../swagger-ui/components/security-schemes.yaml#/BearerAuth
   schemas:
     EduVerificationRequest:
-      $ref: ./components/requests/edu-verification-request.yaml#/EduVerificationRequest
-    Applicant:
-      $ref: ./components/models/applicant.yaml#/Applicant
-    EduEnrollment:
-      $ref: ./components/models/edu-enrollment.yaml#/EduEnrollment
-    ProblemDetails:
-      $ref: ./components/models/problem-details.yaml#/ProblemDetails
+      $ref: ../swagger-ui/components/requests/edu-verification-request.yaml#/EduVerificationRequest
   responses:
     BadRequestProblem:
-      $ref: ./components/responses/bad-request-problem.yaml#/BadRequestProblem
+      $ref: ../swagger-ui/components/responses/bad-request-problem.yaml#/BadRequestProblem
     UnauthorizedProblem:
-      $ref: ./components/responses/unauthorized-problem.yaml#/UnauthorizedProblem
+      $ref: ../swagger-ui/components/responses/unauthorized-problem.yaml#/UnauthorizedProblem
     ForbiddenProblem:
-      $ref: ./components/responses/forbidden-problem.yaml#/ForbiddenProblem
+      $ref: ../swagger-ui/components/responses/forbidden-problem.yaml#/ForbiddenProblem
     TooManyRequestsProblem:
-      $ref: ./components/responses/too-many-requests-problem.yaml#/TooManyRequestsProblem
+      $ref: ../swagger-ui/components/responses/too-many-requests-problem.yaml#/TooManyRequestsProblem
     BadGatewayProblem:
-      $ref: ./components/responses/bad-gateway-problem.yaml#/BadGatewayProblem
+      $ref: ../swagger-ui/components/responses/bad-gateway-problem.yaml#/BadGatewayProblem
     ServiceUnavailableProblem:
-      $ref: ./components/responses/service-unavailable-problem.yaml#/ServiceUnavailableProblem
+      $ref: ../swagger-ui/components/responses/service-unavailable-problem.yaml#/ServiceUnavailableProblem
   examples:
     EduVerificationRequestExample:
-      $ref: ./components/examples/requests/edu-verification-request.yaml#/EduVerificationRequestExample
+      $ref: ../swagger-ui/components/examples/requests/edu-verification-request.yaml#/EduVerificationRequestExample
     EduEnrollmentExample:
-      $ref: ./components/examples/responses/edu-enrollment.yaml#/EduEnrollmentExample
+      $ref: ../swagger-ui/components/examples/responses/edu-enrollment.yaml#/EduEnrollmentExample
     BadRequestProblemExample:
-      $ref: ./components/examples/responses/problems/bad-request-problem.yaml#/BadRequestProblemExample
+      $ref: ../swagger-ui/components/examples/responses/problems/bad-request-problem.yaml#/BadRequestProblemExample
     UnauthorizedProblemExample:
-      $ref: ./components/examples/responses/problems/unauthorized-problem.yaml#/UnauthorizedProblemExample
+      $ref: ../swagger-ui/components/examples/responses/problems/unauthorized-problem.yaml#/UnauthorizedProblemExample
     ForbiddenProblemExample:
-      $ref: ./components/examples/responses/problems/forbidden-problem.yaml#/ForbiddenProblemExample
+      $ref: ../swagger-ui/components/examples/responses/problems/forbidden-problem.yaml#/ForbiddenProblemExample
     TooManyRequestsProblemExample:
-      $ref: ./components/examples/responses/problems/too-many-requests-problem.yaml#/TooManyRequestsProblemExample
+      $ref: ../swagger-ui/components/examples/responses/problems/too-many-requests-problem.yaml#/TooManyRequestsProblemExample
     BadGatewayProblemExample:
-      $ref: ./components/examples/responses/problems/bad-gateway-problem.yaml#/BadGatewayProblemExample
+      $ref: ../swagger-ui/components/examples/responses/problems/bad-gateway-problem.yaml#/BadGatewayProblemExample
     ServiceUnavailableProblemExample:
-      $ref: ./components/examples/responses/problems/service-unavailable-problem.yaml#/ServiceUnavailableProblemExample
+      $ref: ../swagger-ui/components/examples/responses/problems/service-unavailable-problem.yaml#/ServiceUnavailableProblemExample
 security:
   - BearerAuth: []

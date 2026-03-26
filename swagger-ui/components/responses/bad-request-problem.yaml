@@ -3,7 +3,7 @@ BadRequestProblem:
   content:
     application/problem+json:
       schema:
-        $ref: ../models/problem-details.yaml#/ProblemDetails
+        $ref: ../../../schema/common/v1/problem-details.schema.json
       examples:
         invalidRequest:
           $ref: ../examples/responses/problems/bad-request-problem.yaml#/BadRequestProblemExample

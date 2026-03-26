@@ -3,7 +3,7 @@ UnauthorizedProblem:
   content:
     application/problem+json:
       schema:
-        $ref: ../models/problem-details.yaml#/ProblemDetails
+        $ref: ../../../schema/common/v1/problem-details.schema.json
       examples:
         unauthorized:
           $ref: ../examples/responses/problems/unauthorized-problem.yaml#/UnauthorizedProblemExample

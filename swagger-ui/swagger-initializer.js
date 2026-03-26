@@ -3,7 +3,7 @@ window.onload = function() {
 
   // the following lines will be replaced by docker/configurator, when it runs in a docker-container
   window.ui = SwaggerUIBundle({
-    url: "https://cmsgov.github.io/emmy-api/api-spec/dist/openapi.bundled.json",
+    url: "../api-spec/dist/openapi.bundled.json",
     dom_id: '#swagger-ui',
     deepLinking: true,
     presets: [

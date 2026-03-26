@@ -14,6 +14,34 @@ run = "./scripts/validate-api-spec"
 description = "Lint the bundled OpenAPI YAML with Spectral"
 run = "./scripts/lint-api-spec"
 
+[tasks.lint-yaml-files]
+description = "Lint hand-authored YAML files with yamllint"
+run = "./scripts/lint-yaml-files"
+
+[tasks.check-format-contract-files]
+description = "Check formatting for contract YAML and JSON files with Prettier"
+run = "./scripts/check-format-contract-files"
+
+[tasks.check-json-schemas]
+description = "Compile standalone JSON Schemas with Ajv"
+run = "./scripts/check-json-schemas"
+
+[tasks.check-openapi-breaking]
+description = "Check the bundled OpenAPI artifact for breaking changes against a base ref"
+run = "./scripts/check-openapi-breaking"
+
 [tasks.check-api-spec]
 description = "Bundle, validate, and lint the OpenAPI spec"
 depends = ["bundle-api-spec", "validate-api-spec", "lint-api-spec"]
+
+[tasks.check-contract-files]
+description = "Run local lint, format, schema, and breaking-change checks for contract files"
+depends = [
+  "bundle-api-spec",
+  "validate-api-spec",
+  "lint-api-spec",
+  "lint-yaml-files",
+  "check-format-contract-files",
+  "check-json-schemas",
+  "check-openapi-breaking",
+]

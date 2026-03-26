@@ -21,7 +21,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/requests/edu-verification-request.yaml#/EduVerificationRequest
+          $ref: ../../api-spec/openapi.yaml#/components/schemas/EduVerificationRequest
         examples:
           standard:
             $ref: ../components/examples/requests/edu-verification-request.yaml#/EduVerificationRequestExample
@@ -31,7 +31,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/models/edu-enrollment.yaml#/EduEnrollment
+            $ref: ../../schema/education/v1/edu-enrollment.schema.json
           examples:
             verified:
               $ref: ../components/examples/responses/edu-enrollment.yaml#/EduEnrollmentExample

@@ -3,7 +3,7 @@ ServiceUnavailableProblem:
   content:
     application/problem+json:
       schema:
-        $ref: ../models/problem-details.yaml#/ProblemDetails
+        $ref: ../../../schema/common/v1/problem-details.schema.json
       examples:
         serviceUnavailable:
           $ref: ../examples/responses/problems/service-unavailable-problem.yaml#/ServiceUnavailableProblemExample

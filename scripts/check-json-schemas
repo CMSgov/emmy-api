@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Compiles standalone JSON Schema files with Ajv to catch schema syntax and ref issues.
+# Exits non-zero if no schema files are found or Ajv rejects any schema.
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+cd "$repo_root"
+
+schema_count=0
+
+while IFS= read -r schema_file; do
+  [[ -z "$schema_file" ]] && continue
+  schema_count=$((schema_count + 1))
+  echo "Checking $schema_file"
+  npx --yes --package ajv-cli --package ajv-formats \
+    ajv compile --spec=draft2020 --strict=false -c ajv-formats -s "$schema_file"
+done < <(find schema -type f -name '*.schema.json' | sort)
+
+if [[ "$schema_count" -eq 0 ]]; then
+  echo "error: no schema files found under $repo_root/schema" >&2
+  exit 1
+fi

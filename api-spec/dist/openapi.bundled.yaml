@@ -49,7 +49,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EduEnrollment'
+                $ref: '#/components/schemas/edu-enrollment.schema'
               examples:
                 verified:
                   $ref: '#/components/examples/EduEnrollmentExample'
@@ -79,8 +79,12 @@ components:
         - applicant
       properties:
         applicant:
-          $ref: '#/components/schemas/Applicant'
-    Applicant:
+          $ref: '#/components/schemas/applicant.schema'
+    applicant.schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      $id: https://github.com/DSACMS/verification-service-api/schema/education/v1/applicant.schema.json
+      title: Applicant
+      description: Minimal applicant identity payload for an education verification request.
       type: object
       additionalProperties: false
       required:
@@ -116,7 +120,11 @@ components:
           pattern: ^[0-9]{9}$
           description: Full Social Security number when available.
           example: '123456789'
-    EduEnrollment:
+    edu-enrollment.schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      $id: https://github.com/DSACMS/verification-service-api/schema/education/v1/edu-enrollment.schema.json
+      title: EduEnrollment
+      description: Normalized education enrollment verification result.
       type: object
       additionalProperties: false
       required:
@@ -137,10 +145,13 @@ components:
             - Q
             - H
             - L
-          description: |
-            Enrollment load code where `F` is full-time, `Q` is three-quarter time, `H` is half-time, and `L` is less than half-time.
+          description: Enrollment load code where `F` is full-time, `Q` is three-quarter time, `H` is half-time, and `L` is less than half-time.
           example: F
-    ProblemDetails:
+    problem-details.schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      $id: https://github.com/DSACMS/verification-service-api/schema/common/v1/problem-details.schema.json
+      title: ProblemDetails
+      description: RFC 7807-style problem details payload.
       type: object
       additionalProperties: false
       required:
@@ -172,7 +183,7 @@ components:
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/ProblemDetails'
+            $ref: '#/components/schemas/problem-details.schema'
           examples:
             invalidRequest:
               $ref: '#/components/examples/BadRequestProblemExample'
@@ -181,7 +192,7 @@ components:
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/ProblemDetails'
+            $ref: '#/components/schemas/problem-details.schema'
           examples:
             unauthorized:
               $ref: '#/components/examples/UnauthorizedProblemExample'
@@ -190,7 +201,7 @@ components:
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/ProblemDetails'
+            $ref: '#/components/schemas/problem-details.schema'
           examples:
             forbidden:
               $ref: '#/components/examples/ForbiddenProblemExample'
@@ -199,7 +210,7 @@ components:
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/ProblemDetails'
+            $ref: '#/components/schemas/problem-details.schema'
           examples:
             tooManyRequests:
               $ref: '#/components/examples/TooManyRequestsProblemExample'
@@ -208,7 +219,7 @@ components:
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/ProblemDetails'
+            $ref: '#/components/schemas/problem-details.schema'
           examples:
             badGateway:
               $ref: '#/components/examples/BadGatewayProblemExample'
@@ -217,7 +228,7 @@ components:
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/ProblemDetails'
+            $ref: '#/components/schemas/problem-details.schema'
           examples:
             serviceUnavailable:
               $ref: '#/components/examples/ServiceUnavailableProblemExample'

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Compares the current bundled OpenAPI artifact against a base ref with oasdiff.
+# Defaults to origin/main, then main, then HEAD~1 when available.
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+current_spec="$repo_root/api-spec/dist/openapi.bundled.yaml"
+base_ref="${1:-}"
+
+if [[ ! -f "$current_spec" ]]; then
+  echo "error: bundled spec not found at $current_spec; run ./scripts/bundle-api-spec first" >&2
+  exit 1
+fi
+
+cd "$repo_root"
+
+if [[ -z "$base_ref" ]]; then
+  if git rev-parse --verify origin/main^{commit} >/dev/null 2>&1; then
+    base_ref="origin/main"
+  elif git rev-parse --verify main^{commit} >/dev/null 2>&1; then
+    base_ref="main"
+  elif git rev-parse --verify HEAD~1^{commit} >/dev/null 2>&1; then
+    base_ref="HEAD~1"
+  else
+    echo "error: could not determine a base ref; pass one explicitly, for example ./scripts/check-openapi-breaking main" >&2
+    exit 1
+  fi
+fi
+
+if ! git rev-parse --verify "${base_ref}^{commit}" >/dev/null 2>&1; then
+  echo "error: base ref '$base_ref' was not found" >&2
+  exit 1
+fi
+
+tmp_dir="$(mktemp -d)"
+trap 'rm -rf "$tmp_dir"' EXIT
+base_spec="$tmp_dir/openapi.base.bundled.yaml"
+
+if ! git show "${base_ref}:api-spec/dist/openapi.bundled.yaml" >"$base_spec" 2>/dev/null; then
+  echo "error: base ref '$base_ref' does not contain api-spec/dist/openapi.bundled.yaml" >&2
+  exit 1
+fi
+
+echo "Checking for breaking OpenAPI changes against $base_ref"
+go run github.com/oasdiff/oasdiff@latest breaking \
+  "$base_spec" \
+  "$current_spec" \
+  --fail-on ERR
