@@ -4,14 +4,18 @@
   "scripts": {
     "bundle-spec": "redocly bundle api-spec/v0/openapi.yaml -o api-spec/dist/v0/openapi.json",
     "fmt": "prettier --write .",
-    "fmt:check": "prettier --check ."
+    "check:fmt": "prettier --check .",
+    "check:schemas": "node scripts/validate-json-schemas.mjs"
   },
   "devDependencies": {
     "@apidevtools/swagger-cli": "^4.0.4",
     "@redocly/cli": "^1.34.5",
     "@stoplight/spectral-cli": "^6.15.0",
+    "ajv": "^8.18.0",
     "ajv-cli": "^5.0.0",
     "ajv-formats": "^3.0.1",
-    "prettier": "^3.6.2"
+    "glob": "^13.0.6",
+    "prettier": "^3.6.2",
+    "typescript": "^6.0.2"
   }
 }

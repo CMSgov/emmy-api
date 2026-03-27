@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "schema/v0/school_enrollment_status.schema.json",
+  "$id": "urn:emmy:schema:v0:school-enrollment-status",
   "title": "SchoolEnrollmentStatus",
   "description": "Enrollment intensity status for a student's school attendance.",
   "type": "string",
@@ -36,5 +36,5 @@
       "description": "Student is enrolled, but the enrollment intensity is unknown."
     }
   },
-  "example": "FULL_TIME"
+  "examples": ["FULL_TIME", "ENROLLED"]
 }

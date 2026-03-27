@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Compiles standalone JSON Schema files with Ajv to catch schema syntax and ref issues.
-# Exits non-zero if no schema files are found or Ajv rejects any schema.
+e# Exits non-zero if no schema files are found or Ajv rejects any schema.
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

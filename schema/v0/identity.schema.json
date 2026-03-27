@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "schema/v0/identity.schema.json",
+  "$id": "urn:emmy:schema:v0:identity",
   "title": "Identity",
   "description": "Basic identifying information for a person.",
   "type": "object",
@@ -10,24 +10,24 @@
     "firstName": {
       "type": "string",
       "description": "Person's legal first name.",
-      "example": "Lynette"
+      "examples": ["Lynette"]
     },
     "middleName": {
       "type": "string",
       "description": "Person's legal middle name when available.",
-      "example": "Marie"
+      "examples": ["Marie"]
     },
     "lastName": {
       "type": "string",
       "description": "Person's legal last name.",
-      "example": "Oyola"
+      "examples": ["Oyola"]
     },
     "dateOfBirth": {
-      "$ref": "./date.schema.json",
+      "$ref": "urn:emmy:schema:v0:date",
       "description": "Person's date of birth."
     },
     "ssn": {
-      "$ref": "./ssn.schema.json",
+      "$ref": "urn:emmy:schema:v0:ssn",
       "description": "Social Security number when available."
     }
   }
