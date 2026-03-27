@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schema/common/v1/problem-details.schema.json",
+  "title": "ProblemDetails",
+  "description": "RFC 7807-style problem details payload.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "title", "status"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "format": "uri",
+      "example": "https://api.example.gov/problems/invalid-request"
+    },
+    "title": {
+      "type": "string",
+      "example": "Invalid Request"
+    },
+    "status": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 599,
+      "example": 400
+    },
+    "detail": {
+      "type": "string",
+      "example": "The submitted request payload is invalid."
+    },
+    "instance": {
+      "type": "string",
+      "example": "/v0/consent-tokens"
+    }
+  }
+}

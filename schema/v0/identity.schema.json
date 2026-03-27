@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://emmy.cms.gov/schema/v0/identity.schema.json",
+  "$id": "schema/v0/identity.schema.json",
   "title": "Identity",
   "description": "Basic identifying information for a person.",
   "type": "object",
@@ -23,11 +23,11 @@
       "example": "Oyola"
     },
     "dateOfBirth": {
-      "$ref": "https://emmy.cms.gov/schema/v0/date.schema.json",
+      "$ref": "./date.schema.json",
       "description": "Person's date of birth."
     },
     "ssn": {
-      "$ref": "https://emmy.cms.gov/schema/v0/ssn.schema.json",
+      "$ref": "./ssn.schema.json",
       "description": "Social Security number when available."
     }
   }

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://emmy.cms.gov/schema/v0/combined_disability_rating.schema.json",
+  "$id": "schema/v0/combined_disability_rating.schema.json",
   "title": "CombinedDisabilityRating",
   "description": "VA combined disability rating percentage used to quantify the overall severity of a veteran's service-connected disabilities.",
   "type": "integer",

@@ -2,6 +2,9 @@ openapi: 3.1.0
 info:
   title: Verification Service API
   version: 0.1.0
+  contact:
+    name: Eligibility Made Easy (Emmy)
+    url: https://www.cms.gov/medicaid-chip/community-engagement-support/eligibility-made-easy
   summary: >
     Alpha API contract for Emmy consent-based verification workflows supporting
     community engagement reporting.

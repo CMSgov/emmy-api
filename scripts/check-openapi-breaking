@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Compares the current bundled OpenAPI artifact against a base ref with oasdiff.
+# Compares the current bundled v0 OpenAPI artifact against a base ref with oasdiff.
 # Defaults to origin/main, then main, then HEAD~1 when available.
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-current_spec="$repo_root/api-spec/dist/openapi.bundled.yaml"
+current_spec="$repo_root/api-spec/v0/dist/openapi.bundled.yaml"
 base_ref="${1:-}"
 
 if [[ ! -f "$current_spec" ]]; then
@@ -36,8 +36,8 @@ tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 base_spec="$tmp_dir/openapi.base.bundled.yaml"
 
-if ! git show "${base_ref}:api-spec/dist/openapi.bundled.yaml" >"$base_spec" 2>/dev/null; then
-  echo "error: base ref '$base_ref' does not contain api-spec/dist/openapi.bundled.yaml" >&2
+if ! git show "${base_ref}:api-spec/v0/dist/openapi.bundled.yaml" >"$base_spec" 2>/dev/null; then
+  echo "error: base ref '$base_ref' does not contain api-spec/v0/dist/openapi.bundled.yaml" >&2
   exit 1
 fi
 

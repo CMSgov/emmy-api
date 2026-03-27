@@ -8,16 +8,26 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
 schema_count=0
-
-while IFS= read -r schema_file; do
-  [[ -z "$schema_file" ]] && continue
-  schema_count=$((schema_count + 1))
-  echo "Checking $schema_file"
-  npx --yes --package ajv-cli --package ajv-formats \
-    ajv compile --spec=draft2020 --strict=false -c ajv-formats -s "$schema_file"
+schema_files=()
+while IFS= read -r schema_path; do
+  [[ -z "$schema_path" ]] && continue
+  schema_files+=("$schema_path")
 done < <(find schema -type f -name '*.schema.json' | sort)
 
-if [[ "$schema_count" -eq 0 ]]; then
+if [[ "${#schema_files[@]}" -eq 0 ]]; then
   echo "error: no schema files found under $repo_root/schema" >&2
   exit 1
 fi
+
+for schema_file in "${schema_files[@]}"; do
+  schema_count=$((schema_count + 1))
+  echo "Checking $schema_file"
+  ref_args=()
+  for schema_path in "${schema_files[@]}"; do
+    if [[ "$schema_path" != "$schema_file" ]]; then
+      ref_args+=(-r "$schema_path")
+    fi
+  done
+  npx --yes --package ajv-cli --package ajv-formats \
+    ajv compile --spec=draft2020 --strict=false -c ajv-formats "${ref_args[@]}" -s "$schema_file"
+done

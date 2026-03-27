@@ -3,7 +3,7 @@ go = "1.25"
 node = "20"
 
 [tasks.bundle-api-spec]
-description = "Bundle the OpenAPI spec into api-spec/dist/openapi.bundled.yaml"
+description = "Bundle the v0 OpenAPI spec into api-spec/v0/dist/openapi.bundled.yaml"
 run = "./scripts/bundle-api-spec"
 
 [tasks.validate-api-spec]
