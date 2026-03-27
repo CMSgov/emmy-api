@@ -1,9 +1,0 @@
-EduVerificationRequestExample:
-  summary: Minimal Education request with required consent token header.
-  value:
-    applicant:
-      firstName: Lynette
-      lastName: Oyola
-      middleName: Marie
-      dateOfBirth: "1988-10-24"
-      ssn: "123456789"

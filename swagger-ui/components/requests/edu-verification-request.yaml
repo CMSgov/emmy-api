@@ -1,8 +1,0 @@
-EduVerificationRequest:
-  type: object
-  additionalProperties: false
-  required:
-    - applicant
-  properties:
-    applicant:
-      $ref: ../../../schema/education/v1/applicant.schema.json
