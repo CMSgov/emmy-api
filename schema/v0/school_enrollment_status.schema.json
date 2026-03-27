@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SchoolEnrollmentStatus",
+  "description": "Enrollment intensity status for a student's school attendance.",
+  "type": "string",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/FULL_TIME"
+    },
+    {
+      "$ref": "#/$defs/PART_TIME"
+    },
+    {
+      "$ref": "#/$defs/LESS_THAN_PART_TIME"
+    },
+    {
+      "$ref": "#/$defs/ENROLLED"
+    }
+  ],
+  "$defs": {
+    "FULL_TIME": {
+      "const": "FULL_TIME",
+      "description": "Student is enrolled on a full-time basis."
+    },
+    "PART_TIME": {
+      "const": "PART_TIME",
+      "description": "Student is enrolled on a part-time basis."
+    },
+    "LESS_THAN_PART_TIME": {
+      "const": "LESS_THAN_PART_TIME",
+      "description": "Student is enrolled at less than part-time intensity."
+    },
+    "ENROLLED": {
+      "const": "ENROLLED",
+      "description": "Student is enrolled, but the enrollment intensity is unknown."
+    }
+  },
+  "examples": ["FULL_TIME", "ENROLLED"]
+}

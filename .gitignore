@@ -5,3 +5,5 @@ vendor/
 dump.rdb
 .DS_Store
 .postman
+.envrc
+node_modules

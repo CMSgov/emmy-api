@@ -3,17 +3,45 @@ go = "1.25"
 node = "20"
 
 [tasks.bundle-api-spec]
-description = "Bundle the OpenAPI spec into api-spec/dist/openapi.bundled.yaml"
-run = "./scripts/bundle-api-spec"
+description = "Bundle the v0 OpenAPI spec into api-spec/v0/dist/openapi.bundled.yaml"
+run = "pnpm run bundle:api-spec"
 
 [tasks.validate-api-spec]
 description = "Validate the bundled OpenAPI YAML"
-run = "./scripts/validate-api-spec"
+run = "pnpm run validate:api-spec"
 
 [tasks.lint-api-spec]
 description = "Lint the bundled OpenAPI YAML with Spectral"
-run = "./scripts/lint-api-spec"
+run = "pnpm run lint:api-spec"
+
+[tasks.lint-yaml-files]
+description = "Lint hand-authored YAML files with yamllint"
+run = "./scripts/lint-yaml-files"
+
+[tasks.check-format-contract-files]
+description = "Check formatting for contract YAML and JSON files with Prettier"
+run = "pnpm run check:fmt"
+
+[tasks.check-json-schemas]
+description = "Compile standalone JSON Schemas with Ajv"
+run = "pnpm run check:schemas"
+
+[tasks.check-openapi-breaking]
+description = "Check the bundled OpenAPI artifact for breaking changes against a base ref"
+run = "./scripts/check-openapi-breaking"
 
 [tasks.check-api-spec]
 description = "Bundle, validate, and lint the OpenAPI spec"
 depends = ["bundle-api-spec", "validate-api-spec", "lint-api-spec"]
+
+[tasks.check-contract-files]
+description = "Run local lint, format, schema, and breaking-change checks for contract files"
+depends = [
+  "bundle-api-spec",
+  "validate-api-spec",
+  "lint-api-spec",
+  "lint-yaml-files",
+  "check-format-contract-files",
+  "check-json-schemas",
+  "check-openapi-breaking",
+]

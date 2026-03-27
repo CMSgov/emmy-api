@@ -1,8 +1,0 @@
-EduVerificationRequest:
-  type: object
-  additionalProperties: false
-  required:
-    - applicant
-  properties:
-    applicant:
-      $ref: ../models/applicant.yaml#/Applicant

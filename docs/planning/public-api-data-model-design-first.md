@@ -33,13 +33,13 @@ This gives one source of truth that supports:
 
 ### Requirements Fit
 
-| Requirement | Decision fit |
-| --- | --- |
-| Human-readable docs | ReDoc and Swagger UI render directly from OpenAPI |
-| Programmatic processing | OpenAPI supports code generation, schema reuse, mocks, and diff tooling |
-| Contract testing | Schemathesis runs generated tests from the OpenAPI contract |
-| Design-first governance | Spec reviewed and approved before implementation changes |
-| Go implementation alignment | oapi-codegen generates types and Fiber server interfaces |
+| Requirement                 | Decision fit                                                            |
+| --------------------------- | ----------------------------------------------------------------------- |
+| Human-readable docs         | ReDoc and Swagger UI render directly from OpenAPI                       |
+| Programmatic processing     | OpenAPI supports code generation, schema reuse, mocks, and diff tooling |
+| Contract testing            | Schemathesis runs generated tests from the OpenAPI contract             |
+| Design-first governance     | Spec reviewed and approved before implementation changes                |
+| Go implementation alignment | oapi-codegen generates types and Fiber server interfaces                |
 
 ### OpenAPI Version Choice
 
@@ -178,15 +178,15 @@ Starter `.spectral.yaml` (commit and version in repo):
 
 ```yaml
 extends:
-  - spectral:oas
+    - spectral:oas
 rules:
-  operation-summary-required:
-    description: Every operation must define a summary.
-    given: "$.paths[*][*]"
-    severity: warn
-    then:
-      field: summary
-      function: truthy
+    operation-summary-required:
+        description: Every operation must define a summary.
+        given: "$.paths[*][*]"
+        severity: warn
+        then:
+            field: summary
+            function: truthy
 ```
 
 ### 3. Preview Documentation
@@ -216,8 +216,8 @@ Add `oapi-codegen.yaml`:
 ```yaml
 package: api
 generate:
-  - types
-  - fiber-server
+    - types
+    - fiber-server
 output: internal/api/api.gen.go
 ```
 
@@ -267,9 +267,9 @@ After a spec PR merges, publish all of the following from the merged contract:
 
 - name: Prepare base spec
   run: |
-    git fetch --no-tags --depth=1 origin ${{ github.base_ref }}
-    git show origin/${{ github.base_ref }}:api-spec/openapi.yaml > /tmp/openapi.base.yaml
-    npx @redocly/cli bundle /tmp/openapi.base.yaml -o /tmp/openapi.base.bundled.yaml
+      git fetch --no-tags --depth=1 origin ${{ github.base_ref }}
+      git show origin/${{ github.base_ref }}:api-spec/openapi.yaml > /tmp/openapi.base.yaml
+      npx @redocly/cli bundle /tmp/openapi.base.yaml -o /tmp/openapi.base.bundled.yaml
 
 - name: Detect breaking changes
   if: ${{ !contains(github.event.pull_request.labels.*.name, 'breaking-change-approved') }}

@@ -30,12 +30,12 @@ This global behavior applies to `/status`, `/api-spec/v1/verify`, and `/api/edu`
 
 ## Endpoints
 
-| Method | Path                  | Description                         | Success     | Notes |
-| ------ | --------------------- | ----------------------------------- | ----------- | ----- |
-| `GET`  | `/`                   | Liveness string                     | `200` text  | Returns `Backend running!` |
-| `GET`  | `/status`             | Redis health check                  | `200` empty | Auth required unless `SKIP_AUTH=true`; uses 2s Redis ping timeout; wrapped by circuit breaker |
-| `GET`  | `/api-spec/v1/verify` | Bundled OpenAPI JSON artifact       | `200` JSON  | Returns `api-spec/dist/openapi.bundled.json`; auth required unless `SKIP_AUTH=true` |
-| `GET`  | `/api/edu`            | Education verification passthrough  | `200` JSON  | Uses hardcoded request payload in handler; wrapped by circuit breaker |
+| Method | Path                  | Description                        | Success     | Notes                                                                                         |
+| ------ | --------------------- | ---------------------------------- | ----------- | --------------------------------------------------------------------------------------------- |
+| `GET`  | `/`                   | Liveness string                    | `200` text  | Returns `Backend running!`                                                                    |
+| `GET`  | `/status`             | Redis health check                 | `200` empty | Auth required unless `SKIP_AUTH=true`; uses 2s Redis ping timeout; wrapped by circuit breaker |
+| `GET`  | `/api-spec/v1/verify` | Bundled OpenAPI JSON artifact      | `200` JSON  | Returns `api-spec/dist/openapi.bundled.json`; auth required unless `SKIP_AUTH=true`           |
+| `GET`  | `/api/edu`            | Education verification passthrough | `200` JSON  | Uses hardcoded request payload in handler; wrapped by circuit breaker                         |
 
 ## Request and Response Models
 

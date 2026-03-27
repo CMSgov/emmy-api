@@ -83,18 +83,6 @@
     "otel-collector-config.yml",
     "Dockerfile"
   ],
-  "ignoreRegExpList": [
-    "/\\bstd/",
-    "/\\bsdk/",
-    "/out/",
-    "gofiber",
-    "otelfiber",
-    "Urls"
-  ],
-  "userWords": [
-    "DSAC",
-    "DSACMS",
-    "sublicensable",
-    "bugcrowd"
-  ]
+  "ignoreRegExpList": ["/\\bstd/", "/\\bsdk/", "/out/", "gofiber", "otelfiber", "Urls"],
+  "userWords": ["DSAC", "DSACMS", "sublicensable", "bugcrowd"]
 }

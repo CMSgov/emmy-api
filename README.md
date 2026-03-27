@@ -24,7 +24,7 @@ For OpenAPI spec maintenance, the repo also includes utility scripts under
 `scripts/`:
 
 ```sh
-# 1. Rebuild the bundled YAML and JSON artifacts from the multi-file source spec
+# 1. Rebuild the bundled YAML and JSON artifacts from the design-time source spec
 ./scripts/bundle-api-spec
 
 # 2. Validate the bundled YAML artifact
@@ -32,6 +32,18 @@ For OpenAPI spec maintenance, the repo also includes utility scripts under
 
 # 3. Lint the bundled YAML artifact with the repo Spectral ruleset
 ./scripts/lint-api-spec
+
+# 4. Lint hand-authored YAML files
+./scripts/lint-yaml-files
+
+# 5. Check formatting for contract YAML and JSON files
+./scripts/check-format-contract-files
+
+# 6. Compile standalone JSON Schemas
+./scripts/check-json-schemas
+
+# 7. Check for breaking OpenAPI changes against a base ref
+./scripts/check-openapi-breaking [base-ref]
 ```
 
 If you use [mise](https://mise.jdx.dev/), install the pinned runtimes from
@@ -41,12 +53,14 @@ If you use [mise](https://mise.jdx.dev/), install the pinned runtimes from
 # Install the pinned Go and Node runtimes for this repo
 mise install
 
-# Run the full OpenAPI spec workflow
-mise run check-api-spec
+# Run the full local contract/spec workflow
+mise run check-contract-files
 ```
 
 You can also run each step individually with `mise run bundle-api-spec`,
-`mise run validate-api-spec`, and `mise run lint-api-spec`.
+`mise run validate-api-spec`, `mise run lint-api-spec`,
+`mise run lint-yaml-files`, `mise run check-format-contract-files`,
+`mise run check-json-schemas`, and `mise run check-openapi-breaking`.
 
 ## Policies
 

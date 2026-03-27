@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CombinedDisabilityRating",
+  "description": "VA combined disability rating percentage used to quantify the overall severity of a veteran's service-connected disabilities.",
+  "type": "integer",
+  "minimum": 0,
+  "maximum": 100,
+  "examples": [70]
+}

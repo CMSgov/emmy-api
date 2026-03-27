@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Identity",
+  "description": "Basic identifying information for a person.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["firstName", "lastName", "dateOfBirth"],
+  "properties": {
+    "firstName": {
+      "type": "string",
+      "description": "Person's legal first name.",
+      "examples": ["Lynette"]
+    },
+    "middleName": {
+      "type": "string",
+      "description": "Person's legal middle name when available.",
+      "examples": ["Marie"]
+    },
+    "lastName": {
+      "type": "string",
+      "description": "Person's legal last name.",
+      "examples": ["Oyola"]
+    },
+    "dateOfBirth": {
+      "$ref": "./date.schema.json",
+      "description": "Person's date of birth."
+    },
+    "ssn": {
+      "$ref": "./ssn.schema.json",
+      "description": "Social Security number when available."
+    }
+  }
+}

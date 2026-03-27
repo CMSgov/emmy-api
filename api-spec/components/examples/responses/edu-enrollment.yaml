@@ -1,5 +1,0 @@
-EduEnrollmentExample:
-  summary: Subject is currently enrolled full-time.
-  value:
-    currentlyEnrolled: "Y"
-    enrollmentStatus: F

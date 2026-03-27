@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SSN",
+  "description": "Social Security number represented either as a full formatted value (XXX-XX-XXXX) or as the last four digits (XXXX).",
+  "type": "string",
+  "pattern": "^(?:[0-9]{3}-[0-9]{2}-[0-9]{4}|[0-9]{4})$",
+  "examples": ["123-45-6789", "6789"]
+}
