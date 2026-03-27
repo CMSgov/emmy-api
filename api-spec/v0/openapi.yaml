@@ -76,7 +76,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: ../../schema/common/v1/problem-details.schema.json
+                $ref: "#/components/schemas/ProblemDetails"
               examples:
                 invalidIdentity:
                   $ref: "#/components/examples/BadRequestProblemExample"
@@ -125,7 +125,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: ../../schema/common/v1/problem-details.schema.json
+                $ref: "#/components/schemas/ProblemDetails"
               examples:
                 invalidIdentity:
                   $ref: "#/components/examples/BadRequestProblemExample"
@@ -134,7 +134,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: ../../schema/common/v1/problem-details.schema.json
+                $ref: "#/components/schemas/ProblemDetails"
               examples:
                 missingConsentToken:
                   $ref: "#/components/examples/MissingConsentTokenProblemExample"
@@ -183,7 +183,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: ../../schema/common/v1/problem-details.schema.json
+                $ref: "#/components/schemas/ProblemDetails"
               examples:
                 invalidIdentity:
                   $ref: "#/components/examples/BadRequestProblemExample"
@@ -192,7 +192,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: ../../schema/common/v1/problem-details.schema.json
+                $ref: "#/components/schemas/ProblemDetails"
               examples:
                 missingConsentToken:
                   $ref: "#/components/examples/MissingConsentTokenProblemExample"
@@ -209,6 +209,37 @@ components:
           tokenUrl: https://api.dev.emmy.cms.gov/oauth2/token
           scopes: {}
   schemas:
+    ProblemDetails:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri
+          examples:
+            - https://api.example.gov/problems/invalid-request
+        title:
+          type: string
+          examples:
+            - Invalid Request
+        status:
+          type: integer
+          minimum: 100
+          maximum: 599
+          examples:
+            - 400
+        detail:
+          type: string
+          examples:
+            - The submitted request payload is invalid.
+        instance:
+          type: string
+          examples:
+            - /v0/consent-tokens
     CreateConsentTokenRequest:
       type: object
       additionalProperties: false

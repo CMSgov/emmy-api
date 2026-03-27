@@ -1,6 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:emmy:schema:v0:date",
   "title": "Date",
   "description": "Calendar date expressed as an ISO 8601 full-date string in YYYY-MM-DD format.",
   "type": "string",

@@ -1,0 +1,614 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Verification Service API",
+    "version": "0.1.0",
+    "contact": {
+      "name": "Eligibility Made Easy (Emmy)",
+      "url": "https://www.cms.gov/medicaid-chip/community-engagement-support/eligibility-made-easy"
+    },
+    "summary": "Alpha API contract for Emmy consent-based verification workflows supporting community engagement reporting.\n",
+    "description": "Public alpha API contract for the Eligibility Made Easy (Emmy) verification service. Emmy is a CMS-developed suite of open-source tools that supports community engagement reporting through consent-based data sharing and verification across multiple data sources. This API allows state-managed applications to submit standardized identity payloads, create consent tokens, and request verification results such as education enrollment and VA disability rating data. Client applications must authenticate with an OAuth 2.0 bearer token obtained through the client credentials flow. This API is not stable and should be treated as highly volatile for the next several months. Breaking changes are likely as the alpha release evolves.\n"
+  },
+  "servers": [
+    {
+      "url": "https://api.dev.emmy.cms.gov",
+      "description": "Emmy development environment"
+    },
+    {
+      "url": "http://localhost:8000",
+      "description": "Local development"
+    }
+  ],
+  "security": [
+    {
+      "OAuth2ClientCredentials": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Consent and Access",
+      "description": "Operations for creating consent receipts used in Emmy consent-based verification workflows\n"
+    },
+    {
+      "name": "Education Verification",
+      "description": "Operations for retrieving education enrollment data used in community engagement reporting\n"
+    },
+    {
+      "name": "Veteran Verification",
+      "description": "Operations for retrieving VA disability rating data used in community engagement reporting\n"
+    }
+  ],
+  "paths": {
+    "/v0/consent-tokens": {
+      "post": {
+        "tags": [
+          "Consent and Access"
+        ],
+        "summary": "Create a consent token",
+        "description": "Creates a new consent token for the person identified in the supplied identity object. The returned token is opaque and should be treated as a receipt showing the client obtained that person's consent. The caller must also present a bearer token proving the client application is authorized to use this API.\n",
+        "operationId": "createConsentToken",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConsentTokenRequest"
+              },
+              "examples": {
+                "standard": {
+                  "$ref": "#/components/examples/CreateConsentTokenRequestExample"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Consent token created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentTokenResponse"
+                },
+                "examples": {
+                  "created": {
+                    "$ref": "#/components/examples/ConsentTokenResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request body did not satisfy the contract.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "examples": {
+                  "invalidIdentity": {
+                    "$ref": "#/components/examples/BadRequestProblemExample"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/education-enrollments": {
+      "post": {
+        "tags": [
+          "Education Verification"
+        ],
+        "summary": "Get education enrollment status",
+        "description": "Returns the subject's current education enrollment status for the person identified in the supplied identity object. The caller must include a consent token previously returned by the consent-token creation endpoint and must also present a bearer token proving the client application is authorized to use this API.\n",
+        "operationId": "getEducationEnrollmentStatus",
+        "parameters": [
+          {
+            "name": "X-EMMY-Consent-Token",
+            "in": "header",
+            "required": true,
+            "description": "Consent token returned by the consent-token creation endpoint for the same person identified in the request body.\n",
+            "schema": {
+              "$ref": "#/components/schemas/consent-token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetEducationEnrollmentRequest"
+              },
+              "examples": {
+                "standard": {
+                  "$ref": "#/components/examples/GetEducationEnrollmentRequestExample"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Education enrollment status retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EducationEnrollmentResponse"
+                },
+                "examples": {
+                  "enrolled": {
+                    "$ref": "#/components/examples/EducationEnrollmentResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request body did not satisfy the contract.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "examples": {
+                  "invalidIdentity": {
+                    "$ref": "#/components/examples/BadRequestProblemExample"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Consent token was missing, invalid, or could not be used.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "examples": {
+                  "missingConsentToken": {
+                    "$ref": "#/components/examples/MissingConsentTokenProblemExample"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/veteran-disability-ratings": {
+      "post": {
+        "tags": [
+          "Veteran Verification"
+        ],
+        "summary": "Get veteran disability status",
+        "description": "Returns the subject's veteran combined disability rating for the person identified in the supplied identity object. The caller must include a consent token previously returned by the consent-token creation endpoint and must also present a bearer token proving the client application is authorized to use this API.\n",
+        "operationId": "getVeteranDisabilityStatus",
+        "parameters": [
+          {
+            "name": "X-EMMY-Consent-Token",
+            "in": "header",
+            "required": true,
+            "description": "Consent token returned by the consent-token creation endpoint for the same person identified in the request body.\n",
+            "schema": {
+              "$ref": "#/components/schemas/consent-token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetVeteranDisabilityStatusRequest"
+              },
+              "examples": {
+                "standard": {
+                  "$ref": "#/components/examples/GetVeteranDisabilityStatusRequestExample"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Veteran disability status retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VeteranDisabilityStatusResponse"
+                },
+                "examples": {
+                  "rated": {
+                    "$ref": "#/components/examples/VeteranDisabilityStatusResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request body did not satisfy the contract.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "examples": {
+                  "invalidIdentity": {
+                    "$ref": "#/components/examples/BadRequestProblemExample"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Consent token was missing, invalid, or could not be used.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "examples": {
+                  "missingConsentToken": {
+                    "$ref": "#/components/examples/MissingConsentTokenProblemExample"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "OAuth2ClientCredentials": {
+        "type": "oauth2",
+        "description": "OAuth 2.0 bearer token proving the client application is authorized to access the Verification Service API. Only the client credentials grant is supported.\n",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://api.dev.emmy.cms.gov/oauth2/token",
+            "scopes": {}
+          }
+        }
+      }
+    },
+    "schemas": {
+      "ProblemDetails": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "title",
+          "status"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "examples": [
+              "https://api.example.gov/problems/invalid-request"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "examples": [
+              "Invalid Request"
+            ]
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599,
+            "examples": [
+              400
+            ]
+          },
+          "detail": {
+            "type": "string",
+            "examples": [
+              "The submitted request payload is invalid."
+            ]
+          },
+          "instance": {
+            "type": "string",
+            "examples": [
+              "/v0/consent-tokens"
+            ]
+          }
+        }
+      },
+      "CreateConsentTokenRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "identity"
+        ],
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/identity.schema",
+            "description": "Standardized identity for the person whose consent was obtained."
+          }
+        }
+      },
+      "ConsentTokenResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "consentToken"
+        ],
+        "properties": {
+          "consentToken": {
+            "$ref": "#/components/schemas/consent-token",
+            "description": "Opaque token to include in subsequent verification requests."
+          }
+        }
+      },
+      "GetEducationEnrollmentRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "identity"
+        ],
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/identity.schema",
+            "description": "Standardized identity for the person whose enrollment is being verified."
+          }
+        }
+      },
+      "EducationEnrollmentResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "enrollmentStatus"
+        ],
+        "properties": {
+          "enrollmentStatus": {
+            "$ref": "#/components/schemas/school_enrollment_status.schema",
+            "description": "Current enrollment status for the identified person."
+          }
+        }
+      },
+      "GetVeteranDisabilityStatusRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "identity"
+        ],
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/identity.schema",
+            "description": "Standardized identity for the person whose veteran disability status is being verified."
+          }
+        }
+      },
+      "VeteranDisabilityStatusResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "combinedDisabilityRating"
+        ],
+        "properties": {
+          "combinedDisabilityRating": {
+            "$ref": "#/components/schemas/combined_disability_rating.schema",
+            "description": "VA combined disability rating for the identified person."
+          }
+        }
+      },
+      "date.schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Date",
+        "description": "Calendar date expressed as an ISO 8601 full-date string in YYYY-MM-DD format.",
+        "type": "string",
+        "format": "date",
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+        "examples": [
+          "2026-03-27"
+        ]
+      },
+      "ssn.schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "SSN",
+        "description": "Social Security number represented either as a full formatted value (XXX-XX-XXXX) or as the last four digits (XXXX).",
+        "type": "string",
+        "pattern": "^(?:[0-9]{3}-[0-9]{2}-[0-9]{4}|[0-9]{4})$",
+        "examples": [
+          "123-45-6789",
+          "6789"
+        ]
+      },
+      "identity.schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Identity",
+        "description": "Basic identifying information for a person.",
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "firstName",
+          "lastName",
+          "dateOfBirth"
+        ],
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "Person's legal first name.",
+            "examples": [
+              "Lynette"
+            ]
+          },
+          "middleName": {
+            "type": "string",
+            "description": "Person's legal middle name when available.",
+            "examples": [
+              "Marie"
+            ]
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Person's legal last name.",
+            "examples": [
+              "Oyola"
+            ]
+          },
+          "dateOfBirth": {
+            "$ref": "#/components/schemas/date.schema",
+            "description": "Person's date of birth."
+          },
+          "ssn": {
+            "$ref": "#/components/schemas/ssn.schema",
+            "description": "Social Security number when available."
+          }
+        }
+      },
+      "consent-token": {
+        "title": "ConsentToken",
+        "description": "Opaque token proving the client application obtained consent from the person identified in the associated identity payload.\n",
+        "type": "string",
+        "minLength": 1,
+        "example": "$2b$12$8J8ZQG7Kq0r1vM2nX4yP8e9uR3tY6wA1sD5fH7jL0pN2qR4uV6xWm"
+      },
+      "FULL_TIME": {
+        "const": "FULL_TIME",
+        "description": "Student is enrolled on a full-time basis."
+      },
+      "PART_TIME": {
+        "const": "PART_TIME",
+        "description": "Student is enrolled on a part-time basis."
+      },
+      "LESS_THAN_PART_TIME": {
+        "const": "LESS_THAN_PART_TIME",
+        "description": "Student is enrolled at less than part-time intensity."
+      },
+      "ENROLLED": {
+        "const": "ENROLLED",
+        "description": "Student is enrolled, but the enrollment intensity is unknown."
+      },
+      "school_enrollment_status.schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "SchoolEnrollmentStatus",
+        "description": "Enrollment intensity status for a student's school attendance.",
+        "type": "string",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/FULL_TIME"
+          },
+          {
+            "$ref": "#/components/schemas/PART_TIME"
+          },
+          {
+            "$ref": "#/components/schemas/LESS_THAN_PART_TIME"
+          },
+          {
+            "$ref": "#/components/schemas/ENROLLED"
+          }
+        ],
+        "$defs": {
+          "FULL_TIME": {
+            "const": "FULL_TIME",
+            "description": "Student is enrolled on a full-time basis."
+          },
+          "PART_TIME": {
+            "const": "PART_TIME",
+            "description": "Student is enrolled on a part-time basis."
+          },
+          "LESS_THAN_PART_TIME": {
+            "const": "LESS_THAN_PART_TIME",
+            "description": "Student is enrolled at less than part-time intensity."
+          },
+          "ENROLLED": {
+            "const": "ENROLLED",
+            "description": "Student is enrolled, but the enrollment intensity is unknown."
+          }
+        },
+        "examples": [
+          "FULL_TIME",
+          "ENROLLED"
+        ]
+      },
+      "combined_disability_rating.schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "CombinedDisabilityRating",
+        "description": "VA combined disability rating percentage used to quantify the overall severity of a veteran's service-connected disabilities.",
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100,
+        "examples": [
+          70
+        ]
+      }
+    },
+    "examples": {
+      "CreateConsentTokenRequestExample": {
+        "value": {
+          "identity": {
+            "firstName": "Lynette",
+            "middleName": "Marie",
+            "lastName": "Oyola",
+            "dateOfBirth": "1988-10-24",
+            "ssn": "123-45-6789"
+          }
+        }
+      },
+      "ConsentTokenResponseExample": {
+        "value": {
+          "consentToken": "$2b$12$8J8ZQG7Kq0r1vM2nX4yP8e9uR3tY6wA1sD5fH7jL0pN2qR4uV6xWm"
+        }
+      },
+      "BadRequestProblemExample": {
+        "value": {
+          "type": "https://api.example.gov/problems/invalid-request",
+          "title": "Invalid Request",
+          "status": 400,
+          "detail": "identity.dateOfBirth must match the expected YYYY-MM-DD format.",
+          "instance": "/v0/consent-tokens"
+        }
+      },
+      "GetEducationEnrollmentRequestExample": {
+        "value": {
+          "identity": {
+            "firstName": "Lynette",
+            "middleName": "Marie",
+            "lastName": "Oyola",
+            "dateOfBirth": "1988-10-24",
+            "ssn": "123-45-6789"
+          }
+        }
+      },
+      "EducationEnrollmentResponseExample": {
+        "value": {
+          "enrollmentStatus": "FULL_TIME"
+        }
+      },
+      "MissingConsentTokenProblemExample": {
+        "value": {
+          "type": "https://api.example.gov/problems/invalid-consent-token",
+          "title": "Invalid Consent Token",
+          "status": 401,
+          "detail": "X-EMMY-Consent-Token must be a valid token returned by POST /v0/consent-tokens.",
+          "instance": "/v0/education-enrollments"
+        }
+      },
+      "GetVeteranDisabilityStatusRequestExample": {
+        "value": {
+          "identity": {
+            "firstName": "Lynette",
+            "middleName": "Marie",
+            "lastName": "Oyola",
+            "dateOfBirth": "1988-10-24",
+            "ssn": "123-45-6789"
+          }
+        }
+      },
+      "VeteranDisabilityStatusResponseExample": {
+        "value": {
+          "combinedDisabilityRating": 70
+        }
+      }
+    }
+  }
+}

@@ -2,7 +2,9 @@
   "name": "verification-service-api",
   "private": true,
   "scripts": {
-    "bundle-spec": "redocly bundle api-spec/v0/openapi.yaml -o api-spec/dist/v0/openapi.json",
+    "bundle:api-spec": "redocly bundle api-spec/v0/openapi.yaml -o api-spec/v0/dist/openapi.bundled.json",
+    "validate:api-spec": "swagger-cli validate api-spec/v0/dist/openapi.bundled.yaml",
+    "lint:api-spec": "spectral lint api-spec/v0/dist/openapi.bundled.yaml --ruleset .spectral.yaml",
     "fmt": "prettier --write .",
     "check:fmt": "prettier --check .",
     "check:schemas": "node scripts/validate-json-schemas.mjs"
