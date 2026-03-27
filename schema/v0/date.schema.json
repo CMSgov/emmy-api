@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://emmy.cms.gov/schema/v0/date.schema.json",
+  "title": "Date",
+  "description": "Calendar date expressed as an ISO 8601 full-date string in YYYY-MM-DD format.",
+  "type": "string",
+  "format": "date",
+  "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+  "example": "2026-03-27"
+}

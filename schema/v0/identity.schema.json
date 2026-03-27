@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://emmy.cms.gov/schema/v0/identity.schema.json",
+  "title": "Identity",
+  "description": "Basic identifying information for a person.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["firstName", "lastName", "dateOfBirth"],
+  "properties": {
+    "firstName": {
+      "type": "string",
+      "description": "Person's legal first name.",
+      "example": "Lynette"
+    },
+    "middleName": {
+      "type": "string",
+      "description": "Person's legal middle name when available.",
+      "example": "Marie"
+    },
+    "lastName": {
+      "type": "string",
+      "description": "Person's legal last name.",
+      "example": "Oyola"
+    },
+    "dateOfBirth": {
+      "$ref": "https://emmy.cms.gov/schema/v0/date.schema.json",
+      "description": "Person's date of birth."
+    },
+    "ssn": {
+      "$ref": "https://emmy.cms.gov/schema/v0/ssn.schema.json",
+      "description": "Social Security number when available."
+    }
+  }
+}
