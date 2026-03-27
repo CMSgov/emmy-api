@@ -19,4 +19,4 @@ if [[ ! -f "$ruleset" ]]; then
 fi
 
 cd "$repo_root"
-npx @stoplight/spectral-cli lint api-spec/v0/dist/openapi.bundled.yaml --ruleset .spectral.yaml
+pnpm exec spectral lint api-spec/v0/dist/openapi.bundled.yaml --ruleset .spectral.yaml

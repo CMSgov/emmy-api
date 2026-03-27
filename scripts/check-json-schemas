@@ -28,6 +28,5 @@ for schema_file in "${schema_files[@]}"; do
       ref_args+=(-r "$schema_path")
     fi
   done
-  npx --yes --package ajv-cli --package ajv-formats \
-    ajv compile --spec=draft2020 --strict=false -c ajv-formats "${ref_args[@]}" -s "$schema_file"
+  pnpm exec ajv compile --spec=draft2020 --strict=false -c ajv-formats "${ref_args[@]}" -s "$schema_file"
 done

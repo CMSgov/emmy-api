@@ -13,4 +13,4 @@ if [[ ! -f "$bundled_spec" ]]; then
 fi
 
 cd "$repo_root"
-npx @apidevtools/swagger-cli validate api-spec/v0/dist/openapi.bundled.yaml
+pnpm exec swagger-cli validate api-spec/v0/dist/openapi.bundled.yaml

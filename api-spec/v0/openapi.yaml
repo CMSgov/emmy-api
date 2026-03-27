@@ -57,21 +57,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateConsentTokenRequest'
+              $ref: "#/components/schemas/CreateConsentTokenRequest"
             examples:
               standard:
-                $ref: '#/components/examples/CreateConsentTokenRequestExample'
+                $ref: "#/components/examples/CreateConsentTokenRequestExample"
       responses:
-        '201':
+        "201":
           description: Consent token created successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConsentTokenResponse'
+                $ref: "#/components/schemas/ConsentTokenResponse"
               examples:
                 created:
-                  $ref: '#/components/examples/ConsentTokenResponseExample'
-        '400':
+                  $ref: "#/components/examples/ConsentTokenResponseExample"
+        "400":
           description: Request body did not satisfy the contract.
           content:
             application/problem+json:
@@ -79,7 +79,7 @@ paths:
                 $ref: ../../schema/common/v1/problem-details.schema.json
               examples:
                 invalidIdentity:
-                  $ref: '#/components/examples/BadRequestProblemExample'
+                  $ref: "#/components/examples/BadRequestProblemExample"
   /v0/education-enrollments:
     post:
       tags:
@@ -106,21 +106,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetEducationEnrollmentRequest'
+              $ref: "#/components/schemas/GetEducationEnrollmentRequest"
             examples:
               standard:
-                $ref: '#/components/examples/GetEducationEnrollmentRequestExample'
+                $ref: "#/components/examples/GetEducationEnrollmentRequestExample"
       responses:
-        '200':
+        "200":
           description: Education enrollment status retrieved successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EducationEnrollmentResponse'
+                $ref: "#/components/schemas/EducationEnrollmentResponse"
               examples:
                 enrolled:
-                  $ref: '#/components/examples/EducationEnrollmentResponseExample'
-        '400':
+                  $ref: "#/components/examples/EducationEnrollmentResponseExample"
+        "400":
           description: Request body did not satisfy the contract.
           content:
             application/problem+json:
@@ -128,8 +128,8 @@ paths:
                 $ref: ../../schema/common/v1/problem-details.schema.json
               examples:
                 invalidIdentity:
-                  $ref: '#/components/examples/BadRequestProblemExample'
-        '401':
+                  $ref: "#/components/examples/BadRequestProblemExample"
+        "401":
           description: Consent token was missing, invalid, or could not be used.
           content:
             application/problem+json:
@@ -137,7 +137,7 @@ paths:
                 $ref: ../../schema/common/v1/problem-details.schema.json
               examples:
                 missingConsentToken:
-                  $ref: '#/components/examples/MissingConsentTokenProblemExample'
+                  $ref: "#/components/examples/MissingConsentTokenProblemExample"
   /v0/veteran-disability-ratings:
     post:
       tags:
@@ -164,21 +164,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetVeteranDisabilityStatusRequest'
+              $ref: "#/components/schemas/GetVeteranDisabilityStatusRequest"
             examples:
               standard:
-                $ref: '#/components/examples/GetVeteranDisabilityStatusRequestExample'
+                $ref: "#/components/examples/GetVeteranDisabilityStatusRequestExample"
       responses:
-        '200':
+        "200":
           description: Veteran disability status retrieved successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VeteranDisabilityStatusResponse'
+                $ref: "#/components/schemas/VeteranDisabilityStatusResponse"
               examples:
                 rated:
-                  $ref: '#/components/examples/VeteranDisabilityStatusResponseExample'
-        '400':
+                  $ref: "#/components/examples/VeteranDisabilityStatusResponseExample"
+        "400":
           description: Request body did not satisfy the contract.
           content:
             application/problem+json:
@@ -186,8 +186,8 @@ paths:
                 $ref: ../../schema/common/v1/problem-details.schema.json
               examples:
                 invalidIdentity:
-                  $ref: '#/components/examples/BadRequestProblemExample'
-        '401':
+                  $ref: "#/components/examples/BadRequestProblemExample"
+        "401":
           description: Consent token was missing, invalid, or could not be used.
           content:
             application/problem+json:
@@ -195,7 +195,7 @@ paths:
                 $ref: ../../schema/common/v1/problem-details.schema.json
               examples:
                 missingConsentToken:
-                  $ref: '#/components/examples/MissingConsentTokenProblemExample'
+                  $ref: "#/components/examples/MissingConsentTokenProblemExample"
 components:
   securitySchemes:
     OAuth2ClientCredentials:
@@ -270,8 +270,8 @@ components:
           firstName: Lynette
           middleName: Marie
           lastName: Oyola
-          dateOfBirth: '1988-10-24'
-          ssn: '123-45-6789'
+          dateOfBirth: "1988-10-24"
+          ssn: "123-45-6789"
     ConsentTokenResponseExample:
       value:
         consentToken: $2b$12$8J8ZQG7Kq0r1vM2nX4yP8e9uR3tY6wA1sD5fH7jL0pN2qR4uV6xWm
@@ -288,8 +288,8 @@ components:
           firstName: Lynette
           middleName: Marie
           lastName: Oyola
-          dateOfBirth: '1988-10-24'
-          ssn: '123-45-6789'
+          dateOfBirth: "1988-10-24"
+          ssn: "123-45-6789"
     EducationEnrollmentResponseExample:
       value:
         enrollmentStatus: FULL_TIME
@@ -306,8 +306,8 @@ components:
           firstName: Lynette
           middleName: Marie
           lastName: Oyola
-          dateOfBirth: '1988-10-24'
-          ssn: '123-45-6789'
+          dateOfBirth: "1988-10-24"
+          ssn: "123-45-6789"
     VeteranDisabilityStatusResponseExample:
       value:
         combinedDisabilityRating: 70
