@@ -148,7 +148,12 @@ components:
         middleName: Marie
         lastName: Oyola
         dateOfBirth: "1988-10-24"
-        ssn: "123-45-6789"
+        address:
+          street1: 17020 Tortoise St
+          city: Round Rock
+          state: TX
+          postalCode: "78664"
+          country: USA
     VeteranDisabilityStatusResponseExample:
       value:
         combinedDisabilityRating: 70

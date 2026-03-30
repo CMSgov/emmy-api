@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Address",
+  "description": "Postal address used when a lookup requires demographic matching instead of SSN matching.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "street1": {
+      "type": "string",
+      "description": "Primary street address line.",
+      "examples": ["17020 Tortoise St"]
+    },
+    "street2": {
+      "type": "string",
+      "description": "Secondary street address line when available.",
+      "examples": ["Apt 4B"]
+    },
+    "street3": {
+      "type": "string",
+      "description": "Additional street address line when available.",
+      "examples": ["Building C"]
+    },
+    "city": {
+      "type": "string",
+      "description": "City or locality.",
+      "examples": ["Round Rock"]
+    },
+    "state": {
+      "type": "string",
+      "description": "State, province, or region code.",
+      "examples": ["TX"]
+    },
+    "postalCode": {
+      "type": "string",
+      "description": "Postal or ZIP code.",
+      "examples": ["78664"]
+    },
+    "country": {
+      "type": "string",
+      "description": "Country name or code.",
+      "examples": ["USA"]
+    }
+  }
+}

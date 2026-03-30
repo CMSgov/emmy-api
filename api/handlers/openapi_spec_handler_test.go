@@ -24,7 +24,7 @@ func TestOpenAPISpecHandler_ReturnsBundledJSON(t *testing.T) {
 	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
-	expectedBody, err := os.ReadFile(filepath.Join("..", "..", "api-spec", "dist", "openapi.bundled.json"))
+	expectedBody, err := os.ReadFile(filepath.Join("..", "..", "api-spec", "v0", "dist", "openapi.bundled.json"))
 	require.NoError(t, err)
 
 	require.Equal(t, fiber.StatusOK, resp.StatusCode)

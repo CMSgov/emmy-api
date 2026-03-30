@@ -8,6 +8,7 @@ import (
 	"github.com/cmsgov/emmy-api/pkg/circuitbreaker"
 	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/cmsgov/emmy-api/pkg/education"
+	"github.com/cmsgov/emmy-api/pkg/veteran"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 )
@@ -27,6 +28,9 @@ func RegisterRoutes(app fiber.Router, cfg *core.Config, rdb *redis.Client, logge
 	edu := education.New(&cfg.NSC, education.Options{
 		Logger: logger,
 	})
+	veteranService := veteran.New(&cfg.VA, veteran.Options{
+		Logger: logger,
+	})
 
 	// One breaker per endpoint
 	withCB := middleware.WithCircuitBreaker(func(name string) *circuitbreaker.RedisBreaker {
@@ -39,4 +43,5 @@ func RegisterRoutes(app fiber.Router, cfg *core.Config, rdb *redis.Client, logge
 	})
 
 	api.Get("/edu", withCB(handlers.EducationHandler(cfg, edu, logger)))
+	app.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(veteranService, logger)))
 }

@@ -18,10 +18,14 @@
 | Cognito | `COGNITO_REGION`, `COGNITO_USER_POOL_ID`, `COGNITO_APP_CLIENT_ID` | `us-east-1`, `UNSET`, `UNSET` |
 | Redis | `REDIS_ADDR`, `REDIS_PASSWORD`, `REDIS_DB` | `localhost:6379`, empty, `0` |
 | NSC | `NSC_SUBMIT_URL`, `NSC_TOKEN_URL`, `NSC_CLIENT_SECRET`, `NSC_CLIENT_ID`, `NSC_ACCOUNT_ID` | empty |
+| VA | `VA_BASE_URL`, `VA_TOKEN_URL`, `VA_CLIENT_ID`, `VA_AUD`, `VA_PRIVATE_KEY_PATH`, `VA_TIMEOUT_SECONDS` | empty, empty, empty, empty, empty, `5` |
 
-- `.env.example` currently contains only a minimal local subset of variables.
-  Add the remaining values manually as needed for Redis, Cognito, NSC, and OTel
-  workflows.
+- `.env.example` includes the local service settings plus placeholders for VA
+  veteran-verification credentials.
+- VA authentication uses a signed JWT client assertion, so the configured
+  private key path must point to a readable RSA PEM file on disk.
+- Populate the VA values before exercising
+  `POST /v0/veteran-disability-ratings`.
 
 ## Local Run
 
@@ -73,23 +77,14 @@ docker compose up --build
 Services:
 
 - API (`:8000`)
+- Redis (`:6379`)
 - OTel Collector (`:4317`, `:4318`, metrics endpoints)
 - Jaeger UI (`:16686`)
 - Prometheus (`:9090`)
 
-Important: this stack does not include Redis. The API process currently pings
-Redis during startup and exits if Redis is unreachable.
-
-### App + Observability + Redis (current workaround)
-
-Start the compose stack, then run Redis separately:
-
-```bash
-docker compose up --build
-docker run --rm -p 6379:6379 redis:7
-```
-
-This provides Redis (`:6379`) for local circuit-breaker/status behavior.
+The API container is configured with `REDIS_ADDR=redis:6379`, so the compose
+stack now includes the Redis dependency needed for local startup and
+circuit-breaker/status behavior.
 
 ## Build
 
