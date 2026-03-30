@@ -5,6 +5,11 @@ The Verification Service API provides a unified HTTP interface for eligibility v
 
 This service evolved from consent-based verification work and is intended to reduce manual burden during benefits eligibility evaluation.
 
+The intended public API contract for this branch is defined in
+`api-spec/v0/openapi.yaml` and the reusable schemas in `schema/v0/`. This page
+describes the current repository and runtime shape, which still contains
+implementation scaffolding that has not yet converged on the full v0 contract.
+
 ## System Context
 Runtime dependencies in current implementation:
 - Fiber (`github.com/gofiber/fiber/v2`) for HTTP server and routing.
@@ -61,11 +66,12 @@ Current wiring caveat on `main`: `/status` is registered in `api.New` using `api
 ## Documentation Map
 - [Architecture](architecture.md)
 - [Setup](setup.md)
-- [API](api.md)
+- [Runtime API Notes](api.md)
 - [Features](features/)
 - [Research](research/)
 - [Planning](planning/)
-- [Questions](questions/)
+- [API Specification](../api-spec/README.md)
+- [JSON Schemas](../schema/README.md)
 
 Feature docs are categorized by domain under `features/core`, `features/infrastructure`, `features/security`, and `features/resilience`.
 
@@ -73,6 +79,9 @@ Feature docs are categorized by domain under `features/core`, `features/infrastr
 Initial requirements referenced `/docs/planing`; this repo standardizes on `/docs/planning`.
 
 ## Assumptions
-- **High confidence:** Redis is the only persistent/shared runtime store currently used by this service.
-- **Medium confidence:** `/api/edu` is presently a scaffold/test endpoint and not yet a finalized external product contract.
-- **Medium confidence:** Additional verification domains (beyond education) are expected in future iterations based on project intent, but are not yet implemented.
+- **High confidence:** Redis is the only persistent/shared runtime store
+  currently used by this service.
+- **High confidence:** `/api/edu` is presently implementation scaffolding and
+  should not be treated as the public contract for this branch.
+- **Medium confidence:** Additional verification domains beyond the two v0
+  public operations may be introduced in future versions.

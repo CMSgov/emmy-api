@@ -2,7 +2,8 @@
 
 ## Requirements
 - Go `1.25.x` (`go.mod` sets `go 1.25`).
-- [ ] (TODO) Docker and Docker Compose (current committed compose file provides API + observability services only).
+- Docker and Docker Compose for containerized local workflows. The committed
+  compose file currently provides API and observability services only.
 - Local Redis at `localhost:6379` for runtime health checks and several tests.
 
 ## Environment Variables
@@ -16,10 +17,9 @@
 | Redis | `REDIS_ADDR`, `REDIS_PASSWORD`, `REDIS_DB` | `localhost:6379`, empty, `0` |
 | NSC | `NSC_SUBMIT_URL`, `NSC_TOKEN_URL`, `NSC_CLIENT_SECRET`, `NSC_CLIENT_ID`, `NSC_ACCOUNT_ID` | empty |
 
-- [ ] (FIX) `PORT` is parsed from `.env`, but the current `main` listener is still hardcoded to `:8000`.
-- [ ] (FIX) `SKIP_AUTH` does not work
-- [ ] (FIX) `.env.example` currently uses `Port` and `Environment` (mixed case), while code expects `PORT` and `ENVIRONMENT`.
-- [ ] (TODO) add mentioned ENV to the `.env.example`
+- `.env.example` currently contains only a minimal local subset of variables.
+  Add the remaining values manually as needed for Redis, Cognito, NSC, and OTel
+  workflows.
 
 ## Local Run
 ### 1) Configure env

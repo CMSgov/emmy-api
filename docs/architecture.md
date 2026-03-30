@@ -12,6 +12,10 @@
 - `pkg/redis/*.go`
 - `pkg/choice/choice.go`
 
+This page describes the current Go implementation. The intended public API
+contract for the branch is defined separately in `api-spec/v0/openapi.yaml` and
+`schema/v0/`.
+
 ## Dependency Relationships
 ```mermaid
 flowchart LR
@@ -87,9 +91,9 @@ Note: `api.Config` includes a `Redis` field, but current `main` does not inject 
 
 ## Technical Caveats (Current State)
 - `/api/edu` handler builds a hardcoded request payload instead of binding user input.
-- `main.runServer` currently binds literal `":8000"` despite config port being loaded.
-- `.env.example` key casing does not match `NewConfigFromEnv` key names.
 - `/status` is registered inside `api.New` using `cfg.Redis`, but `main` omits `Redis` in `api.Config`, so current status-route wiring can fail at runtime.
+- Current runtime routes do not yet match the intended public v0 contract in
+  `api-spec/v0/openapi.yaml`.
 - Some tests require local Redis and fail when unavailable.
 
 ## Assumptions

@@ -1,8 +1,10 @@
-# API Documentation (Current Implementation)
+# Runtime API Notes (Current Go Implementation)
 
 ## Overview
 
-Base server runs on port `8000` by default. Current routes are small and implementation-focused.
+Base server runs on port `8000` by default. The intended public API contract for
+this branch is defined in `api-spec/v0/openapi.yaml`; this page documents the
+currently wired Go runtime endpoints and their operational caveats.
 
 ## Authentication Behavior
 
@@ -24,7 +26,7 @@ This applies to both `/status` and `/api/edu` when auth is enabled.
 - On breaker deny/open state: `503 Service Unavailable`.
 - On Redis state read failures with fail-open (default): request is allowed.
 
-## Endpoints
+## Runtime Endpoints
 
 | Method | Path       | Description                            | Success     | Notes                                                              |
 | ------ | ---------- | -------------------------------------- | ----------- | ------------------------------------------------------------------ |
@@ -83,10 +85,13 @@ curl -i http://localhost:8000/api/edu
 
 - `/api/edu` currently does not accept caller-provided payload; it submits a hardcoded sample request from handler code.
 - Current `main` wiring registers `/status` through `api.New` with a nil Redis client (because `main` does not inject `api.Config.Redis`), so runtime behavior can fail/panic until code wiring is corrected.
-- This endpoint should be treated as implementation scaffold unless product/API contract is formalized.
+- The intended public contract for this branch is versioned under `api-spec/v0/`
+  and does not match the current `/api/edu` runtime path.
 - Error response bodies come from Fiber error handling and may be plain text.
 
 ## Assumptions
 
-- **High confidence:** `/status` is the only operationally stable endpoint for external health checking today.
-- **Medium confidence:** `/api/edu` contract and HTTP method may change when request binding/validation is introduced.
+- **High confidence:** This page is a runtime reference, not the public API
+  contract reference.
+- **Medium confidence:** `/api/edu` will be removed or reshaped as the runtime
+  converges on the published v0 contract.

@@ -6,6 +6,7 @@ This directory organizes feature documentation by domain so readers can quickly 
 
 | Component | Purpose | Functionality |
 |---|---|---|
+| [Verification API v0 Contract](core/edu-openapi-spec.md) | Document the versioned public API contract defined in OpenAPI and JSON Schema. | Covers the v0 operations, shared request schema, response shapes, and contract-governance expectations. |
 | [NSC Education](core/nsc-education.md) | Describe NSC-based education verification flow. | Covers request/response behavior, service boundaries, and operational caveats for the education path. |
 
 ## Infrastructure
