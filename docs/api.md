@@ -11,10 +11,10 @@ currently wired Go runtime endpoints and their operational caveats.
 - When `SKIP_AUTH=false`, Cognito middleware is enabled globally.
 - Middleware reads access token from header: `x-amzn-oidc-accesstoken`.
 - Token checks include:
-    - valid signature via JWKS
-    - issuer match
-    - `token_use=access`
-    - `client_id` claim equals configured app client ID
+  - valid signature via JWKS
+  - issuer match
+  - `token_use=access`
+  - `client_id` claim equals configured app client ID
 
 If auth fails, response is `401 Unauthorized`.
 This applies to both `/status` and `/api/edu` when auth is enabled.

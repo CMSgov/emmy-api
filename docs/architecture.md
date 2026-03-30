@@ -1,6 +1,7 @@
 # Architecture
 
 ## Package Structure
+
 - `main.go`
 - `api/app.go`
 - `api/routes/*.go`
@@ -17,6 +18,7 @@ contract for the branch is defined separately in `api-spec/v0/openapi.yaml` and
 `schema/v0/`.
 
 ## Dependency Relationships
+
 ```mermaid
 flowchart LR
     main --> core
@@ -44,6 +46,7 @@ flowchart LR
 ```
 
 ## Interfaces and Abstractions
+
 - `pkg/education/service.go`
   - `type EducationService interface { Submit(ctx context.Context, req Request) (Response, error) }`
   - `type HTTPTransport interface { Do(req *http.Request) (*http.Response, error) }`
@@ -52,9 +55,11 @@ flowchart LR
 - `pkg/circuitbreaker/circuitbreaker.go`
   - `type Breaker interface { Allow; OnSuccess; OnFailure }`
 
-These abstractions support unit testing and integration boundary replacement without route-layer rewrites.
+These abstractions support unit testing and integration boundary replacement
+without route-layer rewrites.
 
 ## Concurrency Model
+
 - Server lifecycle:
   - `runServer` starts `app.Listen` in a goroutine and selects on server error or signal context cancellation.
   - graceful shutdown uses `app.ShutdownWithTimeout(5 * time.Second)`.
@@ -65,6 +70,7 @@ These abstractions support unit testing and integration boundary replacement wit
   - lazy breaker initialization via double-check lock pattern.
 
 ## Error Handling Strategy
+
 - Global Fiber error handler (`api/errorHandler`) converts errors into HTTP status and message.
 - `fiber.NewError` used for explicit gateway semantics in education handler.
 - Wrapped errors with context (`fmt.Errorf("...: %w", err)`) in service layers.
@@ -73,7 +79,9 @@ These abstractions support unit testing and integration boundary replacement wit
 - Panic recovery middleware logs stack traces (`recover.Config{EnableStackTrace:true}`).
 
 ## Middleware Stack
+
 Ordered middleware in `api.New`:
+
 1. Recover
 2. CORS (`*` origin/headers/methods)
 3. OpenTelemetry Fiber middleware
@@ -81,15 +89,19 @@ Ordered middleware in `api.New`:
 5. Conditional Cognito auth middleware
 
 ## Dependency Injection Pattern
+
 Observed constructor and options-based DI:
+
 - `education.New(cfg, education.Options{HTTPClient, Logger, Timeout})`
 - Current `main` call: `api.New(&api.Config{Core, Logger, Otel})`
 - Circuit breaker injection via higher-order middleware factory:
   - `WithCircuitBreaker(func(name string) *RedisBreaker { ... })`
 
-Note: `api.Config` includes a `Redis` field, but current `main` does not inject it.
+Note: `api.Config` includes a `Redis` field, but current `main` does not inject
+it.
 
 ## Technical Caveats (Current State)
+
 - `/api/edu` handler builds a hardcoded request payload instead of binding user input.
 - `/status` is registered inside `api.New` using `cfg.Redis`, but `main` omits `Redis` in `api.Config`, so current status-route wiring can fail at runtime.
 - Current runtime routes do not yet match the intended public v0 contract in
@@ -97,5 +109,8 @@ Note: `api.Config` includes a `Redis` field, but current `main` does not inject 
 - Some tests require local Redis and fail when unavailable.
 
 ## Assumptions
-- **High confidence:** Current layering is intentionally thin and integration-oriented rather than strict clean-architecture separation.
-- **Medium confidence:** Additional provider adapters are expected to follow existing interface patterns in `pkg/education` and middleware wrappers.
+
+- **High confidence:** Current layering is intentionally thin and
+  integration-oriented rather than strict clean-architecture separation.
+- **Medium confidence:** Additional provider adapters are expected to follow
+  existing interface patterns in `pkg/education` and middleware wrappers.

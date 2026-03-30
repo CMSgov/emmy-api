@@ -1,6 +1,8 @@
 # Features
 
-This directory organizes feature documentation by domain so readers can quickly navigate core application behavior, supporting infrastructure, security controls, and resilience patterns without scanning a single flat list.
+This directory organizes feature documentation by domain so readers can quickly
+navigate core application behavior, supporting infrastructure, security
+controls, and resilience patterns without scanning a single flat list.
 
 ## Core
 
