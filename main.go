@@ -74,24 +74,12 @@ func run() error {
 
 	logger = core.NewLoggerWithOtel(&cfg, otel)
 
-	app, err := api.New(&api.Config{
-		Core:   cfg,
-		Logger: logger,
-		Otel:   otel,
-	})
-	if err != nil {
-		logger.ErrorContext(
-			ctx,
-			"Error building app",
-			"err", err,
-		)
-		return ErrRunFailed
-	}
-
 	rdb := redis.NewClient(redis.Config{
-		Addr:     cfg.Redis.Addr,
-		Password: cfg.Redis.Password,
-		DB:       cfg.Redis.DB,
+		Addr:               cfg.Redis.Addr,
+		Password:           cfg.Redis.Password,
+		DB:                 cfg.Redis.DB,
+		UseTLS:             cfg.Redis.UseTLS,
+		InsecureSkipVerify: cfg.Redis.InsecureSkipVerify,
 	}, logger)
 
 	err = redis.Ping(ctx, rdb)
@@ -106,6 +94,21 @@ func run() error {
 			logger.Warn("redis close failed", "err", err)
 		}
 	}()
+
+	app, err := api.New(&api.Config{
+		Core:   cfg,
+		Logger: logger,
+		Otel:   otel,
+		Redis:  rdb,
+	})
+	if err != nil {
+		logger.ErrorContext(
+			ctx,
+			"Error building app",
+			"err", err,
+		)
+		return ErrRunFailed
+	}
 
 	routes.RegisterRoutes(app, &cfg, rdb, logger)
 

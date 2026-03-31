@@ -21,5 +21,5 @@ func StatusRouter(app fiber.Router, cfg core.Config, rdb *redis.Client, logger *
 		return circuitbreaker.NewRedisBreaker(rdb, name, circuitbreaker.DefaultOptions(), logger)
 	})
 
-	app.Get("/status", withBreaker(handlers.GetRDBStatus(rdb)))
+	app.Get("/health", withBreaker(handlers.GetRDBStatus(rdb)))
 }

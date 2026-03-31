@@ -17,9 +17,11 @@ type CognitoConfig struct {
 }
 
 type RedisConfig struct {
-	Addr     string
-	Password string
-	DB       int
+	Addr               string
+	Password           string
+	DB                 int
+	UseTLS             bool
+	InsecureSkipVerify bool
 }
 
 type NSCConfig struct {

@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"crypto/tls"
 	"log/slog"
 	"time"
 
@@ -21,9 +22,11 @@ const (
 
 type Config struct {
 	// Typically "localhost:6379"
-	Addr     string
-	Password string
-	DB       int
+	Addr               string
+	Password           string
+	DB                 int
+	UseTLS             bool
+	InsecureSkipVerify bool
 }
 
 func NewClient(c Config, logger *slog.Logger) *redis.Client {
@@ -48,6 +51,11 @@ func NewClient(c Config, logger *slog.Logger) *redis.Client {
 		PoolTimeout:  defaultPoolTimeout,
 		PoolSize:     defaultPoolSize,
 		MinIdleConns: defaultMinIdleConns,
+	}
+	if c.UseTLS {
+		opts.TLSConfig = &tls.Config{
+			InsecureSkipVerify: c.InsecureSkipVerify,
+		}
 	}
 
 	logger.Info("initializing redis client")

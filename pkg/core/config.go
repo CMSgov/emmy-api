@@ -7,9 +7,9 @@ import (
 
 const (
 	defaultConfigEnvironment    string = "development"
-	defaultConfigPort           int    = 8000
+	defaultConfigPort           int    = 3000
 	defaultSkipAuth             bool   = false
-	defaultOtelDisable          bool   = false
+	defaultOtelDisable          bool   = true
 	defaultOTLPExporterEndpoint string = "localhost:4317"
 	defaultOTLPInsecure         bool   = false
 	defaultCognitoRegion        string = "us-east-1"
@@ -18,6 +18,8 @@ const (
 	defaultRedisAddr            string = "localhost:6379"
 	defaultRedisPassword        string = ""
 	defaultRedisDB              int    = 0
+	defaultRedisUseTLS          bool   = true
+	defaultRedisInsecureSkip    bool   = false
 
 	keyNSCSubmitURL string = "NSC_SUBMIT_URL"
 	keyTokenURL     string = "NSC_TOKEN_URL"
@@ -47,9 +49,11 @@ func DefaultConfig() Config {
 		},
 
 		Redis: RedisConfig{
-			Addr:     defaultRedisAddr,
-			Password: defaultRedisPassword,
-			DB:       defaultRedisDB,
+			Addr:               defaultRedisAddr,
+			Password:           defaultRedisPassword,
+			DB:                 defaultRedisDB,
+			UseTLS:             defaultRedisUseTLS,
+			InsecureSkipVerify: defaultRedisInsecureSkip,
 		},
 
 		NSC: NSCConfig{
@@ -103,6 +107,8 @@ func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
 		setFromEnv(&cfg.Redis.Addr, "REDIS_ADDR"),
 		setFromEnv(&cfg.Redis.Password, "REDIS_PASSWORD"),
 		setFromEnv(&cfg.Redis.DB, "REDIS_DB"),
+		setFromEnv(&cfg.Redis.UseTLS, "REDIS_USE_TLS"),
+		setFromEnv(&cfg.Redis.InsecureSkipVerify, "REDIS_INSECURE_SKIP_VERIFY"),
 
 		setFromEnv(&cfg.NSC.SubmitURL, "NSC_SUBMIT_URL"),
 		setFromEnv(&cfg.NSC.TokenURL, "NSC_TOKEN_URL"),

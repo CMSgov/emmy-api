@@ -103,6 +103,8 @@ func New(cfg *Config) (*fiber.App, error) {
 		},
 	))
 
+	routes.StatusRouter(app, cfg.Core, cfg.Redis, logger)
+
 	if cfg.Core.SkipAuth {
 		app.Use(middleware.SkipAuthMiddleware())
 	} else {
@@ -116,8 +118,6 @@ func New(cfg *Config) (*fiber.App, error) {
 		}
 		app.Use(verifier.FiberMiddleware())
 	}
-
-	routes.StatusRouter(app, cfg.Core, cfg.Redis, logger)
 
 	return app, nil
 }
