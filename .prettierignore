@@ -1,8 +1,9 @@
 .git
-api-spec/dist
-swagger-ui/*.js
-swagger-ui/*.css
-swagger-ui/*.html
-swagger-ui/favicon-*.png
-swagger-ui/oauth2-redirect.js
 **/*~
+node_modules
+**/dist
+.github
+swagger-ui
+examples/postman
+**/*.md
+pnpm-lock.yaml

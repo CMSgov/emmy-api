@@ -1,9 +1,0 @@
-ForbiddenProblem:
-  description: Caller is authenticated but not authorized for this resource.
-  content:
-    application/problem+json:
-      schema:
-        $ref: ../../../schema/common/v1/problem-details.schema.json
-      examples:
-        forbidden:
-          $ref: ../examples/responses/problems/forbidden-problem.yaml#/ForbiddenProblemExample

@@ -13,7 +13,7 @@ MD005: true
 MD007:
   indent:
   start_indented: false
-  start_indent: 2
+  start_indent: 4
 
 MD009:
   br_spaces: 2
@@ -128,7 +128,6 @@ MD051: true
 
 MD052:
   shortcut_syntax: false
-
 
 MD053:
   ignored_definitions:

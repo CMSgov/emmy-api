@@ -1,4 +1,4 @@
-module github.com/DSACMS/verification-service-api
+module github.com/cmsgov/emmy-api
 
 go 1.25
 

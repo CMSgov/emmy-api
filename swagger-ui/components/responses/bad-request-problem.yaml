@@ -1,9 +1,0 @@
-BadRequestProblem:
-  description: Invalid education verification request.
-  content:
-    application/problem+json:
-      schema:
-        $ref: ../../../schema/common/v1/problem-details.schema.json
-      examples:
-        invalidRequest:
-          $ref: ../examples/responses/problems/bad-request-problem.yaml#/BadRequestProblemExample

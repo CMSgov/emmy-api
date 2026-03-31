@@ -11,9 +11,11 @@ type OtelConfig struct {
 }
 
 type RedisConfig struct {
-	Addr     string
-	Password string
-	DB       int
+	Addr               string
+	Password           string
+	DB                 int
+	UseTLS             bool
+	InsecureSkipVerify bool
 }
 
 type NSCConfig struct {
@@ -24,6 +26,15 @@ type NSCConfig struct {
 	AccountID    string
 }
 
+type VAConfig struct {
+	BaseURL        string
+	TokenURL       string
+	ClientID       string
+	TokenAudience  string
+	PrivateKeyPath string
+	TimeoutSeconds int
+}
+
 type Config struct {
 	Environment string
 	Otel        OtelConfig
@@ -31,4 +42,5 @@ type Config struct {
 	SkipAuth    bool
 	Redis       RedisConfig
 	NSC         NSCConfig
+	VA          VAConfig
 }

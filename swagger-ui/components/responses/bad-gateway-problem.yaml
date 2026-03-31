@@ -1,9 +1,0 @@
-BadGatewayProblem:
-  description: A downstream dependency failed to process the request.
-  content:
-    application/problem+json:
-      schema:
-        $ref: ../../../schema/common/v1/problem-details.schema.json
-      examples:
-        badGateway:
-          $ref: ../examples/responses/problems/bad-gateway-problem.yaml#/BadGatewayProblemExample

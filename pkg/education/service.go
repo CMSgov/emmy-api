@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/DSACMS/verification-service-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/core"
 )
 
 type EducationService interface {
@@ -45,7 +45,7 @@ func New(cfg *core.NSCConfig, opts Options) EducationService {
 	)
 
 	client := opts.HTTPClient
-	
+
 	if client == nil {
 		client = nscHTTPClient(context.Background(), cfg)
 	}

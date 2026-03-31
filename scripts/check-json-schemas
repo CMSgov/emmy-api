@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Compiles standalone JSON Schema files with Ajv to catch schema syntax and ref issues.
-# Exits non-zero if no schema files are found or Ajv rejects any schema.
+e# Exits non-zero if no schema files are found or Ajv rejects any schema.
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -28,6 +28,5 @@ for schema_file in "${schema_files[@]}"; do
       ref_args+=(-r "$schema_path")
     fi
   done
-  npx --yes --package ajv-cli --package ajv-formats \
-    ajv compile --spec=draft2020 --strict=false -c ajv-formats "${ref_args[@]}" -s "$schema_file"
+  pnpm exec ajv compile --spec=draft2020 --strict=false -c ajv-formats "${ref_args[@]}" -s "$schema_file"
 done

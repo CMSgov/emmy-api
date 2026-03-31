@@ -1,0 +1,7 @@
+interface:
+  display_name: "Technical Research Docs"
+  short_description: "Create docs/research paper-style analyses"
+  default_prompt: "Create or update a docs/research paper using the repository's standard structure and evidence-backed references."
+
+policy:
+  allow_implicit_invocation: false

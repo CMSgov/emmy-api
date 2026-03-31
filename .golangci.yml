@@ -217,7 +217,7 @@ linters:
       constant-kind: true
     wrapcheck:
       ignore-package-globs:
-        - github.com/DSACMS/verification-service-api/*
+        - github.com/cmsgov/emmy-api/*
   exclusions:
     rules:
       - path: '(.+)_test\.go'
@@ -236,11 +236,11 @@ formatters:
     gci:
       sections:
         - standard
-        - prefix(github.com/DSACMS/verification-service-api)
+        - prefix(github.com/cmsgov/emmy-api)
         - default
         - blank
         - dot
       custom-order: true
     gofumpt:
-      module-path: github.com/DSACMS/verification-service-api
+      module-path: github.com/cmsgov/emmy-api
       extra-rules: true

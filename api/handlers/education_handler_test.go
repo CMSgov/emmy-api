@@ -9,9 +9,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/DSACMS/verification-service-api/pkg/core"
-	"github.com/DSACMS/verification-service-api/pkg/education"
-	"github.com/DSACMS/verification-service-api/pkg/resilience"
+	"github.com/cmsgov/emmy-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/education"
+	"github.com/cmsgov/emmy-api/pkg/resilience"
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel"

@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"runtime/debug"
 
-	"github.com/DSACMS/verification-service-api/api/middleware"
-	"github.com/DSACMS/verification-service-api/api/routes"
-	"github.com/DSACMS/verification-service-api/pkg/core"
+	"github.com/cmsgov/emmy-api/api/middleware"
+	"github.com/cmsgov/emmy-api/api/routes"
+	"github.com/cmsgov/emmy-api/pkg/core"
 
 	"go.opentelemetry.io/otel/codes"
 
@@ -102,11 +102,11 @@ func New(cfg *Config) (*fiber.App, error) {
 		},
 	))
 
+	routes.StatusRouter(app, cfg.Core, cfg.Redis, logger)
+
 	if cfg.Core.SkipAuth {
 		app.Use(middleware.SkipAuthMiddleware())
 	}
-
-	routes.StatusRouter(app, cfg.Core, cfg.Redis, logger)
 
 	return app, nil
 }

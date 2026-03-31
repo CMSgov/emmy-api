@@ -7,11 +7,20 @@ jobs:
   scan-for-secrets:
     name: Run gitleaks
     runs-on: self-hosted
+    env:
+      RUNNER_TEMP: ${{ github.workspace }}/.runner-temp/gitleaks-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v3
         with: { fetch-depth: 0 }
+
+      - name: Prepare GitLeaks temp directory
+        run: mkdir -p "$RUNNER_TEMP"
 
       - name: Check for GitLeaks
         uses: gacts/gitleaks@v1
         with:
           config-path: .github/.gitleaks.toml
+
+      - name: Clean up GitLeaks temp directory
+        if: always()
+        run: rm -rf "$RUNNER_TEMP"

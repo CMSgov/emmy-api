@@ -4,30 +4,29 @@ The Emmy API is a CMS-provided secure service that enables you to connect to and
 
 **With the Emmy API, you are able to:**
 
-* Obtain student enrollment information
-* Verify veteran disability status
+- Obtain student enrollment information
+- Verify veteran disability status
 
 ## Technical Requirements & Prerequisites
 
 You must be able to:
 
-|Requirement|Details|
-|--|--|
-|Obtain Credentials|You must have worked with the CMS Emmy team to get onboarded and receive your API client ID and secret.|
-|Access Emmy API Endpoints|The onboarding process will have provided you the endpoint URL. You must have outbound network/firewall access to this host.|
-|Make HTTP POST (REST) Calls|Your system (or testing tool) must be capable of making HTTP POST calls where you can supply specific headers in the request.|
+| Requirement                 | Details                                                                                                                       |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Obtain Credentials          | You must have worked with the CMS Emmy team to get onboarded and receive your API client ID and secret.                       |
+| Access Emmy API Endpoints   | The onboarding process will have provided you the endpoint URL. You must have outbound network/firewall access to this host.  |
+| Make HTTP POST (REST) Calls | Your system (or testing tool) must be capable of making HTTP POST calls where you can supply specific headers in the request. |
 
 When you onboard with the CMS Emmy team, you will obtain credentials. You will use the values you received in this guide:
 
-* ```client_id``` This is your client ID provided during onboarding
-* ```client_secret``` The secret password for your client ID
-* ```auth_base``` The endpoint used for **authentication** (but not Emmy API actions)
-* ```api_base``` The endpoint used for **Emmy API actions** (but not authentication)
+- `client_id` This is your client ID provided during onboarding
+- `client_secret` The secret password for your client ID
+- `auth_base` The OAuth 2.0 token endpoint for your environment
+- `api_base` The base URL for Emmy API actions in your environment
 
-Later in this guide, you will also build or obtain these values as well:
+Later in this guide, you will obtain:
 
-* ```base64_credentials``` A Base64-encoded version of your client ID and secret
-* ```access_token``` Your short-lived token used to make Emmy API calls
+- `access_token` Your short-lived bearer token used to make Emmy API calls
 
 Let's get started!
 
@@ -37,68 +36,111 @@ To begin using the Emmy API, we will start with manual steps which ensure your c
 
 ### Step 1: Get a Token with your Client Credentials
 
-To **authenticate** with the Emmy API, you will use your client ID and client secret to obtain a token for all Emmy API operations. Tokens are short-lived and must be refreshed once expired. Once you obtain a token, you will use it to make any subsequent Emmy API requests.
+The v0 contract uses OAuth 2.0 client credentials. Obtain a bearer token from
+the token endpoint for your environment before calling Emmy API operations.
 
-Obtaining a token requires that you use a **Basic Authentication** HTTP header. This means that you will join your ```<client_id>``` and ```<client_secreet>``` with a colon ```:``` and then Base64 encode the whole string. Follow the [Authentication Base64 Encoding](02-authentication.md#credential-format) instructions to build your credential string. We'll refer to the credential string as ```<base64_credentials>``` below.
-
-For simplicity, we'll use ```curl``` to showcase getting an access token. From a terminal or command prompt, run the ```curl``` command below ([how do I install ```curl```?](../examples/v1/curl.md#installing-curl)) by substituting the appropriate variables with the values you received during onboarding:
+For simplicity, we'll use `curl` to showcase getting an access token. The
+Postman examples in this repository use HTTP Basic auth to send the client
+credentials, so this guide does the same:
 
 ```bash
 curl --location '<AUTH_BASE>' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
---header 'Authorization: Basic <BASE64_CREDENTIALS>' \
+--user '<CLIENT_ID>:<CLIENT_SECRET>' \
 --data-urlencode 'grant_type=client_credentials'
 ```
 
-After successfully running this command, a JSON response which contains your freshly minted ```<access_token>``` will appear. Here is an example (note that your response will likely not be beautifully indented):
+After successfully running this command, a JSON response which contains your freshly minted `<access_token>` will appear. Here is an example (note that your response will likely not be beautifully indented):
 
 ```json
 {
-    "access_token":"<ACCESS_TOKEN>",
-    "expires_in":3600,
-    "token_type":"Bearer"
+    "access_token": "<ACCESS_TOKEN>",
+    "expires_in": 3600,
+    "token_type": "Bearer"
 }
 ```
 
-Copy the ```access_token``` value (this will be a long string of text) from the response. Now you are ready to [prepare your request payload](01-getting-started.md#step-2-prepare-your-request-payload) and call an Emmy API endpoint!
+Copy the `access_token` value from the response. Now you are ready to
+[prepare your request payload](01-getting-started.md#step-2-prepare-your-request-payload)
+and call an Emmy API endpoint.
 
-*(Review the [Authentication Guide](02-authentication.md) for more details on authenticating. Also consider browsing the [Postman Examples](../examples/v1/postman.md) or [curl Examples](../examples/v1/curl.md) for more help using these tools.)*
+_(Review the [Authentication Guide](02-authentication.md) for more details on authenticating. Also consider browsing the [Postman Examples](../examples/v1/postman.md) or [curl Examples](../examples/v1/curl.md) for more help using these tools.)_
 
 ### Step 2: Prepare your Request Payload
 
-Requests to the Emmy API use JSON content payloads in the request body. First, review the [Emmy API specification](https://cmsgov.github.io/emmy-api/api-spec) for the operation you would like to perform. In this example, we will make request a member's educational enrollment information from the Emmy API's ```/edu``` endpoint.
+The checked-in v0 contract defines two public operations:
 
-In the [API specs for ```/edu```](https://cmsgov.github.io/emmy-api/api-spec/#/Education/submitEducationVerification), you can see the structure of the request body. Build a JSON body using your member's information, like so:
+- `POST /v0/education-enrollments`
+- `POST /v0/veteran-disability-ratings`
+
+Both operations reuse the same request body shape from
+`schema/v0/identity.schema.json`. Build a JSON body using the person's
+identifying information, like so:
 
 ```json
 {
-  "clientReferenceId": "tracking-id-from-your-system",
-  "applicant": {
     "firstName": "Lynette",
+    "middleName": "Marie",
     "lastName": "Oyola",
     "dateOfBirth": "1988-10-24",
-    "ssnLast4": "4321"
-  }
+    "ssn": "123-45-6789"
 }
 ```
 
-Note that the ```"clientReferenceId"``` is a tracking value that you generate from your system side. The Emmy API does not care about nor use this value, other than to give it back to you so you can tie your requests and responses together.
+Required fields are `firstName`, `lastName`, and `dateOfBirth`. `middleName`
+and `ssn` are optional in the current v0 schema. Veteran disability requests
+may also include an optional `address` object for demographic matching when
+SSN data is not available, for example:
 
-With your JSON payload prepared, you can now [make a request to the Emmy API](01-getting-started.md#step-3-invoke-an-emmy-api-request).
+```json
+{
+    "firstName": "Lynette",
+    "lastName": "Oyola",
+    "dateOfBirth": "1988-10-24",
+    "address": {
+        "street1": "17020 Tortoise St",
+        "city": "Round Rock",
+        "state": "TX",
+        "postalCode": "78664",
+        "country": "USA"
+    }
+}
+```
+
+With your JSON payload prepared, you can now
+[make a request to the Emmy API](01-getting-started.md#step-3-invoke-an-emmy-api-request).
 
 ### Step 3: Invoke an Emmy API Request
 
-In this step, we will again use the ```curl``` tool to make a request to the Emmy API. We will continue the example from step 2 and request member information from the [Education ```/edu```](https://cmsgov.github.io/emmy-api/api-spec/#/Education/submitEducationVerification) endpoint.
+In this step, we will use `curl` to call the education verification operation.
+The v0 contract expects an HTTP `POST` request with a bearer token and JSON
+request body.
 
-This request is slightly more complex since it now has HTTP authorization, a content body, and a different endpoint. Use this example by substituting the values for your situation:
+Use this example by substituting the values for your situation:
 
 ```bash
-curl --location --request GET '<API_BASE>/v1/enrollment' \
+curl --location --request POST '<API_BASE>/v0/education-enrollments' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data '{
     "firstName": "Lynette",
+    "middleName": "Marie",
     "lastName": "Oyola",
-    "dateOfBirth": "1988-10-24"
+    "dateOfBirth": "1988-10-24",
+    "ssn": "123-45-6789"
 }'
+```
+
+The current v0 success response for education returns:
+
+```json
+{
+    "enrollmentStatus": "FULL_TIME"
+}
+```
+
+To request veteran disability data instead, send the same identity payload to:
+
+```text
+POST <API_BASE>/v0/veteran-disability-ratings
 ```

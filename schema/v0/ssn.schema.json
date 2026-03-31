@@ -1,6 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "schema/v0/ssn.schema.json",
   "title": "SSN",
   "description": "Social Security number represented either as a full formatted value (XXX-XX-XXXX) or as the last four digits (XXXX).",
   "type": "string",

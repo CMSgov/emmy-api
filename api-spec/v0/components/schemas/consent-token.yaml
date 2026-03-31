@@ -1,7 +1,0 @@
-title: ConsentToken
-description: >
-  Opaque token proving the client application obtained consent from the person
-  identified in the associated identity payload.
-type: string
-minLength: 1
-example: $2b$12$8J8ZQG7Kq0r1vM2nX4yP8e9uR3tY6wA1sD5fH7jL0pN2qR4uV6xWm

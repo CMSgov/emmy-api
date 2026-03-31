@@ -1,9 +1,10 @@
-# API Documentation (Current Implementation)
+# Runtime API Notes (Current Go Implementation)
 
 ## Overview
 
-The server listens on port `8000` by default and currently exposes a small set
-of implementation-oriented routes plus a bundled OpenAPI JSON artifact route.
+Base server runs on port `8000` by default. The intended public API contract for
+this branch is defined in `api-spec/v0/openapi.yaml`; this page documents the
+currently wired Go runtime endpoints and their operational caveats.
 
 ## Authentication Behavior
 
@@ -14,12 +15,16 @@ of implementation-oriented routes plus a bundled OpenAPI JSON artifact route.
 
 `/status` and `/api/edu` are wrapped by Redis-backed circuit breaker middleware.
 
-- On breaker deny/open state: `503 Service Unavailable`
-- On Redis state read failures with fail-open behavior: request is allowed to continue
+- On breaker deny/open state: `503 Service Unavailable`.
+- On Redis state read failures with fail-open (default): request is allowed.
 
-`/api-spec/v1/verify` is not wrapped by the circuit breaker.
+## Runtime Endpoints
 
-## Endpoints
+| Method | Path       | Description                            | Success     | Notes                                                              |
+| ------ | ---------- | -------------------------------------- | ----------- | ------------------------------------------------------------------ |
+| `GET`  | `/`        | Liveness string                        | `200` text  | Returns `Backend running!`                                         |
+| `GET`  | `/status`  | Redis health check                     | `200` empty | Auth required unless `SKIP_AUTH=true`; pings Redis with 2s timeout |
+| `GET`  | `/api/edu` | NSC education verification passthrough | `200` JSON  | Uses hardcoded request payload in handler                          |
 
 | Method | Path                  | Description                         | Success     | Notes |
 | ------ | --------------------- | ----------------------------------- | ----------- | ----- |
@@ -28,9 +33,7 @@ of implementation-oriented routes plus a bundled OpenAPI JSON artifact route.
 | `GET`  | `/api-spec/v1/verify` | Bundled OpenAPI JSON artifact       | `200` JSON  | Returns `api-spec/dist/openapi.bundled.json` |
 | `GET`  | `/api/edu`            | Education verification passthrough  | `200` JSON  | Uses hardcoded request payload in handler; wrapped by circuit breaker |
 
-## Request and Response Models
-
-### Education verify request sent to NSC (`pkg/education/models_request.go`)
+### NSC Submit Request model (`pkg/education/models_request.go`)
 
 ```go
 type Request struct {
@@ -49,7 +52,7 @@ type Request struct {
 }
 ```
 
-### Education verify response returned from NSC (`pkg/education/models_response.go`)
+### NSC Submit Response model (`pkg/education/models_response.go`)
 
 ```go
 type Response struct {
@@ -61,9 +64,7 @@ type Response struct {
 }
 ```
 
-## Examples
-
-### `/status`
+## Example: `/status`
 
 ```bash
 curl -i http://localhost:8000/status
@@ -77,7 +78,7 @@ curl -i http://localhost:8000/api-spec/v1/verify
 
 Returns the checked-in bundled OpenAPI JSON artifact with `Content-Type: application/json`.
 
-### `/api/edu` (auth skipped locally)
+## Example: `/api/edu` (auth skipped locally)
 
 ```bash
 curl -i http://localhost:8000/api/edu
@@ -86,11 +87,14 @@ curl -i http://localhost:8000/api/edu
 ## Current-State Caveats
 
 - `/api/edu` currently does not accept caller-provided payload; it submits a hardcoded sample request from handler code.
-- `/api-spec/v1/verify` serves the checked-in artifact from disk and does not rebuild the spec at request time.
+- Current `main` wiring registers `/status` through `api.New` with a nil Redis client (because `main` does not inject `api.Config.Redis`), so runtime behavior can fail/panic until code wiring is corrected.
+- The intended public contract for this branch is versioned under `api-spec/v0/`
+  and does not match the current `/api/edu` runtime path.
 - Error response bodies come from Fiber error handling and may be plain text.
-- `main.go` currently constructs the app without passing a Redis client into `api.New`, so the `/status` route registered there may not behave correctly until that wiring is aligned.
 
 ## Assumptions
 
-- **High confidence:** `/api-spec/v1/verify` is the most stable machine-readable contract endpoint currently exposed by the app.
-- **Medium confidence:** `/api/edu` contract and HTTP method may change when request binding and public request validation are introduced.
+- **High confidence:** This page is a runtime reference, not the public API
+  contract reference.
+- **Medium confidence:** `/api/edu` will be removed or reshaped as the runtime
+  converges on the published v0 contract.

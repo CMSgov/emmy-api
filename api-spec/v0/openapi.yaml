@@ -6,19 +6,19 @@ info:
     name: Eligibility Made Easy (Emmy)
     url: https://www.cms.gov/medicaid-chip/community-engagement-support/eligibility-made-easy
   summary: >
-    Alpha API contract for Emmy consent-based verification workflows supporting
-    community engagement reporting.
+    Alpha API contract for Emmy verification workflows supporting community
+    engagement reporting.
   description: >
     Public alpha API contract for the Eligibility Made Easy (Emmy) verification
     service. Emmy is a CMS-developed suite of open-source tools that supports
-    community engagement reporting through consent-based data sharing and
-    verification across multiple data sources. This API allows state-managed
-    applications to submit standardized identity payloads, create consent
-    tokens, and request verification results such as education enrollment and
-    VA disability rating data. Client applications must authenticate with an
-    OAuth 2.0 bearer token obtained through the client credentials flow. This
-    API is not stable and should be treated as highly volatile for the next
-    several months. Breaking changes are likely as the alpha release evolves.
+    community engagement reporting through data sharing and verification across
+    multiple data sources. This API allows state-managed applications to submit
+    standardized identity payloads and request verification results such as
+    education enrollment and VA disability rating data. Client applications
+    must authenticate with an OAuth 2.0 bearer token obtained through the
+    client credentials flow. This API is not stable and should be treated as
+    highly volatile for the next several months. Breaking changes are likely as
+    the alpha release evolves.
 servers:
   - url: https://api.dev.emmy.cms.gov
     description: Emmy development environment
@@ -27,10 +27,6 @@ servers:
 security:
   - OAuth2ClientCredentials: []
 tags:
-  - name: Consent and Access
-    description: >
-      Operations for creating consent receipts used in Emmy consent-based
-      verification workflows
   - name: Education Verification
     description: >
       Operations for retrieving education enrollment data used in community
@@ -40,46 +36,6 @@ tags:
       Operations for retrieving VA disability rating data used in community
       engagement reporting
 paths:
-  /v0/consent-tokens:
-    post:
-      tags:
-        - Consent and Access
-      summary: Create a consent token
-      description: >
-        Creates a new consent token for the person identified in the supplied
-        identity object. The returned token is opaque and should be treated as a
-        receipt showing the client obtained that person's consent. The caller
-        must also present a bearer token proving the client application is
-        authorized to use this API.
-      operationId: createConsentToken
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateConsentTokenRequest'
-            examples:
-              standard:
-                $ref: '#/components/examples/CreateConsentTokenRequestExample'
-      responses:
-        '201':
-          description: Consent token created successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ConsentTokenResponse'
-              examples:
-                created:
-                  $ref: '#/components/examples/ConsentTokenResponseExample'
-        '400':
-          description: Request body did not satisfy the contract.
-          content:
-            application/problem+json:
-              schema:
-                $ref: ../../schema/common/v1/problem-details.schema.json
-              examples:
-                invalidIdentity:
-                  $ref: '#/components/examples/BadRequestProblemExample'
   /v0/education-enrollments:
     post:
       tags:
@@ -87,57 +43,29 @@ paths:
       summary: Get education enrollment status
       description: >
         Returns the subject's current education enrollment status for the person
-        identified in the supplied identity object. The caller must include a
-        consent token previously returned by the consent-token creation
-        endpoint and must also present a bearer token proving the client
-        application is authorized to use this API.
+        identified in the supplied identity object. The caller must also
+        present a bearer token proving the client application is authorized to
+        use this API.
       operationId: getEducationEnrollmentStatus
-      parameters:
-        - name: X-EMMY-Consent-Token
-          in: header
-          required: true
-          description: >
-            Consent token returned by the consent-token creation endpoint for
-            the same person identified in the request body.
-          schema:
-            $ref: ./components/schemas/consent-token.yaml
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetEducationEnrollmentRequest'
+              $ref: "#/components/schemas/GetEducationEnrollmentRequest"
             examples:
               standard:
-                $ref: '#/components/examples/GetEducationEnrollmentRequestExample'
+                $ref: "#/components/examples/GetEducationEnrollmentRequestExample"
       responses:
-        '200':
+        "200":
           description: Education enrollment status retrieved successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EducationEnrollmentResponse'
+                $ref: "#/components/schemas/EducationEnrollmentResponse"
               examples:
                 enrolled:
-                  $ref: '#/components/examples/EducationEnrollmentResponseExample'
-        '400':
-          description: Request body did not satisfy the contract.
-          content:
-            application/problem+json:
-              schema:
-                $ref: ../../schema/common/v1/problem-details.schema.json
-              examples:
-                invalidIdentity:
-                  $ref: '#/components/examples/BadRequestProblemExample'
-        '401':
-          description: Consent token was missing, invalid, or could not be used.
-          content:
-            application/problem+json:
-              schema:
-                $ref: ../../schema/common/v1/problem-details.schema.json
-              examples:
-                missingConsentToken:
-                  $ref: '#/components/examples/MissingConsentTokenProblemExample'
+                  $ref: "#/components/examples/EducationEnrollmentResponseExample"
   /v0/veteran-disability-ratings:
     post:
       tags:
@@ -145,57 +73,29 @@ paths:
       summary: Get veteran disability status
       description: >
         Returns the subject's veteran combined disability rating for the person
-        identified in the supplied identity object. The caller must include a
-        consent token previously returned by the consent-token creation
-        endpoint and must also present a bearer token proving the client
-        application is authorized to use this API.
+        identified in the supplied identity object. The caller must also
+        present a bearer token proving the client application is authorized to
+        use this API.
       operationId: getVeteranDisabilityStatus
-      parameters:
-        - name: X-EMMY-Consent-Token
-          in: header
-          required: true
-          description: >
-            Consent token returned by the consent-token creation endpoint for
-            the same person identified in the request body.
-          schema:
-            $ref: ./components/schemas/consent-token.yaml
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetVeteranDisabilityStatusRequest'
+              $ref: "#/components/schemas/GetVeteranDisabilityStatusRequest"
             examples:
               standard:
-                $ref: '#/components/examples/GetVeteranDisabilityStatusRequestExample'
+                $ref: "#/components/examples/GetVeteranDisabilityStatusRequestExample"
       responses:
-        '200':
+        "200":
           description: Veteran disability status retrieved successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VeteranDisabilityStatusResponse'
+                $ref: "#/components/schemas/VeteranDisabilityStatusResponse"
               examples:
                 rated:
-                  $ref: '#/components/examples/VeteranDisabilityStatusResponseExample'
-        '400':
-          description: Request body did not satisfy the contract.
-          content:
-            application/problem+json:
-              schema:
-                $ref: ../../schema/common/v1/problem-details.schema.json
-              examples:
-                invalidIdentity:
-                  $ref: '#/components/examples/BadRequestProblemExample'
-        '401':
-          description: Consent token was missing, invalid, or could not be used.
-          content:
-            application/problem+json:
-              schema:
-                $ref: ../../schema/common/v1/problem-details.schema.json
-              examples:
-                missingConsentToken:
-                  $ref: '#/components/examples/MissingConsentTokenProblemExample'
+                  $ref: "#/components/examples/VeteranDisabilityStatusResponseExample"
 components:
   securitySchemes:
     OAuth2ClientCredentials:
@@ -209,33 +109,8 @@ components:
           tokenUrl: https://api.dev.emmy.cms.gov/oauth2/token
           scopes: {}
   schemas:
-    CreateConsentTokenRequest:
-      type: object
-      additionalProperties: false
-      required:
-        - identity
-      properties:
-        identity:
-          $ref: ../../schema/v0/identity.schema.json
-          description: Standardized identity for the person whose consent was obtained.
-    ConsentTokenResponse:
-      type: object
-      additionalProperties: false
-      required:
-        - consentToken
-      properties:
-        consentToken:
-          $ref: ./components/schemas/consent-token.yaml
-          description: Opaque token to include in subsequent verification requests.
     GetEducationEnrollmentRequest:
-      type: object
-      additionalProperties: false
-      required:
-        - identity
-      properties:
-        identity:
-          $ref: ../../schema/v0/identity.schema.json
-          description: Standardized identity for the person whose enrollment is being verified.
+      $ref: ../../schema/v0/identity.schema.json
     EducationEnrollmentResponse:
       type: object
       additionalProperties: false
@@ -246,14 +121,7 @@ components:
           $ref: ../../schema/v0/school_enrollment_status.schema.json
           description: Current enrollment status for the identified person.
     GetVeteranDisabilityStatusRequest:
-      type: object
-      additionalProperties: false
-      required:
-        - identity
-      properties:
-        identity:
-          $ref: ../../schema/v0/identity.schema.json
-          description: Standardized identity for the person whose veteran disability status is being verified.
+      $ref: ../../schema/v0/identity.schema.json
     VeteranDisabilityStatusResponse:
       type: object
       additionalProperties: false
@@ -264,50 +132,28 @@ components:
           $ref: ../../schema/v0/combined_disability_rating.schema.json
           description: VA combined disability rating for the identified person.
   examples:
-    CreateConsentTokenRequestExample:
-      value:
-        identity:
-          firstName: Lynette
-          middleName: Marie
-          lastName: Oyola
-          dateOfBirth: '1988-10-24'
-          ssn: '123-45-6789'
-    ConsentTokenResponseExample:
-      value:
-        consentToken: $2b$12$8J8ZQG7Kq0r1vM2nX4yP8e9uR3tY6wA1sD5fH7jL0pN2qR4uV6xWm
-    BadRequestProblemExample:
-      value:
-        type: https://api.example.gov/problems/invalid-request
-        title: Invalid Request
-        status: 400
-        detail: identity.dateOfBirth must match the expected YYYY-MM-DD format.
-        instance: /v0/consent-tokens
     GetEducationEnrollmentRequestExample:
       value:
-        identity:
-          firstName: Lynette
-          middleName: Marie
-          lastName: Oyola
-          dateOfBirth: '1988-10-24'
-          ssn: '123-45-6789'
+        firstName: Lynette
+        middleName: Marie
+        lastName: Oyola
+        dateOfBirth: "1988-10-24"
+        ssn: "123-45-6789"
     EducationEnrollmentResponseExample:
       value:
         enrollmentStatus: FULL_TIME
-    MissingConsentTokenProblemExample:
-      value:
-        type: https://api.example.gov/problems/invalid-consent-token
-        title: Invalid Consent Token
-        status: 401
-        detail: X-EMMY-Consent-Token must be a valid token returned by POST /v0/consent-tokens.
-        instance: /v0/education-enrollments
     GetVeteranDisabilityStatusRequestExample:
       value:
-        identity:
-          firstName: Lynette
-          middleName: Marie
-          lastName: Oyola
-          dateOfBirth: '1988-10-24'
-          ssn: '123-45-6789'
+        firstName: Lynette
+        middleName: Marie
+        lastName: Oyola
+        dateOfBirth: "1988-10-24"
+        address:
+          street1: 17020 Tortoise St
+          city: Round Rock
+          state: TX
+          postalCode: "78664"
+          country: USA
     VeteranDisabilityStatusResponseExample:
       value:
         combinedDisabilityRating: 70

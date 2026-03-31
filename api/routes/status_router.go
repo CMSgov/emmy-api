@@ -3,10 +3,10 @@ package routes
 import (
 	"log/slog"
 
-	"github.com/DSACMS/verification-service-api/api/handlers"
-	"github.com/DSACMS/verification-service-api/api/middleware"
-	"github.com/DSACMS/verification-service-api/pkg/circuitbreaker"
-	"github.com/DSACMS/verification-service-api/pkg/core"
+	"github.com/cmsgov/emmy-api/api/handlers"
+	"github.com/cmsgov/emmy-api/api/middleware"
+	"github.com/cmsgov/emmy-api/pkg/circuitbreaker"
+	"github.com/cmsgov/emmy-api/pkg/core"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
@@ -21,5 +21,5 @@ func StatusRouter(app fiber.Router, cfg core.Config, rdb *redis.Client, logger *
 		return circuitbreaker.NewRedisBreaker(rdb, name, circuitbreaker.DefaultOptions(), logger)
 	})
 
-	app.Get("/status", withBreaker(handlers.GetRDBStatus(rdb)))
+	app.Get("/health", withBreaker(handlers.GetRDBStatus(rdb)))
 }
