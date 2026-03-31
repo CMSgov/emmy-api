@@ -10,7 +10,7 @@ help:
 	@printf '%s\n' \
 	  'Targets:' \
 	  '  make build [CONTEXT=.] [PLATFORM=linux/amd64] Build the local image tagged with the short git SHA' \
-	  '  make push [CONTEXT=.] [PLATFORMS=linux/amd64,linux/arm64] Build and push the image to Artifactory' \
+	  '  make push [CONTEXT=.] [PLATFORMS=linux/amd64] Build and push the image to Artifactory' \
 	  '  make deploy ENV=<env> [IMAGE_TAG=tag]  Update the ECS task definition and deploy it' \
 	  '  make release ENV=<env> [CONTEXT=.]     Push and then deploy the current image tag' \
 	  '  make print-image-tag                   Print the image tag that will be used' \
