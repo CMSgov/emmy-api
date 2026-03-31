@@ -1,12 +1,18 @@
-# Verification Service API
+# Emmy API Verification Service
 
-An API that provides a unified, standard interface to the data sources needed to verify community engagement for the purpose of evaluating Medicaid eligibility.
+The Emmy API is a backend data service designed to equip states with the automated verification capabilities needed to determine if an applicant has met H.R. 1 Community Engagement (CE) standards.
+
+## Quick Links
+- **[Guide to Getting Started](docs/guides/01-getting-started.md)**
+- [Usage Examples](docs/guides/03-usage-examples.md)
 
 ## About the Project
 
 <!-- This should be a longer-form description of the project. It can include history, background, details, problem statements, links to design documents or other supporting materials, or any other information/context that a user or contributor might be interested in. -->
 
 This project evolved out of the [IVaaS](https://github.com/DSACMS/iv-cbv-payroll "IVaaS repository") tool for consent based verification. As the need for more complex forms of validation developed, it became clear that providing a way for agencies to integrate directly with an API was becoming increasingly useful, particularly for ex parte renewals. The ultimate goals of this and related projects is to remove as much friction as possible between the applicant and receiving their benefits by reducing the burden placed on them to manually provide evidence of eligibility.
+
+The Emmy API serves as a"Decision Brain" for the state. It does not replace the state's eligibility system; instead, it feeds it the definitive "Verified/Not Verified" signals needed to clear the backlog.
 
 ## Core Team
 
