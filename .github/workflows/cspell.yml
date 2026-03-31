@@ -8,9 +8,6 @@ on:
       - synchronize
       - reopened
       - ready_for_review
-  push:
-    branches:
-      - main
 
 permissions:
   contents: read

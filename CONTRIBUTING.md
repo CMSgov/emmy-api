@@ -1,14 +1,71 @@
-<!--- # NOTE: Modify sections marked with `TODO` -->
-
 # How to Contribute
 
 ## Getting Started
 
-### Building dependencies
+Start with [docs/setup.md](docs/setup.md), which is the repository's detailed
+setup guide. The current branch expects:
 
-### Building the Project
+- Go `1.25.x`
+- Node `20` for contract and docs tooling
+- Local Redis on `localhost:6379` for several tests and health-check behavior
+- Docker for the local compose workflow
 
-### Issues
+If you use `mise`, install the pinned toolchain with:
+
+```sh
+mise install
+```
+
+To enable the repo's pre-commit hooks:
+
+```sh
+pre-commit install
+```
+
+## Local Development Workflow
+
+Run the service directly:
+
+```sh
+go run .
+```
+
+Run the local container stack:
+
+```sh
+docker compose up --build
+```
+
+Run the Go test suite:
+
+```sh
+go test ./...
+```
+
+Run the routine lint and scan tasks with `mise`:
+
+```sh
+mise run lint
+```
+
+For contract-focused changes, run the narrower contract workflow:
+
+```sh
+mise run check-contract-files
+```
+
+That task bundles, validates, lints, and formatting-checks the OpenAPI and JSON
+Schema artifacts that live under `api-spec/` and `schema/`.
+
+## Pull Requests and Issues
+
+- Keep pull requests scoped to one logical change when possible.
+- If you change source spec files under `api-spec/v0/`, include the generated
+  `api-spec/v0/dist/` and `api-spec/dist/v0/` updates in the same change.
+- Run the relevant local checks before opening a pull request.
+- Use GitHub issues and pull requests in this repository for bug reports,
+  feature discussions, and proposed changes.
+- Use synthetic data only in docs, tests, fixtures, and examples.
 
 ## Policies
 

@@ -4,13 +4,18 @@ An API that provides a unified, standard interface to the data sources needed to
 
 ## About the Project
 
-<!-- This should be a longer-form description of the project. It can include history, background, details, problem statements, links to design documents or other supporting materials, or any other information/context that a user or contributor might be interested in. -->
-
 This project evolved out of the [IVaaS](https://github.com/DSACMS/iv-cbv-payroll "IVaaS repository") tool for consent based verification. As the need for more complex forms of validation developed, it became clear that providing a way for agencies to integrate directly with an API was becoming increasingly useful, particularly for ex parte renewals. The ultimate goals of this and related projects is to remove as much friction as possible between the applicant and receiving their benefits by reducing the burden placed on them to manually provide evidence of eligibility.
+
+Current repository-focused documentation starts with:
+
+- [docs/overview.md](docs/overview.md) for runtime shape and system context
+- [docs/setup.md](docs/setup.md) for local setup, testing, and tooling
+- [api-spec/README.md](api-spec/README.md) for the contract-first API workflow
 
 ## Core Team
 
-A list of core team members responsible for the code and documentation in this repository can be found in [COMMUNITY.md](COMMUNITY.md).
+Repository contact channels and observable contributor information are listed in
+[COMMUNITY.md](COMMUNITY.md).
 
 ## Local Development
 
@@ -80,7 +85,8 @@ For more information about our Security, Vulnerability, and Responsible Disclosu
 
 A Software Bill of Materials (SBOM) is a formal record containing the details and supply chain relationships of various components used in building software.
 
-In the spirit of [Executive Order 14028 - Improving the Nation’s Cyber Security](https://www.gsa.gov/technology/it-contract-vehicles-and-purchasing-programs/information-technology-category/it-security/executive-order-14028), a SBOM for this repository is provided here: [https://github.com/{{](https://github.com/{{) cookiecutter.project_org }}/{{ cookiecutter.project_repo_name }}/network/dependencies.
+In the spirit of [Executive Order 14028 - Improving the Nation’s Cyber Security](https://www.gsa.gov/technology/it-contract-vehicles-and-purchasing-programs/information-technology-category/it-security/executive-order-14028), the current dependency graph for this repository is available at:
+[https://github.com/CMSgov/emmy-api/network/dependencies](https://github.com/CMSgov/emmy-api/network/dependencies)
 
 For more information and resources about SBOMs, visit: [https://www.cisa.gov/sbom](https://www.cisa.gov/sbom).
 
