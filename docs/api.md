@@ -7,17 +7,8 @@ of implementation-oriented routes plus a bundled OpenAPI JSON artifact route.
 
 ## Authentication Behavior
 
-- When `SKIP_AUTH=false`, Cognito middleware is enabled globally for the Fiber app.
-- Middleware reads the access token from header `x-amzn-oidc-accesstoken`.
-- Token validation checks:
-  - valid signature via JWKS
-  - issuer match
-  - `token_use=access`
-  - `client_id` claim equals the configured app client ID
-- When `SKIP_AUTH=true`, local identity values are injected through the skip-auth middleware instead.
-
-If auth fails, the response is `401 Unauthorized`.
-This global behavior applies to `/status`, `/api-spec/v1/verify`, and `/api/edu` when auth is enabled.
+- Authentication is expected to be enforced upstream by the load balancer.
+- When `SKIP_AUTH=true`, local identity values are injected through skip-auth middleware for development and testing.
 
 ## Circuit Breaker Behavior
 
@@ -33,8 +24,8 @@ This global behavior applies to `/status`, `/api-spec/v1/verify`, and `/api/edu`
 | Method | Path                  | Description                         | Success     | Notes |
 | ------ | --------------------- | ----------------------------------- | ----------- | ----- |
 | `GET`  | `/`                   | Liveness string                     | `200` text  | Returns `Backend running!` |
-| `GET`  | `/status`             | Redis health check                  | `200` empty | Auth required unless `SKIP_AUTH=true`; uses 2s Redis ping timeout; wrapped by circuit breaker |
-| `GET`  | `/api-spec/v1/verify` | Bundled OpenAPI JSON artifact       | `200` JSON  | Returns `api-spec/dist/openapi.bundled.json`; auth required unless `SKIP_AUTH=true` |
+| `GET`  | `/status`             | Redis health check                  | `200` empty | Uses 2s Redis ping timeout; wrapped by circuit breaker |
+| `GET`  | `/api-spec/v1/verify` | Bundled OpenAPI JSON artifact       | `200` JSON  | Returns `api-spec/dist/openapi.bundled.json` |
 | `GET`  | `/api/edu`            | Education verification passthrough  | `200` JSON  | Uses hardcoded request payload in handler; wrapped by circuit breaker |
 
 ## Request and Response Models
@@ -77,8 +68,6 @@ type Response struct {
 ```bash
 curl -i http://localhost:8000/status
 ```
-
-If `SKIP_AUTH=false`, include `x-amzn-oidc-accesstoken`.
 
 ### `/api-spec/v1/verify`
 
