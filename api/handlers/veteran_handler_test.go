@@ -36,9 +36,9 @@ func TestVeteranDisabilityHandler_Success(t *testing.T) {
 		response: veteran.Response{CombinedDisabilityRating: 70},
 	}
 
-	app.Post("/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, logger))
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, logger))
 
-	req := httptest.NewRequest(http.MethodPost, "/v0/veteran-disability-ratings", strings.NewReader(`{
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"firstName":"Lynette",
 		"middleName":"Marie",
 		"lastName":"Oyola",
@@ -67,9 +67,9 @@ func TestVeteranDisabilityHandler_AddressOnlySuccess(t *testing.T) {
 		response: veteran.Response{CombinedDisabilityRating: 70},
 	}
 
-	app.Post("/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, logger))
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, logger))
 
-	req := httptest.NewRequest(http.MethodPost, "/v0/veteran-disability-ratings", strings.NewReader(`{
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"firstName":"Lynette",
 		"lastName":"Oyola",
 		"dateOfBirth":"1988-10-24",
@@ -97,9 +97,9 @@ func TestVeteranDisabilityHandler_InvalidJSONReturnsBadRequest(t *testing.T) {
 	app := fiber.New()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	app.Post("/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{}, logger))
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{}, logger))
 
-	req := httptest.NewRequest(http.MethodPost, "/v0/veteran-disability-ratings", strings.NewReader(`{`))
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{`))
 	req.Header.Set("Content-Type", fiber.MIMEApplicationJSON)
 
 	resp, err := app.Test(req)
@@ -113,9 +113,9 @@ func TestVeteranDisabilityHandler_MissingRequiredFieldReturnsBadRequest(t *testi
 	app := fiber.New()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	app.Post("/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{}, logger))
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{}, logger))
 
-	req := httptest.NewRequest(http.MethodPost, "/v0/veteran-disability-ratings", strings.NewReader(`{
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"lastName":"Oyola",
 		"dateOfBirth":"1988-10-24",
 		"ssn":"123-45-6789"
@@ -134,9 +134,9 @@ func TestVeteranDisabilityHandler_MissingSSNAndAddressReturnsNotFoundWithoutCall
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	service := &fakeVeteranService{}
 
-	app.Post("/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, logger))
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, logger))
 
-	req := httptest.NewRequest(http.MethodPost, "/v0/veteran-disability-ratings", strings.NewReader(`{
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"firstName":"Lynette",
 		"lastName":"Oyola",
 		"dateOfBirth":"1988-10-24"
@@ -156,9 +156,9 @@ func TestVeteranDisabilityHandler_IncompleteAddressWithoutSSNReturnsNotFoundWith
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	service := &fakeVeteranService{}
 
-	app.Post("/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, logger))
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, logger))
 
-	req := httptest.NewRequest(http.MethodPost, "/v0/veteran-disability-ratings", strings.NewReader(`{
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"firstName":"Lynette",
 		"lastName":"Oyola",
 		"dateOfBirth":"1988-10-24",
@@ -181,11 +181,11 @@ func TestVeteranDisabilityHandler_UpstreamNotFoundReturnsNotFound(t *testing.T) 
 	app := fiber.New()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	app.Post("/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{
 		err: veteran.ErrNotFound,
 	}, logger))
 
-	req := httptest.NewRequest(http.MethodPost, "/v0/veteran-disability-ratings", strings.NewReader(`{
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"firstName":"Lynette",
 		"lastName":"Oyola",
 		"dateOfBirth":"1988-10-24",
@@ -204,11 +204,11 @@ func TestVeteranDisabilityHandler_UpstreamErrorReturnsBadGateway(t *testing.T) {
 	app := fiber.New()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	app.Post("/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{
 		err: errors.New("provider failed"),
 	}, logger))
 
-	req := httptest.NewRequest(http.MethodPost, "/v0/veteran-disability-ratings", strings.NewReader(`{
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"firstName":"Lynette",
 		"lastName":"Oyola",
 		"dateOfBirth":"1988-10-24",
@@ -227,11 +227,11 @@ func TestVeteranDisabilityHandler_CircuitOpenReturnsServiceUnavailable(t *testin
 	app := fiber.New()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	app.Post("/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{
 		err: resilience.ErrCircuitOpen,
 	}, logger))
 
-	req := httptest.NewRequest(http.MethodPost, "/v0/veteran-disability-ratings", strings.NewReader(`{
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"firstName":"Lynette",
 		"lastName":"Oyola",
 		"dateOfBirth":"1988-10-24",

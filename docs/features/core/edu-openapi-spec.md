@@ -9,8 +9,8 @@ are the source of truth for intended API behavior in this repository.
 ## Business Logic
 
 - Expose two public operations:
-  - `POST /v0/education-enrollments`
-  - `POST /v0/veteran-disability-ratings`
+  - `POST /api/v0/education-enrollments`
+  - `POST /api/v0/veteran-disability-ratings`
 - Apply the global `OAuth2ClientCredentials` security scheme to the contract.
 - Reuse the shared `Identity` schema for both request bodies.
 - Return operation-specific response shapes:
@@ -37,7 +37,7 @@ are the source of truth for intended API behavior in this repository.
 
 ```yaml
 paths:
-  /v0/education-enrollments:
+  /api/v0/education-enrollments:
     post:
       requestBody:
         required: true

@@ -52,7 +52,7 @@ Authorization: Bearer <ACCESS_TOKEN>
 Example:
 
 ```bash
-curl --location --request POST '<API_BASE>/v0/education-enrollments' \
+curl --location --request POST '<API_BASE>/api/v0/education-enrollments' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data '{

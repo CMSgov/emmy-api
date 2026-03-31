@@ -64,7 +64,7 @@ without route-layer rewrites.
   - `runServer` starts `app.Listen` in a goroutine and selects on server error or signal context cancellation.
   - graceful shutdown uses `app.ShutdownWithTimeout(5 * time.Second)`.
 - Request lifecycle:
-  - handlers create per-request contexts with timeout (`/health`: 2s, `/api/edu`: 5s, `/v0/veteran-disability-ratings`: 5s).
+  - handlers create per-request contexts with timeout (`/health`: 2s, `/api/edu`: 5s, `/api/v0/veteran-disability-ratings`: 5s).
 - Circuit-breaker middleware:
   - breaker registry map guarded with `sync.RWMutex`.
   - lazy breaker initialization via double-check lock pattern.
@@ -104,8 +104,8 @@ injects it.
 
 - `/api/edu` handler builds a hardcoded request payload instead of binding user input.
 - `/health` is registered before the auth middleware, so it remains a runtime-only unauthenticated health route.
-- Current runtime routes are a mix of scaffold and contract-aligned paths: `GET /`, `GET /health`, `GET /api/edu`, and `POST /v0/veteran-disability-ratings`.
-- `GET /api/edu` remains runtime scaffolding, while `POST /v0/veteran-disability-ratings` matches the checked-in v0 contract in `api-spec/v0/openapi.yaml`.
+- Current runtime routes are a mix of scaffold and contract-aligned paths: `GET /`, `GET /health`, `GET /api/edu`, and `POST /api/v0/veteran-disability-ratings`.
+- `GET /api/edu` remains runtime scaffolding, while `POST /api/v0/veteran-disability-ratings` matches the checked-in v0 contract in `api-spec/v0/openapi.yaml`.
 - Some tests require local Redis and fail when unavailable.
 
 ## Assumptions

@@ -19,13 +19,13 @@ caveats.
   - `client_id` claim equals configured app client ID
 
 If auth fails, response is `401 Unauthorized`.
-This applies to `/api/edu` and `/v0/veteran-disability-ratings` when auth is
+This applies to `/api/edu` and `/api/v0/veteran-disability-ratings` when auth is
 enabled. `/health` is registered before the auth middleware and remains
 unauthenticated in the current branch.
 
 ## Circuit Breaker Behavior
 
-`/health`, `/api/edu`, and `/v0/veteran-disability-ratings` are wrapped by
+`/health`, `/api/edu`, and `/api/v0/veteran-disability-ratings` are wrapped by
 Redis-backed circuit breaker middleware.
 
 - On breaker deny/open state: `503 Service Unavailable`.
@@ -38,7 +38,7 @@ Redis-backed circuit breaker middleware.
 | `GET`  | `/`                            | Liveness string                        | `200` text  | Returns `Backend running!`                                         |
 | `GET`  | `/health`                      | Redis health check                     | `200` empty | Registered before auth middleware; pings Redis with 2s timeout    |
 | `GET`  | `/api/edu`                     | NSC education verification scaffold    | `200` JSON  | Uses a hardcoded request payload in handler; not the v0 contract   |
-| `POST` | `/v0/veteran-disability-ratings` | Veteran disability status from v0 spec | `200` JSON  | Accepts caller-provided identity payload and matches the v0 route  |
+| `POST` | `/api/v0/veteran-disability-ratings` | Veteran disability status from v0 spec | `200` JSON  | Accepts caller-provided identity payload and matches the v0 route  |
 
 | Method | Path                  | Description                         | Success     | Notes |
 | ------ | --------------------- | ----------------------------------- | ----------- | ----- |
@@ -98,10 +98,10 @@ Returns the checked-in bundled OpenAPI JSON artifact with `Content-Type: applica
 curl -i http://localhost:8000/api/edu
 ```
 
-## Example: `/v0/veteran-disability-ratings`
+## Example: `/api/v0/veteran-disability-ratings`
 
 ```bash
-curl -i --request POST http://localhost:8000/v0/veteran-disability-ratings \
+curl -i --request POST http://localhost:8000/api/v0/veteran-disability-ratings \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer <ACCESS_TOKEN>' \
   --data '{

@@ -26,7 +26,7 @@
 - VA authentication uses a signed JWT client assertion, so the configured
   private key path must point to a readable RSA PEM file on disk.
 - Populate the VA values before exercising
-  `POST /v0/veteran-disability-ratings`.
+  `POST /api/v0/veteran-disability-ratings`.
 
 ## Local Run
 

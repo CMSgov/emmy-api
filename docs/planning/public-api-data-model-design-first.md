@@ -133,8 +133,8 @@ Contract boundary:
 Current v0 contract conventions in this repo:
 
 - Public paths:
-  - `POST /v0/education-enrollments`
-  - `POST /v0/veteran-disability-ratings`
+  - `POST /api/v0/education-enrollments`
+  - `POST /api/v0/veteran-disability-ratings`
 - OpenAPI version: `3.1.0`
 - Security model: global OAuth 2.0 client-credentials security scheme
 - Request model style: flat reusable `Identity` schema from `schema/v0/identity.schema.json`
