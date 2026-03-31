@@ -4,7 +4,7 @@ An API that provides a unified, standard interface to the data sources needed to
 
 ### Using the API
 
-[Click here](docs/guides/01-getting-started.md) for the steps to begin using the data sources available through the API, and see the speciification of what kind of data is available.
+[Click here](docs/guides/01-getting-started.md) for the steps to begin using the data sources available through the API, and see the specification of what kind of data is available.
 
 ## About the Project
 
