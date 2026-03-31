@@ -26,6 +26,10 @@ run = "pnpm run check:fmt"
 description = "Compile standalone JSON Schemas with Ajv"
 run = "pnpm run check:schemas"
 
+[tasks.check-spelling]
+description = "Spell-check repository files with cspell"
+run = "pnpm run check:spelling"
+
 [tasks.check-openapi-breaking]
 description = "Check the bundled OpenAPI artifact for breaking changes against a base ref"
 run = "./scripts/check-openapi-breaking"
