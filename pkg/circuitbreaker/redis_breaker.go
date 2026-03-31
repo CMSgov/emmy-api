@@ -23,6 +23,9 @@ type RedisBreaker struct {
 var _ Breaker = (*RedisBreaker)(nil)
 
 func NewRedisBreaker(rdb *redis.Client, name string, opts Options, logger *slog.Logger) *RedisBreaker {
+	if rdb == nil {
+		panic("redis client cannot be nil for RedisBreaker")
+	}
 	if opts.FailureThreshold <= 0 {
 		opts = DefaultOptions()
 	}

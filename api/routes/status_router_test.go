@@ -27,7 +27,7 @@ func TestStatusEndpoint(t *testing.T) {
 
 	StatusRouter(app, cfg, rdb, logger)
 
-	req := httptest.NewRequest(http.MethodGet, "/status", http.NoBody)
+	req := httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
 
 	expected := fiber.StatusOK
 

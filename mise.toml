@@ -34,6 +34,27 @@ run = "./scripts/check-openapi-breaking"
 description = "Bundle, validate, and lint the OpenAPI spec"
 depends = ["bundle-api-spec", "validate-api-spec", "lint-api-spec"]
 
+[tasks.build]
+description = "Build the Go server"
+run = "go build -o bin/apiserver ."
+
+[tasks.run]
+description = "Run the Go server locally"
+depends = ["build"]
+run = "bin/apiserver"
+
+[tasks.test]
+description = "Run all Go tests"
+run = "go test ./..."
+
+[tasks.runlocaldeps]
+description = "Start all local development dependencies"
+run = "docker compose up -d"
+
+[tasks.down]
+description = "Stop all local development dependencies"
+run = "docker compose down"
+
 [tasks.check-contract-files]
 description = "Run local lint, format, schema, and breaking-change checks for contract files"
 depends = [
