@@ -233,7 +233,7 @@ func WithCircuitBreaker(newBreaker func(name string) *circuitbreaker.RedisBreake
 		mu.Lock()
 		// release the mutex lock immediately after this function runs
 		defer mu.Unlock()
-		// now that mutext is locked, check if breaker exists
+		// now that mutex is locked, check if breaker exists
 		b = breakers[name]
 		// if breaker exists, return it
 		if b != nil {
