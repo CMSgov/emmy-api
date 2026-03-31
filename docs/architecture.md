@@ -64,7 +64,7 @@ without route-layer rewrites.
   - `runServer` starts `app.Listen` in a goroutine and selects on server error or signal context cancellation.
   - graceful shutdown uses `app.ShutdownWithTimeout(5 * time.Second)`.
 - Request lifecycle:
-  - handlers create per-request contexts with timeout (`/status`: 2s, `/api/edu`: 5s).
+  - handlers create per-request contexts with timeout (`/health`: 2s, `/api/edu`: 5s, `/v0/veteran-disability-ratings`: 5s).
 - Circuit-breaker middleware:
   - breaker registry map guarded with `sync.RWMutex`.
   - lazy breaker initialization via double-check lock pattern.
@@ -93,19 +93,19 @@ Ordered middleware in `api.New`:
 Observed constructor and options-based DI:
 
 - `education.New(cfg, education.Options{HTTPClient, Logger, Timeout})`
-- Current `main` call: `api.New(&api.Config{Core, Logger, Otel})`
+- Current `main` call: `api.New(&api.Config{Core, Logger, Otel, Redis})`
 - Circuit breaker injection via higher-order middleware factory:
   - `WithCircuitBreaker(func(name string) *RedisBreaker { ... })`
 
-Note: `api.Config` includes a `Redis` field, but current `main` does not inject
-it.
+Note: `api.Config` includes a `Redis` field and the current `main` path now
+injects it.
 
 ## Technical Caveats (Current State)
 
 - `/api/edu` handler builds a hardcoded request payload instead of binding user input.
-- `/status` is registered inside `api.New` using `cfg.Redis`, but `main` omits `Redis` in `api.Config`, so current status-route wiring can fail at runtime.
-- Current runtime routes do not yet match the intended public v0 contract in
-  `api-spec/v0/openapi.yaml`.
+- `/health` is registered before the auth middleware, so it remains a runtime-only unauthenticated health route.
+- Current runtime routes are a mix of scaffold and contract-aligned paths: `GET /`, `GET /health`, `GET /api/edu`, and `POST /v0/veteran-disability-ratings`.
+- `GET /api/edu` remains runtime scaffolding, while `POST /v0/veteran-disability-ratings` matches the checked-in v0 contract in `api-spec/v0/openapi.yaml`.
 - Some tests require local Redis and fail when unavailable.
 
 ## Assumptions

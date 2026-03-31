@@ -3,17 +3,16 @@
 ## Purpose
 
 The Verification Service API provides a unified HTTP interface for eligibility
-verification workflows, currently focused on education verification through NSC
-(National Student Clearinghouse) integration and system health verification
-through Redis-backed checks.
+verification workflows, currently focused on a runtime education scaffold, a
+Redis-backed health check, and the checked-in v0 veteran disability contract.
 
 This service evolved from consent-based verification work and is intended to
 reduce manual burden during benefits eligibility evaluation.
 
 The intended public API contract for this branch is defined in
 `api-spec/v0/openapi.yaml` and the reusable schemas in `schema/v0/`. This page
-describes the current repository and runtime shape, which still contains
-implementation scaffolding that has not yet converged on the full v0 contract.
+describes the current repository and runtime shape, which still contains a mix
+of contract-aligned routes and implementation scaffolding.
 
 ## System Context
 
@@ -29,11 +28,12 @@ Runtime dependencies in current implementation:
 
 - `main`: process bootstrap, env/config load, OTel startup, Redis client init, route registration, graceful shutdown.
 - `api`: Fiber app construction and shared middleware setup.
-- `api/routes`: endpoint registration (`/`, `/status`, `/api/edu`).
-- `api/handlers`: HTTP handlers for Redis status and education verification.
+- `api/routes`: endpoint registration (`/`, `/health`, `/api/edu`, `/v0/veteran-disability-ratings`).
+- `api/handlers`: HTTP handlers for Redis health, education scaffolding, and veteran verification.
 - `api/middleware`: Cognito auth and circuit-breaker middleware.
 - `pkg/core`: configuration, logger, OTel service abstractions/utilities.
 - `pkg/education`: NSC service abstraction and HTTP/OAuth submit flow.
+- `pkg/veteran`: VA service abstraction and JWT client-assertion flow.
 - `pkg/circuitbreaker`: Redis-backed circuit-breaker implementation.
 - `pkg/redis`: Redis client factory and health ping.
 
@@ -58,7 +58,7 @@ flowchart TD
     F --> G{Circuit Breaker Allow?}
     G -->|No| H[503 Service Unavailable]
 
-    G -->|Yes: /status| I[Redis Ping]
+    G -->|Yes: /health| I[Redis Ping]
     I --> J[200 OK or Fiber Error]
 
     G -->|Yes: /api/edu| K[EducationService.Submit]
@@ -66,15 +66,20 @@ flowchart TD
     L --> M[NSC submit endpoint]
     M --> N[JSON response]
 
+    G -->|Yes: /v0/veteran-disability-ratings| V[VeteranService.LookupDisabilityRating]
+    V --> W[VA token exchange]
+    W --> X[VA disability endpoint]
+    X --> Y[JSON response]
+
     B -.-> O[OpenTelemetry exporter]
     I -.-> O
     K -.-> O
+    V -.-> O
 ```
 
-Current wiring caveat on `main`: `/status` is registered in `api.New` using
-`api.Config.Redis`, but `main` currently builds `api.Config` without a Redis
-client. Treat the `/status` flow above as intended behavior pending that wiring
-fix.
+Current wiring caveat on `main`: `api.New` now receives a Redis client from
+`main`, so `/health` can use the same Redis dependency that powers the breaker
+and health checks.
 
 ## Documentation Map
 
@@ -101,5 +106,7 @@ Initial requirements referenced `/docs/planing`; this repo standardizes on
   currently used by this service.
 - **High confidence:** `/api/edu` is presently implementation scaffolding and
   should not be treated as the public contract for this branch.
-- **Medium confidence:** Additional verification domains beyond the two v0
-  public operations may be introduced in future versions.
+- **High confidence:** `POST /v0/veteran-disability-ratings` is the current
+  checked-in v0 contract path for veteran verification.
+- **Medium confidence:** Additional verification domains beyond the current
+  runtime routes may be introduced in future versions.

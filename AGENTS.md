@@ -11,6 +11,7 @@ This repo currently contains:
 - Redis-backed status and circuit-breaker behavior
 - NSC education integration code
 - OpenTelemetry, Prometheus, and Jaeger local observability config
+- ECS deployment and image-publish helper scripts
 - OpenAPI contract files and repository documentation
 
 When repo prose and current implementation disagree, treat code, config, and CI
@@ -26,6 +27,7 @@ Core structure:
 - `api-spec/`: OpenAPI source files and bundled artifacts
 - `docs/`: setup, architecture, API, feature, research, and audit docs
 - `.github/workflows/`: CI checks for tests, linting, markdown, spelling, and secrets
+- `scripts/`: helper scripts for image build/push and ECS deployment
 - `Dockerfile`, `docker-compose.yml`, `otel-collector-config.yml`, `prometheus.yml`: local container and observability setup
 
 API boundaries:
@@ -40,6 +42,12 @@ Observed entry points:
 - `api.New`
 - `routes.RegisterRoutes`
 - `api-spec/openapi.yaml`
+
+Observed deployment helpers:
+
+- `scripts/push-image`: builds and pushes images to the configured private registry
+- `scripts/deploy-ecs`: updates ECS task definitions and services for named environments
+- `scripts/emmy-common.sh`: defines the supported deploy environments: `dev`, `test`, `demo`, `uat`, `sandbox`, `prod`
 
 Do not modify these without an explicit task and approval:
 
@@ -117,14 +125,16 @@ Data privacy:
 
 Deployment restrictions:
 
-- Do not claim or modify production deployment behavior based on this repo alone
-- The observable deployment-related assets here are local Docker/Compose and CI build/test workflows
+- Do not claim full cloud topology, account layout, or approval policy unless it is observable in the current branch
+- The repo does include deployment automation artifacts: ECS deployment helpers under `scripts/`, an Artifactory image default in `scripts/emmy-common.sh`, and CI workflow definitions under `.github/workflows/`
+- Treat environment names and deploy script behavior as source-of-truth only for what the scripts actually encode
 
 Approval required before changing:
 
 - Auth behavior
 - Secret-scanning rules
 - Workflow files
+- Deployment scripts or registry/deploy environment conventions
 - Policy files
 - Bundled OpenAPI outputs
 - `public.jwk`
