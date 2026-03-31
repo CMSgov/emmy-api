@@ -51,10 +51,10 @@ func TestRegisterRoutes_RegistersVeteranDisabilityEndpoint(t *testing.T) {
 
 	routes := app.GetRoutes(true)
 	for _, route := range routes {
-		if route.Method == http.MethodPost && route.Path == "/v0/veteran-disability-ratings" {
+		if route.Method == http.MethodPost && route.Path == "/api/v0/veteran-disability-ratings" {
 			return
 		}
 	}
 
-	t.Fatalf("expected POST /v0/veteran-disability-ratings to be registered")
+	t.Fatalf("expected POST /api/v0/veteran-disability-ratings to be registered")
 }

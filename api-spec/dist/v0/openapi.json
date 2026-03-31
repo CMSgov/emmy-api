@@ -97,7 +97,7 @@
         }
       }
     },
-    "/v0/education-enrollments": {
+    "/api/v0/education-enrollments": {
       "post": {
         "tags": [
           "Education Verification"
@@ -180,7 +180,7 @@
         }
       }
     },
-    "/v0/veteran-disability-ratings": {
+    "/api/v0/veteran-disability-ratings": {
       "post": {
         "tags": [
           "Veteran Verification"
@@ -639,7 +639,7 @@
           "title": "Invalid Consent Token",
           "status": 401,
           "detail": "X-EMMY-Consent-Token must be a valid token returned by POST /v0/consent-tokens.",
-          "instance": "/v0/education-enrollments"
+          "instance": "/api/v0/education-enrollments"
         }
       },
       "GetVeteranDisabilityStatusRequestExample": {

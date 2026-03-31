@@ -36,7 +36,7 @@ tags:
       Operations for retrieving VA disability rating data used in community
       engagement reporting
 paths:
-  /v0/education-enrollments:
+  /api/v0/education-enrollments:
     post:
       tags:
         - Education Verification
@@ -66,7 +66,7 @@ paths:
               examples:
                 enrolled:
                   $ref: "#/components/examples/EducationEnrollmentResponseExample"
-  /v0/veteran-disability-ratings:
+  /api/v0/veteran-disability-ratings:
     post:
       tags:
         - Veteran Verification

@@ -28,7 +28,7 @@ Runtime dependencies in current implementation:
 
 - `main`: process bootstrap, env/config load, OTel startup, Redis client init, route registration, graceful shutdown.
 - `api`: Fiber app construction and shared middleware setup.
-- `api/routes`: endpoint registration (`/`, `/health`, `/api/edu`, `/v0/veteran-disability-ratings`).
+- `api/routes`: endpoint registration (`/`, `/health`, `/api/edu`, `/api/v0/veteran-disability-ratings`).
 - `api/handlers`: HTTP handlers for Redis health, education scaffolding, and veteran verification.
 - `api/middleware`: Cognito auth and circuit-breaker middleware.
 - `pkg/core`: configuration, logger, OTel service abstractions/utilities.
@@ -66,7 +66,7 @@ flowchart TD
     L --> M[NSC submit endpoint]
     M --> N[JSON response]
 
-    G -->|Yes: /v0/veteran-disability-ratings| V[VeteranService.LookupDisabilityRating]
+    G -->|Yes: /api/v0/veteran-disability-ratings| V[VeteranService.LookupDisabilityRating]
     V --> W[VA token exchange]
     W --> X[VA disability endpoint]
     X --> Y[JSON response]
@@ -106,7 +106,7 @@ Initial requirements referenced `/docs/planing`; this repo standardizes on
   currently used by this service.
 - **High confidence:** `/api/edu` is presently implementation scaffolding and
   should not be treated as the public contract for this branch.
-- **High confidence:** `POST /v0/veteran-disability-ratings` is the current
+- **High confidence:** `POST /api/v0/veteran-disability-ratings` is the current
   checked-in v0 contract path for veteran verification.
 - **Medium confidence:** Additional verification domains beyond the current
   runtime routes may be introduced in future versions.

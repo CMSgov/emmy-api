@@ -70,8 +70,8 @@ _(Review the [Authentication Guide](02-authentication.md) for more details on au
 
 The checked-in v0 contract defines two public operations:
 
-- `POST /v0/education-enrollments`
-- `POST /v0/veteran-disability-ratings`
+- `POST /api/v0/education-enrollments`
+- `POST /api/v0/veteran-disability-ratings`
 
 Both operations reuse the same request body shape from
 `schema/v0/identity.schema.json`. Build a JSON body using the person's
@@ -119,7 +119,7 @@ request body.
 Use this example by substituting the values for your situation:
 
 ```bash
-curl --location --request POST '<API_BASE>/v0/education-enrollments' \
+curl --location --request POST '<API_BASE>/api/v0/education-enrollments' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data '{
@@ -142,5 +142,5 @@ The current v0 success response for education returns:
 To request veteran disability data instead, send the same identity payload to:
 
 ```text
-POST <API_BASE>/v0/veteran-disability-ratings
+POST <API_BASE>/api/v0/veteran-disability-ratings
 ```

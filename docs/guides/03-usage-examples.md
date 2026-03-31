@@ -5,7 +5,7 @@ These examples mirror the checked-in v0 public contract.
 ## Education Verification
 
 ```bash
-curl --location --request POST '<API_BASE>/v0/education-enrollments' \
+curl --location --request POST '<API_BASE>/api/v0/education-enrollments' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data '{
@@ -28,7 +28,7 @@ Example success response:
 ## Veteran Disability Verification
 
 ```bash
-curl --location --request POST '<API_BASE>/v0/veteran-disability-ratings' \
+curl --location --request POST '<API_BASE>/api/v0/veteran-disability-ratings' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data '{
