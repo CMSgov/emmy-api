@@ -115,6 +115,7 @@ aws ecs update-service \
   --cluster "$cluster_name" \
   --service "$service_name" \
   --task-definition "$new_task_definition_arn" \
+  --force-new-deployment \
   --output json >/dev/null
 
 echo "Waiting for service $service_name to become stable"

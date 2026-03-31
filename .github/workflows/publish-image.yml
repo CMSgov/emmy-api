@@ -13,6 +13,8 @@ jobs:
   publish:
     name: push image
     runs-on: self-hosted
+    outputs:
+      image_tag: ${{ steps.derive-image-tag.outputs.image_tag }}
     steps:
       - name: Fetch Repository
         uses: actions/checkout@v6
@@ -21,8 +23,11 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Derive image tag
+        id: derive-image-tag
         shell: bash
-        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+        run: |
+          echo "IMAGE_TAG=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+          echo "image_tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Artifactory
         uses: docker/login-action@v3
@@ -33,3 +38,22 @@ jobs:
 
       - name: Push Docker image
         run: ./scripts/push-image
+
+  deploy:
+    name: deploy ${{ matrix.env_name }}
+    needs: publish
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix:
+        env_name:
+          - dev
+          # - test
+    steps:
+      - name: Fetch Repository
+        uses: actions/checkout@v6
+
+      - name: Deploy to ECS
+        env:
+          IMAGE_TAG: ${{ needs.publish.outputs.image_tag }}
+        run: ./scripts/deploy-ecs "${{ matrix.env_name }}"
