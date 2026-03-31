@@ -81,3 +81,39 @@ func WithCognitoAppClientID(appClientID string) func(*Config) {
 		c.Cognito.AppClientID = appClientID
 	}
 }
+
+func WithVABaseURL(baseURL string) func(*Config) {
+	return func(c *Config) {
+		c.VA.BaseURL = baseURL
+	}
+}
+
+func WithVATokenURL(tokenURL string) func(*Config) {
+	return func(c *Config) {
+		c.VA.TokenURL = tokenURL
+	}
+}
+
+func WithVAClientID(clientID string) func(*Config) {
+	return func(c *Config) {
+		c.VA.ClientID = clientID
+	}
+}
+
+func WithVATokenAudience(aud string) func(*Config) {
+	return func(c *Config) {
+		c.VA.TokenAudience = aud
+	}
+}
+
+func WithVAPrivateKeyPath(path string) func(*Config) {
+	return func(c *Config) {
+		c.VA.PrivateKeyPath = path
+	}
+}
+
+func WithVATimeoutSeconds(timeout int) func(*Config) {
+	return func(c *Config) {
+		c.VA.TimeoutSeconds = timeout
+	}
+}

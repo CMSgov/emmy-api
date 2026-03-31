@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-const bundledOpenAPISpecPath = "api-spec/dist/openapi.bundled.json"
+const bundledOpenAPISpecPath = "api-spec/v0/dist/openapi.bundled.json"
 
 func OpenAPISpecHandler() fiber.Handler {
 	return OpenAPISpecHandlerForPath(bundledOpenAPISpecPath)

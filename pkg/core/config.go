@@ -20,12 +20,19 @@ const (
 	defaultRedisDB              int    = 0
 	defaultRedisUseTLS          bool   = true
 	defaultRedisInsecureSkip    bool   = false
+	defaultVATimeoutSeconds     int    = 5
 
 	keyNSCSubmitURL string = "NSC_SUBMIT_URL"
 	keyTokenURL     string = "NSC_TOKEN_URL"
 	keyClientSecret string = "NSC_CLIENT_SECRET"
 	keyClientID     string = "NSC_CLIENT_ID"
 	keyAccountID    string = "NSC_ACCOUNT_ID"
+	keyVABaseURL    string = "VA_BASE_URL"
+	keyVATokenURL   string = "VA_TOKEN_URL"
+	keyVAClientID   string = "VA_CLIENT_ID"
+	keyVAAudience   string = "VA_AUD"
+	keyVAKeyPath    string = "VA_PRIVATE_KEY_PATH"
+	keyVATimeout    string = "VA_TIMEOUT_SECONDS"
 )
 
 func DefaultConfig() Config {
@@ -63,6 +70,15 @@ func DefaultConfig() Config {
 			ClientID:     getEnv(keyClientID, ""),
 			AccountID:    getEnv(keyAccountID, ""),
 		},
+
+		VA: VAConfig{
+			BaseURL:        getEnv(keyVABaseURL, ""),
+			TokenURL:       getEnv(keyVATokenURL, ""),
+			ClientID:       getEnv(keyVAClientID, ""),
+			TokenAudience:  getEnv(keyVAAudience, ""),
+			PrivateKeyPath: getEnv(keyVAKeyPath, ""),
+			TimeoutSeconds: defaultVATimeoutSeconds,
+		},
 	}
 }
 
@@ -86,6 +102,8 @@ func NewConfig(options ...func(*Config)) Config {
 // - REDIS_ADDR, REDIS_PASSWORD, REDIS_DB
 //
 // - NSC_SUBMIT_URL, NSC_TOKEN_URL, NSC_CLIENT_SECRET, NSC_CLIENT_ID, NSC_ACCOUNT_ID
+//
+// - VA_BASE_URL, VA_TOKEN_URL, VA_CLIENT_ID, VA_AUD, VA_PRIVATE_KEY_PATH, VA_TIMEOUT_SECONDS
 //
 // Provided options are applied after env loading and override both defaults and env file values.
 func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
@@ -115,6 +133,13 @@ func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
 		setFromEnv(&cfg.NSC.ClientSecret, "NSC_CLIENT_SECRET"),
 		setFromEnv(&cfg.NSC.ClientID, "NSC_CLIENT_ID"),
 		setFromEnv(&cfg.NSC.AccountID, "NSC_ACCOUNT_ID"),
+
+		setFromEnv(&cfg.VA.BaseURL, "VA_BASE_URL"),
+		setFromEnv(&cfg.VA.TokenURL, "VA_TOKEN_URL"),
+		setFromEnv(&cfg.VA.ClientID, "VA_CLIENT_ID"),
+		setFromEnv(&cfg.VA.TokenAudience, "VA_AUD"),
+		setFromEnv(&cfg.VA.PrivateKeyPath, "VA_PRIVATE_KEY_PATH"),
+		setFromEnv(&cfg.VA.TimeoutSeconds, "VA_TIMEOUT_SECONDS"),
 	)
 
 	for _, opt := range options {

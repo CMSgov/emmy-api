@@ -32,6 +32,15 @@ type NSCConfig struct {
 	AccountID    string
 }
 
+type VAConfig struct {
+	BaseURL        string
+	TokenURL       string
+	ClientID       string
+	TokenAudience  string
+	PrivateKeyPath string
+	TimeoutSeconds int
+}
+
 type Config struct {
 	Cognito     CognitoConfig
 	Environment string
@@ -40,4 +49,5 @@ type Config struct {
 	SkipAuth    bool
 	Redis       RedisConfig
 	NSC         NSCConfig
+	VA          VAConfig
 }

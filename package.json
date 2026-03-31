@@ -5,6 +5,7 @@
     "bundle:api-spec": "redocly bundle api-spec/v0/openapi.yaml -o api-spec/v0/dist/openapi.bundled.json",
     "validate:api-spec": "swagger-cli validate api-spec/v0/dist/openapi.bundled.yaml",
     "lint:api-spec": "spectral lint api-spec/v0/dist/openapi.bundled.yaml --ruleset .spectral.yaml",
+    "lint:markdown": "markdownlint-cli2 \"**/*.md\" \"**/*.MD\" \"#node_modules\" \"#.github\" --fix",
     "fmt": "prettier --write .",
     "check:fmt": "prettier --check .",
     "check:schemas": "node scripts/validate-json-schemas.mjs",
@@ -41,6 +42,7 @@
     "ajv-formats": "^3.0.1",
     "cspell": "^9.7.0",
     "glob": "^13.0.6",
+    "markdownlint-cli2": "^0.22.0",
     "prettier": "^3.6.2",
     "typescript": "^6.0.2"
   }

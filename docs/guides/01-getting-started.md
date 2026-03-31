@@ -88,7 +88,24 @@ identifying information, like so:
 ```
 
 Required fields are `firstName`, `lastName`, and `dateOfBirth`. `middleName`
-and `ssn` are optional in the current v0 schema.
+and `ssn` are optional in the current v0 schema. Veteran disability requests
+may also include an optional `address` object for demographic matching when
+SSN data is not available, for example:
+
+```json
+{
+    "firstName": "Lynette",
+    "lastName": "Oyola",
+    "dateOfBirth": "1988-10-24",
+    "address": {
+        "street1": "17020 Tortoise St",
+        "city": "Round Rock",
+        "state": "TX",
+        "postalCode": "78664",
+        "country": "USA"
+    }
+}
+```
 
 With your JSON payload prepared, you can now
 [make a request to the Emmy API](01-getting-started.md#step-3-invoke-an-emmy-api-request).
