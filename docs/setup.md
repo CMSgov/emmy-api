@@ -16,7 +16,7 @@
 | Service | `ENVIRONMENT`, `PORT`, `SKIP_AUTH` | `development`, `3000`, `false` |
 | OTel | `OTEL_DISABLE`, `OTEL_OTLP_EXPORTER_ENDPOINT`, `OTEL_OTLP_EXPORTER_INSECURE` | `true`, `localhost:4317`, `false` |
 | Cognito | `COGNITO_REGION`, `COGNITO_USER_POOL_ID`, `COGNITO_APP_CLIENT_ID` | `us-east-1`, `UNSET`, `UNSET` |
-| Redis | `REDIS_ADDR`, `REDIS_PASSWORD`, `REDIS_DB` | `localhost:6379`, empty, `0` |
+| Redis | `REDIS_ADDR`, `REDIS_PASSWORD`, `REDIS_DB`, `REDIS_USE_TLS`, `REDIS_INSECURE_SKIP_VERIFY` | `localhost:6379`, empty, `0`, `true`, `false` |
 | NSC | `NSC_SUBMIT_URL`, `NSC_TOKEN_URL`, `NSC_CLIENT_SECRET`, `NSC_CLIENT_ID`, `NSC_ACCOUNT_ID` | empty |
 | VA | `VA_BASE_URL`, `VA_TOKEN_URL`, `VA_CLIENT_ID`, `VA_AUD`, `VA_PRIVATE_KEY_PATH`, `VA_TIMEOUT_SECONDS` | empty, empty, empty, empty, empty, `5` |
 
@@ -34,6 +34,11 @@
 
 Create `.env.local` and/or `.env` from `.env.example`. Adjust variables to your
 preferred values.
+
+For local Redis started via `docker compose` or `redis-server`, set
+`REDIS_USE_TLS=false`. The code default is `true`, which is appropriate for
+TLS-enabled deployments but will cause local startup to hang or fail against
+the plain `redis:7` container in this repo's compose stack.
 
 ### 2) Run service directly
 
@@ -86,6 +91,8 @@ Services:
 The API container is configured with `REDIS_ADDR=redis:6379`, so the compose
 stack now includes the Redis dependency needed for local startup and
 circuit-breaker/status behavior.
+It also sets `REDIS_USE_TLS=false` because the local Redis container does not
+serve TLS.
 
 ## Build
 
