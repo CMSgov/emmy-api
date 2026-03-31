@@ -58,3 +58,22 @@ func TestRegisterRoutes_RegistersVeteranDisabilityEndpoint(t *testing.T) {
 
 	t.Fatalf("expected POST /api/v0/veteran-disability-ratings to be registered")
 }
+
+func TestRegisterRoutes_RegistersEducationEnrollmentsEndpoint(t *testing.T) {
+	app := fiber.New()
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	rdb := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
+
+	RegisterRoutes(app, &core.Config{}, rdb, logger)
+
+	routes := app.GetRoutes(true)
+	for _, route := range routes {
+		if route.Method == http.MethodPost && route.Path == "/api/v0/education-enrollments" {
+			return
+		}
+	}
+
+	t.Fatalf("expected POST /api/v0/education-enrollments to be registered")
+}

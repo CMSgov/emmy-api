@@ -7,9 +7,9 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
-	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/cmsgov/emmy-api/pkg/education"
 	"github.com/cmsgov/emmy-api/pkg/resilience"
 	"github.com/gofiber/fiber/v2"
@@ -22,27 +22,124 @@ import (
 type fakeEducationService struct {
 	response education.Response
 	err      error
+	calls    int
+	lastReq  education.Request
 }
 
-func (s *fakeEducationService) Submit(_ context.Context, _ education.Request) (education.Response, error) {
+func (s *fakeEducationService) LookupEnrollmentStatus(_ context.Context, req education.Request) (education.Response, error) {
+	s.calls++
+	s.lastReq = req
 	return s.response, s.err
+}
+
+func TestEducationHandler_Success(t *testing.T) {
+	app := fiber.New()
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	service := &fakeEducationService{
+		response: education.Response{EnrollmentStatus: education.EnrollmentStatusEnrolled},
+	}
+
+	app.Post("/api/v0/education-enrollments", EducationHandler(service, logger))
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/education-enrollments", strings.NewReader(`{
+		"firstName":"Lynette",
+		"middleName":"Marie",
+		"lastName":"Oyola",
+		"dateOfBirth":"1988-10-24",
+		"ssn":"123-45-6789"
+	}`))
+	req.Header.Set("Content-Type", fiber.MIMEApplicationJSON)
+
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+
+	require.Equal(t, fiber.StatusOK, resp.StatusCode)
+	require.JSONEq(t, `{"enrollmentStatus":"ENROLLED"}`, string(body))
+	require.Equal(t, 1, service.calls)
+	require.Equal(t, "Lynette", service.lastReq.FirstName)
+	require.Equal(t, "Marie", service.lastReq.MiddleName)
+	require.Equal(t, "123-45-6789", service.lastReq.SSN)
+}
+
+func TestEducationHandler_InvalidJSONReturnsBadRequest(t *testing.T) {
+	app := fiber.New()
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+	app.Post("/api/v0/education-enrollments", EducationHandler(&fakeEducationService{}, logger))
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/education-enrollments", strings.NewReader(`{`))
+	req.Header.Set("Content-Type", fiber.MIMEApplicationJSON)
+
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+}
+
+func TestEducationHandler_MissingRequiredFieldReturnsBadRequest(t *testing.T) {
+	app := fiber.New()
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+	app.Post("/api/v0/education-enrollments", EducationHandler(&fakeEducationService{}, logger))
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/education-enrollments", strings.NewReader(`{
+		"lastName":"Oyola",
+		"dateOfBirth":"1988-10-24",
+		"ssn":"123-45-6789"
+	}`))
+	req.Header.Set("Content-Type", fiber.MIMEApplicationJSON)
+
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+}
+
+func TestEducationHandler_NotFoundReturnsNotFound(t *testing.T) {
+	app := fiber.New()
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+	app.Post("/api/v0/education-enrollments", EducationHandler(&fakeEducationService{
+		err: education.ErrNotFound,
+	}, logger))
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/education-enrollments", strings.NewReader(`{
+		"firstName":"Lynette",
+		"lastName":"Oyola",
+		"dateOfBirth":"1988-10-24",
+		"ssn":"123-45-6789"
+	}`))
+	req.Header.Set("Content-Type", fiber.MIMEApplicationJSON)
+
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, fiber.StatusNotFound, resp.StatusCode)
 }
 
 func TestEducationHandler_CircuitOpenReturnsServiceUnavailable(t *testing.T) {
 	app := fiber.New()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	cfg := &core.Config{
-		NSC: core.NSCConfig{
-			AccountID: "10053523",
-		},
-	}
-
-	app.Get("/edu", EducationHandler(cfg, &fakeEducationService{
+	app.Post("/api/v0/education-enrollments", EducationHandler(&fakeEducationService{
 		err: resilience.ErrCircuitOpen,
 	}, logger))
 
-	req := httptest.NewRequest(http.MethodGet, "/edu", http.NoBody)
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/education-enrollments", strings.NewReader(`{
+		"firstName":"Lynette",
+		"lastName":"Oyola",
+		"dateOfBirth":"1988-10-24",
+		"ssn":"123-45-6789"
+	}`))
+	req.Header.Set("Content-Type", fiber.MIMEApplicationJSON)
+
 	resp, err := app.Test(req)
 	require.NoError(t, err)
 	defer resp.Body.Close()
@@ -54,17 +151,18 @@ func TestEducationHandler_VendorErrorReturnsBadGateway(t *testing.T) {
 	app := fiber.New()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	cfg := &core.Config{
-		NSC: core.NSCConfig{
-			AccountID: "10053523",
-		},
-	}
-
-	app.Get("/edu", EducationHandler(cfg, &fakeEducationService{
+	app.Post("/api/v0/education-enrollments", EducationHandler(&fakeEducationService{
 		err: errors.New("vendor request failed"),
 	}, logger))
 
-	req := httptest.NewRequest(http.MethodGet, "/edu", http.NoBody)
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/education-enrollments", strings.NewReader(`{
+		"firstName":"Lynette",
+		"lastName":"Oyola",
+		"dateOfBirth":"1988-10-24",
+		"ssn":"123-45-6789"
+	}`))
+	req.Header.Set("Content-Type", fiber.MIMEApplicationJSON)
+
 	resp, err := app.Test(req)
 	require.NoError(t, err)
 	defer resp.Body.Close()
@@ -85,17 +183,18 @@ func TestEducationHandler_EmitsVerificationSpans(t *testing.T) {
 	app := fiber.New()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	cfg := &core.Config{
-		NSC: core.NSCConfig{
-			AccountID: "10053523",
-		},
-	}
-
-	app.Get("/edu", EducationHandler(cfg, &fakeEducationService{
-		response: education.Response{},
+	app.Post("/api/v0/education-enrollments", EducationHandler(&fakeEducationService{
+		response: education.Response{EnrollmentStatus: education.EnrollmentStatusFullTime},
 	}, logger))
 
-	req := httptest.NewRequest(http.MethodGet, "/edu", http.NoBody)
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/education-enrollments", strings.NewReader(`{
+		"firstName":"Lynette",
+		"lastName":"Oyola",
+		"dateOfBirth":"1988-10-24",
+		"ssn":"123-45-6789"
+	}`))
+	req.Header.Set("Content-Type", fiber.MIMEApplicationJSON)
+
 	resp, err := app.Test(req)
 	require.NoError(t, err)
 	defer resp.Body.Close()

@@ -2,6 +2,7 @@ package education
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"time"
@@ -9,8 +10,10 @@ import (
 	"github.com/cmsgov/emmy-api/pkg/core"
 )
 
-type EducationService interface {
-	Submit(ctx context.Context, req Request) (Response, error)
+var ErrNotFound = errors.New("education enrollment not found")
+
+type Service interface {
+	LookupEnrollmentStatus(ctx context.Context, req Request) (Response, error)
 }
 
 type HTTPTransport interface {
@@ -33,7 +36,7 @@ type service struct {
 	opts   Options
 }
 
-func New(cfg *core.NSCConfig, opts Options) EducationService {
+func New(cfg *core.NSCConfig, opts Options) Service {
 	logger := opts.Logger
 	if logger == nil {
 		logger = slog.Default()
@@ -47,7 +50,7 @@ func New(cfg *core.NSCConfig, opts Options) EducationService {
 	client := opts.HTTPClient
 
 	if client == nil {
-		client = nscHTTPClient(context.Background(), cfg)
+		client = nscHTTPClient(context.Background(), cfg, logger)
 	}
 
 	return &service{
