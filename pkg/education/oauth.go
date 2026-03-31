@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/DSACMS/verification-service-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/core"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )

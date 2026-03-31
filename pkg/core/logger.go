@@ -23,7 +23,7 @@ func NewLogger(cfg *Config) *slog.Logger {
 func NewLoggerWithOtel(cfg *Config, otel OtelService) *slog.Logger {
 	stdoutHandler := newStdoutHandler(cfg)
 	otelHandler := otelslog.NewHandler(
-		"verification-service-api",
+		"emmy-api",
 		otelslog.WithLoggerProvider(otel.LoggerProvider()),
 	)
 

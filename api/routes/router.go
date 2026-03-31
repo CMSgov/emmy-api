@@ -3,11 +3,11 @@ package routes
 import (
 	"log/slog"
 
-	"github.com/DSACMS/verification-service-api/api/handlers"
-	"github.com/DSACMS/verification-service-api/api/middleware"
-	"github.com/DSACMS/verification-service-api/pkg/circuitbreaker"
-	"github.com/DSACMS/verification-service-api/pkg/core"
-	"github.com/DSACMS/verification-service-api/pkg/education"
+	"github.com/cmsgov/emmy-api/api/handlers"
+	"github.com/cmsgov/emmy-api/api/middleware"
+	"github.com/cmsgov/emmy-api/pkg/circuitbreaker"
+	"github.com/cmsgov/emmy-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/education"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 )

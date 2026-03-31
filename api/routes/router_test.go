@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/DSACMS/verification-service-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"

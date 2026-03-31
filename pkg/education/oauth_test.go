@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/DSACMS/verification-service-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/stretchr/testify/require"
 )
 

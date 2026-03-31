@@ -8,16 +8,16 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/DSACMS/verification-service-api/pkg/core"
-	"github.com/DSACMS/verification-service-api/pkg/education"
-	"github.com/DSACMS/verification-service-api/pkg/resilience"
+	"github.com/cmsgov/emmy-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/education"
+	"github.com/cmsgov/emmy-api/pkg/resilience"
 	"github.com/gofiber/fiber/v2"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 )
 
-var verificationTracer = otel.Tracer("verification-service-api/verification")
+var verificationTracer = otel.Tracer("emmy-api/verification")
 
 func EducationHandler(cfg *core.Config, edu education.EducationService, logger *slog.Logger) fiber.Handler {
 	const contextTimeout time.Duration = 5 * time.Second

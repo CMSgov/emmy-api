@@ -31,7 +31,7 @@ import (
 //
 //	export SERVICE_VERSION=$(git rev-parse --short HEAD)
 //	go build -o out \
-//	  -X verification-service-api/pkg/core.ServiceVersion=${SERVICE_VERSION}
+//	  -X github.com/cmsgov/emmy-api/pkg/core.ServiceVersion=${SERVICE_VERSION}
 var ServiceVersion = "UNSET"
 
 // OtelService provides methods for handling OpenTelemetry operations.
