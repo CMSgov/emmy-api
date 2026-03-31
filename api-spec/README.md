@@ -42,25 +42,25 @@ The public contract in this branch is currently defined in
 
 ## Bundling And Checks
 
-Use the repo scripts from the project root:
+Use the currently checked-in commands from the project root:
 
 ```sh
-./scripts/bundle-api-spec
-./scripts/validate-api-spec
-./scripts/lint-api-spec
+pnpm run bundle:api-spec
+pnpm exec swagger-cli validate api-spec/v0/dist/openapi.bundled.json
+pnpm exec spectral lint api-spec/v0/dist/openapi.bundled.json --ruleset .spectral.yaml
 ```
 
-Or, with `mise`:
+Or, with the currently backed `mise` task:
 
 ```sh
 mise install
-mise run check-api-spec
+mise run bundle-api-spec
 ```
 
-Bundling produces checked-in versioned artifacts under `api-spec/v0/dist/` and
-`api-spec/dist/v0/`. Those artifacts are for machine consumption and runtime
-serving; they should always be regenerated from the source files in this
-directory.
+The current branch checks in bundled JSON artifacts under `api-spec/v0/dist/`
+and `api-spec/dist/v0/`. Those artifacts are for machine consumption and
+runtime serving; they should always be regenerated from the source files in
+this directory.
 
 ## Pull Request Expectations
 

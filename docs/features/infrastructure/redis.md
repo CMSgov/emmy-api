@@ -16,6 +16,7 @@ Provides the shared Redis integration used for runtime connectivity checks and d
 - `pkg/redis/redis.go`
 - `pkg/core/config.go`
 - `api/handlers/status_handler.go`
+- `api/routes/status_router.go`
 - `main.go`
 
 ## Key Structs and Interfaces
@@ -64,7 +65,9 @@ if err := redisotel.InstrumentMetrics(rdb); err != nil {
   - `MinIdleConns` = 2
 - Config defaults from `core.DefaultConfig()`:
   - `REDIS_ADDR=localhost:6379`, empty password, `REDIS_DB=0`
+  - `REDIS_USE_TLS=true`, `REDIS_INSECURE_SKIP_VERIFY=false`
 - Redis connectivity is currently a hard startup dependency in `main.run` (`redis.Ping` failure aborts startup).
+- Local non-TLS Redis usage requires an explicit `REDIS_USE_TLS=false` override.
 
 ## Future Improvements
 
@@ -75,7 +78,9 @@ if err := redisotel.InstrumentMetrics(rdb); err != nil {
 ## Assumptions
 
 - **High confidence:** Redis is an operational dependency for current startup and status-check behavior.
-- **High confidence:** There is an active wiring caveat on `main` where status route setup may receive nil Redis via `api.New` config path until Redis injection is corrected there.
+- **High confidence:** `main` injects the same Redis client into `api.New` and
+  `routes.RegisterRoutes`, so health checks and breaker-backed routes share the
+  same runtime Redis dependency.
 
 ---
 
@@ -95,4 +100,6 @@ if err := redisotel.InstrumentMetrics(rdb); err != nil {
 
 `redis-server`
 
-- [ ] Replace with docker container option
+For the repo's local container workflow, `docker compose up --build` also
+starts Redis, but the app still needs `REDIS_USE_TLS=false` for a non-TLS local
+container.

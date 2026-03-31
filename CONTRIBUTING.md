@@ -42,20 +42,26 @@ Run the Go test suite:
 go test ./...
 ```
 
-Run the routine lint and scan tasks with `mise`:
+Run the routine local checks that are fully wired on this branch:
 
 ```sh
-mise run lint
+golangci-lint run
+pnpm run lint:markdown
+go test ./...
 ```
 
-For contract-focused changes, run the narrower contract workflow:
+For contract-focused changes, run the currently checked-in contract commands:
 
 ```sh
-mise run check-contract-files
+pnpm run bundle:api-spec
+pnpm exec swagger-cli validate api-spec/v0/dist/openapi.bundled.json
+pnpm exec spectral lint api-spec/v0/dist/openapi.bundled.json --ruleset .spectral.yaml
+pnpm exec prettier --check --no-error-on-unmatched-pattern "api-spec/**/*.yaml" "schema/**/*.json"
+pnpm run check:schemas
 ```
 
-That task bundles, validates, lints, and formatting-checks the OpenAPI and JSON
-Schema artifacts that live under `api-spec/` and `schema/`.
+Those commands cover the checked-in OpenAPI and JSON Schema artifacts that live
+under `api-spec/` and `schema/`.
 
 ## Pull Requests and Issues
 

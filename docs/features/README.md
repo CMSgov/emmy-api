@@ -24,7 +24,7 @@ controls, and resilience patterns without scanning a single flat list.
 
 | Component | Purpose | Functionality |
 |---|---|---|
-| [Cognito Auth](security/cognito-auth.md) | Document Cognito access-token validation middleware. | Covers token header/claims checks, local context propagation, and auth-related edge cases. |
+| [Skip Auth Middleware](security/skip-auth-middleware.md) | Document the local identity injection used when auth is skipped. | Covers the `x-skip-auth-*` headers, default locals, and the current runtime auth gap. |
 
 ## Resilience
 

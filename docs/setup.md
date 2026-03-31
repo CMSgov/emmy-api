@@ -4,7 +4,8 @@
 
 - Go `1.25.x` (`go.mod` sets `go 1.25`).
 - Docker and Docker Compose for containerized local workflows. The committed
-  compose file currently provides API and observability services only.
+  compose file includes the API container, Redis, and local observability
+  services.
 - Local Redis at `localhost:6379` for runtime health checks and several tests.
 
 ## Environment Variables
@@ -15,14 +16,18 @@
 |---|---|---|
 | Service | `ENVIRONMENT`, `PORT`, `SKIP_AUTH` | `development`, `3000`, `false` |
 | OTel | `OTEL_DISABLE`, `OTEL_OTLP_EXPORTER_ENDPOINT`, `OTEL_OTLP_EXPORTER_INSECURE` | `true`, `localhost:4317`, `false` |
-| Cognito | `COGNITO_REGION`, `COGNITO_USER_POOL_ID`, `COGNITO_APP_CLIENT_ID` | `us-east-1`, `UNSET`, `UNSET` |
-| Redis | `REDIS_ADDR`, `REDIS_PASSWORD`, `REDIS_DB` | `localhost:6379`, empty, `0` |
+| Redis | `REDIS_ADDR`, `REDIS_PASSWORD`, `REDIS_DB`, `REDIS_USE_TLS`, `REDIS_INSECURE_SKIP_VERIFY` | `localhost:6379`, empty, `0`, `true`, `false` |
 | NSC | `NSC_SUBMIT_URL`, `NSC_TOKEN_URL`, `NSC_CLIENT_SECRET`, `NSC_CLIENT_ID`, `NSC_ACCOUNT_ID` | empty |
 | VA | `VA_BASE_URL`, `VA_TOKEN_URL`, `VA_CLIENT_ID`, `VA_AUD`, `VA_PRIVATE_KEY_PATH`, `VA_TIMEOUT_SECONDS` | empty, empty, empty, empty, empty, `5` |
 
 - The table above reflects code defaults from `pkg/core/config.go`.
-- `.env.example` overrides the local example port to `PORT=8000` and includes
-  placeholders for VA veteran-verification credentials.
+- `.env.example` overrides the local example port to `PORT=8000`, enables
+  `SKIP_AUTH=true`, and includes placeholders for VA veteran-verification
+  credentials.
+- `core.NewConfigFromEnv()` does not currently read any Cognito-specific
+  environment variables on this branch.
+- Local Redis containers and `redis-server` are typically non-TLS, so local
+  development usually needs `REDIS_USE_TLS=false`.
 - VA authentication uses a signed JWT client assertion, so the configured
   private key path must point to a readable RSA PEM file on disk.
 - Populate the VA values before exercising
@@ -83,9 +88,13 @@ Services:
 - Jaeger UI (`:16686`)
 - Prometheus (`:9090`)
 
-The API container is configured with `REDIS_ADDR=redis:6379`, so the compose
-stack now includes the Redis dependency needed for local startup and
-circuit-breaker/status behavior.
+- The compose file sets `REDIS_ADDR=redis:6379`, but `core.DefaultConfig()`
+  still defaults `REDIS_USE_TLS=true`. Add `REDIS_USE_TLS=false` in your local
+  env or compose overrides when using the non-TLS Redis container from this
+  repository.
+- The compose file sets `OTEL_EXPORTER_OTLP_ENDPOINT`, while app config reads
+  `OTEL_OTLP_EXPORTER_ENDPOINT`, so local telemetry export may need an env
+  override until those names are aligned.
 
 ## Build
 

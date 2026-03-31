@@ -64,7 +64,7 @@ without route-layer rewrites.
   - `runServer` starts `app.Listen` in a goroutine and selects on server error or signal context cancellation.
   - graceful shutdown uses `app.ShutdownWithTimeout(5 * time.Second)`.
 - Request lifecycle:
-  - handlers create per-request contexts with timeout (`/health`: 2s, `/api/edu`: 5s, `/api/v0/veteran-disability-ratings`: 5s).
+  - handlers create per-request contexts with timeout (`/health`: 2s, `POST /api/v0/education-enrollments`: 5s, `POST /api/v0/veteran-disability-ratings`: 5s).
 - Circuit-breaker middleware:
   - breaker registry map guarded with `sync.RWMutex`.
   - lazy breaker initialization via double-check lock pattern.
@@ -86,7 +86,7 @@ Ordered middleware in `api.New`:
 2. CORS (`*` origin/headers/methods)
 3. OpenTelemetry Fiber middleware
 4. Structured request logging (trace/span/request IDs)
-5. Conditional Cognito auth middleware
+5. Conditional `SkipAuthMiddleware` when `SKIP_AUTH=true`
 
 ## Dependency Injection Pattern
 
@@ -102,10 +102,17 @@ injects it.
 
 ## Technical Caveats (Current State)
 
-- `/api/edu` handler builds a hardcoded request payload instead of binding user input.
+- `POST /api/v0/education-enrollments` builds a hardcoded request payload
+  instead of binding user input from the caller body.
 - `/health` is registered before the auth middleware, so it remains a runtime-only unauthenticated health route.
-- Current runtime routes are a mix of scaffold and contract-aligned paths: `GET /`, `GET /health`, `GET /api/edu`, and `POST /api/v0/veteran-disability-ratings`.
-- `GET /api/edu` remains runtime scaffolding, while `POST /api/v0/veteran-disability-ratings` matches the checked-in v0 contract in `api-spec/v0/openapi.yaml`.
+- Current runtime routes are `GET /`, `GET /health`, `GET /api-spec/v1/verify`,
+  `POST /api/v0/education-enrollments`, and
+  `POST /api/v0/veteran-disability-ratings`.
+- `POST /api/v0/education-enrollments` uses a contract-aligned path but remains
+  runtime scaffolding, while `POST /api/v0/veteran-disability-ratings` matches
+  the checked-in v0 route and binds caller input.
+- When `SKIP_AUTH=false`, no request-auth middleware is currently installed in
+  `api.New`.
 - Some tests require local Redis and fail when unavailable.
 
 ## Assumptions
