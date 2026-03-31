@@ -18,9 +18,13 @@ run = "pnpm run lint:api-spec"
 description = "Lint hand-authored YAML files with yamllint"
 run = "./scripts/lint-yaml-files"
 
+[tasks.lint-go]
+description = "Lint Go code with golangci-lint"
+run = "golangci-lint run"
+
 [tasks.lint-markdown-files]
 description = "Lint Markdown files with markdownlint-cli2, excluding .github"
-run = 'markdownlint-cli2 "**/*.md" "**/*.MD" "#node_modules" "#.github" --fix'
+run = "pnpm run lint:markdown"
 
 [tasks.check-format-contract-files]
 description = "Check formatting for contract YAML and JSON files with Prettier"
@@ -33,6 +37,10 @@ run = "pnpm run check:schemas"
 [tasks.check-spelling]
 description = "Spell-check repository files with cspell"
 run = "pnpm run check:spelling"
+
+[tasks.scan-secrets]
+description = "Scan the repository for secrets with gitleaks"
+run = "gitleaks git --config .github/.gitleaks.toml ."
 
 [tasks.check-openapi-breaking]
 description = "Check the bundled OpenAPI artifact for breaking changes against a base ref"
@@ -73,4 +81,14 @@ depends = [
   "check-format-contract-files",
   "check-json-schemas",
   "check-openapi-breaking",
+]
+
+[tasks.lint]
+description = "Run routine repository lint and scan tasks"
+depends = [
+  "lint-go",
+  "lint-markdown-files",
+  "check-spelling",
+  "check-contract-files",
+  "scan-secrets",
 ]
