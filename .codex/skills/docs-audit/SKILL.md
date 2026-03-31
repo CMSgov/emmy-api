@@ -17,11 +17,13 @@ Use current checked-out branch files as source of truth.
 ## Required Workflow
 
 1. Audit docs claims against runtime truth.
+
 - Verify runtime contract and wiring first: API behavior, auth, health/status, initialization flow, dependency injection, and error semantics.
 - Evaluate setup and contributor docs next: setup steps, env vars, tooling instructions, placeholders, and broken references.
 - Treat runtime code as canonical when docs conflict.
 
-2. Classify findings and score.
+1. Classify findings and score.
+
 - Assign severity:
   - `P1`: Contract or operationally misleading statements in primary docs.
   - `P2`: Stale setup/runtime guidance, broken references, or placeholders that affect contributors.
@@ -31,12 +33,14 @@ Use current checked-out branch files as source of truth.
   - `PASS` only if no meaningful unresolved `P1` or `P2` findings remain.
   - Otherwise `FAIL`.
 
-3. Capture evidence and reproducibility.
+1. Capture evidence and reproducibility.
+
 - Cite every material finding with repository file paths and line references.
 - Keep caveats inline at the claim location; do not hide primary caveats only in late sections.
 - Include a reproducible command log in Section D.
 
-4. Run hygiene checks.
+1. Run hygiene checks.
+
 - Run a sensitive-file scan for private credential artifacts in tracked files.
 - Run markdown link/reference/path validation for reviewed docs.
 
