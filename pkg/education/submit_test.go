@@ -47,7 +47,25 @@ func TestSubmit_Success(t *testing.T) {
 	require.Equal(t, "application/json", ft.req.Header.Get("Content-Type"))
 	require.Equal(t, "application/json", ft.req.Header.Get("Accept"))
 
-	require.Equal(t, "0", out.Status.Code)
-	require.Equal(t, "Lynette", out.StudentInfoProvided.FirstName)
-	require.Equal(t, "Oyola", out.StudentInfoProvided.LastName)
+	require.Equal(t, "FULL_TIME", out.EnrollmentStatus)
+}
+
+func TestSubmit_NoHit(t *testing.T) {
+	ft := &fakeTransport{
+		resp: &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     http.Header{"Content-Type": []string{"application/json"}},
+			Body: io.NopCloser(bytes.NewBufferString(`{
+				"transactionDetails":{"nscHit":"N"}
+			}`)),
+		},
+	}
+
+	svc := New(&core.NSCConfig{SubmitURL: "https://example.test/submit"}, Options{
+		HTTPClient: ft,
+	})
+
+	out, err := svc.Submit(context.Background(), Request{})
+	require.NoError(t, err)
+	require.Equal(t, "UNKNOWN", out.EnrollmentStatus)
 }

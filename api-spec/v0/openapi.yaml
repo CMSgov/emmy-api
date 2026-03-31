@@ -66,6 +66,8 @@ paths:
               examples:
                 enrolled:
                   $ref: "#/components/examples/EducationEnrollmentResponseExample"
+        "404":
+          description: Education enrollment status is UNKNOWN.
   /api/v0/veteran-disability-ratings:
     post:
       tags:

@@ -43,17 +43,31 @@ func EducationHandler(cfg *core.Config, edu education.EducationService, logger *
 		ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 		defer cancel()
 
+		var reqBody education.Request
+		if len(c.Body()) > 0 {
+			if err := c.BodyParser(&reqBody); err != nil {
+				verificationSpan.RecordError(err)
+				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadRequest))
+				return fiber.NewError(fiber.StatusBadRequest, fmt.Sprintf("invalid request body: %v", err))
+			}
+		}
+
+		if err := c.QueryParser(&reqBody); err != nil {
+			verificationSpan.RecordError(err)
+			verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadRequest))
+			return fiber.NewError(fiber.StatusBadRequest, fmt.Sprintf("invalid query parameters: %v", err))
+		}
+
+		// Ensure AccountID is set from config if not provided in request
+		if reqBody.AccountID == "" {
+			reqBody.AccountID = cfg.NSC.AccountID
+		}
+		reqBody.Terms = "y"
+		reqBody.EndClient = "CMS"
+
 		ctx, decisionSpan := verificationTracer.Start(ctx, "decision.engine")
 
-		reqBody := education.Request{
-			AccountID:        cfg.NSC.AccountID,
-			OrganizationName: "Lynette",
-			DateOfBirth:      "1988-10-24",
-			LastName:         "Oyola",
-			FirstName:        "Lynette",
-			Terms:            "y",
-			EndClient:        "CMS",
-		}
+		logger.ErrorContext(ctx, "hello world", slog.Any("req", reqBody))
 
 		result, err := edu.Submit(ctx, reqBody)
 		if err != nil {
@@ -79,6 +93,11 @@ func EducationHandler(cfg *core.Config, edu education.EducationService, logger *
 
 		decisionSpan.SetStatus(codes.Ok, "decision completed")
 		decisionSpan.End()
+
+		if result.EnrollmentStatus == "UNKNOWN" {
+			verificationSpan.SetStatus(codes.Error, "enrollment status unknown")
+			return fiber.NewError(fiber.StatusNotFound, "enrollment status unknown")
+		}
 
 		verificationSpan.SetStatus(codes.Ok, "verification completed")
 		return c.Status(fiber.StatusOK).JSON(result)

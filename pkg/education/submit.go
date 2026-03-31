@@ -81,10 +81,17 @@ func (s *service) Submit(ctx context.Context, reqBody Request) (Response, error)
 		return Response{}, fmt.Errorf("nsc submit failed: status=%d", resp.StatusCode)
 	}
 
-	var out Response
-	if err := json.Unmarshal(respBytes, &out); err != nil {
+	var nscResp NSCResponse
+	if err := json.Unmarshal(respBytes, &nscResp); err != nil {
 		log.Error("nsc submit decode failed", slog.Any("error", err))
 		return Response{}, fmt.Errorf("decode nsc response: %w", err)
+	}
+
+	var out Response
+	if nscResp.TransactionDetails.NSCHit == "Y" {
+		out.EnrollmentStatus = "FULL_TIME"
+	} else {
+		out.EnrollmentStatus = "UNKNOWN"
 	}
 
 	log.Debug("nsc submit decoded successfully")

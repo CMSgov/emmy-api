@@ -1,6 +1,10 @@
 package education
 
 type Response struct {
+	EnrollmentStatus string `json:"enrollmentStatus"`
+}
+
+type NSCResponse struct {
 	ClientData          ClientDataResponse          `json:"clientData"`
 	IdentityDetails     []IdentityDetailsResponse   `json:"identityDetails"`
 	Status              StatusResponse              `json:"status"`
