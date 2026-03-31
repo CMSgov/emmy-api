@@ -8,16 +8,8 @@ currently wired Go runtime endpoints and their operational caveats.
 
 ## Authentication Behavior
 
-- When `SKIP_AUTH=false`, Cognito middleware is enabled globally.
-- Middleware reads access token from header: `x-amzn-oidc-accesstoken`.
-- Token checks include:
-  - valid signature via JWKS
-  - issuer match
-  - `token_use=access`
-  - `client_id` claim equals configured app client ID
-
-If auth fails, response is `401 Unauthorized`.
-This applies to both `/status` and `/api/edu` when auth is enabled.
+- Authentication is expected to be enforced upstream by the load balancer.
+- When `SKIP_AUTH=true`, local identity values are injected through skip-auth middleware for development and testing.
 
 ## Circuit Breaker Behavior
 
@@ -34,7 +26,12 @@ This applies to both `/status` and `/api/edu` when auth is enabled.
 | `GET`  | `/status`  | Redis health check                     | `200` empty | Auth required unless `SKIP_AUTH=true`; pings Redis with 2s timeout |
 | `GET`  | `/api/edu` | NSC education verification passthrough | `200` JSON  | Uses hardcoded request payload in handler                          |
 
-## Request/Response Models
+| Method | Path                  | Description                         | Success     | Notes |
+| ------ | --------------------- | ----------------------------------- | ----------- | ----- |
+| `GET`  | `/`                   | Liveness string                     | `200` text  | Returns `Backend running!` |
+| `GET`  | `/status`             | Redis health check                  | `200` empty | Uses 2s Redis ping timeout; wrapped by circuit breaker |
+| `GET`  | `/api-spec/v1/verify` | Bundled OpenAPI JSON artifact       | `200` JSON  | Returns `api-spec/dist/openapi.bundled.json` |
+| `GET`  | `/api/edu`            | Education verification passthrough  | `200` JSON  | Uses hardcoded request payload in handler; wrapped by circuit breaker |
 
 ### NSC Submit Request model (`pkg/education/models_request.go`)
 
@@ -73,7 +70,13 @@ type Response struct {
 curl -i http://localhost:8000/status
 ```
 
-If `SKIP_AUTH=false`, include `x-amzn-oidc-accesstoken` header.
+### `/api-spec/v1/verify`
+
+```bash
+curl -i http://localhost:8000/api-spec/v1/verify
+```
+
+Returns the checked-in bundled OpenAPI JSON artifact with `Content-Type: application/json`.
 
 ## Example: `/api/edu` (auth skipped locally)
 

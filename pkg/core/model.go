@@ -10,12 +10,6 @@ type OtelConfig struct {
 	Disable      bool
 }
 
-type CognitoConfig struct {
-	Region      string
-	UserPoolID  string
-	AppClientID string
-}
-
 type RedisConfig struct {
 	Addr               string
 	Password           string
@@ -42,7 +36,6 @@ type VAConfig struct {
 }
 
 type Config struct {
-	Cognito     CognitoConfig
 	Environment string
 	Otel        OtelConfig
 	Port        int
