@@ -59,6 +59,7 @@ jobs:
     name: deploy ${{ matrix.env_name }}
     needs: publish
     runs-on: self-hosted
+    environment: ${{ matrix.env_name }}
     permissions:
       contents: read
       id-token: write
@@ -76,7 +77,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME || format('arn:aws:iam::{0}:role/{1}', vars.AWS_ACCOUNT_ID, vars.AWS_ROLE_NAME) }}
 
       - name: Fetch current task definition
         env:
