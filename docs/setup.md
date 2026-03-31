@@ -59,7 +59,7 @@ air
 `air` is optional. This repo includes `.air.toml` with build command:
 
 ```bash
-go build -o ./tmp/main -ldflags "-X verification-service-api/pkg/core.ServiceVersion=local" .
+go build -o ./tmp/main -ldflags "-X github.com/cmsgov/emmy-api/pkg/core.ServiceVersion=local" .
 ```
 
 ## Docker Workflows

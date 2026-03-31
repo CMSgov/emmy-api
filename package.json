@@ -1,5 +1,5 @@
 {
-  "name": "verification-service-api",
+  "name": "emmy-api",
   "private": true,
   "scripts": {
     "bundle:api-spec": "redocly bundle api-spec/v0/openapi.yaml -o api-spec/v0/dist/openapi.bundled.json",

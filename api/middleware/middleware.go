@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/DSACMS/verification-service-api/pkg/circuitbreaker"
+	"github.com/cmsgov/emmy-api/pkg/circuitbreaker"
 	"github.com/gofiber/fiber/v2"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"

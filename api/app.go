@@ -6,9 +6,9 @@ import (
 	"log/slog"
 	"runtime/debug"
 
-	"github.com/DSACMS/verification-service-api/api/middleware"
-	"github.com/DSACMS/verification-service-api/api/routes"
-	"github.com/DSACMS/verification-service-api/pkg/core"
+	"github.com/cmsgov/emmy-api/api/middleware"
+	"github.com/cmsgov/emmy-api/api/routes"
+	"github.com/cmsgov/emmy-api/pkg/core"
 
 	"go.opentelemetry.io/otel/codes"
 

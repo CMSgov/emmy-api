@@ -7,7 +7,7 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main -ldflags \"-X verification-service-api/pkg/core.ServiceVersion=local\" ."
+  cmd = "go build -o ./tmp/main -ldflags \"-X github.com/cmsgov/emmy-api/pkg/core.ServiceVersion=local\" ."
   delay = 1000
   entrypoint = ["./tmp/main"]
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
