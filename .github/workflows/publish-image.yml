@@ -55,5 +55,6 @@ jobs:
 
       - name: Deploy to ECS
         env:
+          AWS_REGION: us-east-1
           IMAGE_TAG: ${{ needs.publish.outputs.image_tag }}
         run: ./scripts/deploy-ecs "${{ matrix.env_name }}"
