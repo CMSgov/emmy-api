@@ -9,3 +9,5 @@ dump.rdb
 node_modules
 
 examples/java/target/
+examples/csharp/bin/
+examples/csharp/obj/

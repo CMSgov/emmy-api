@@ -40,7 +40,7 @@ To **authenticate** with the Emmy API, you will use your `<client_id>` and `<cli
 
 Obtaining a token requires that you use a **Basic Authentication** HTTP header. This means that you will join your `<client_id>` and `<client_secreet>` with a colon `:` and then Base64 encode the entire string. Follow the [Authentication Base64 Encoding](02-authentication.md#credential-format) instructions to build your credential string. We'll refer to the credential string that you generate as `<base64_credentials>`.
 
-For simplicity, we'll use `curl` to showcase getting an access token. From a terminal or command prompt, run the `curl` command below ([how do I install `curl`?](../examples/v1/curl.md#installing-curl)) by substituting the appropriate variables (shown ```<IN_BRACKETS>``` below) with their actual values:
+For simplicity, we'll use `curl` to showcase getting an access token. From a terminal or command prompt, run the `curl` command below ([how do I install `curl`?](../examples/v0/curl.md#installing-curl)) by substituting the appropriate variables (shown ```<IN_BRACKETS>``` below) with their actual values:
 
 ```bash
 curl --location '<AUTH_BASE>' \
