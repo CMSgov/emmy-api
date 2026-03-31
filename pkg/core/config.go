@@ -12,9 +12,6 @@ const (
 	defaultOtelDisable          bool   = true
 	defaultOTLPExporterEndpoint string = "localhost:4317"
 	defaultOTLPInsecure         bool   = false
-	defaultCognitoRegion        string = "us-east-1"
-	defaultCognitoUserPoolID    string = "UNSET"
-	defaultCognitoAppClientID   string = "UNSET"
 	defaultRedisAddr            string = "localhost:6379"
 	defaultRedisPassword        string = ""
 	defaultRedisDB              int    = 0
@@ -47,12 +44,6 @@ func DefaultConfig() Config {
 				Endpoint: defaultOTLPExporterEndpoint,
 				Insecure: defaultOTLPInsecure,
 			},
-		},
-
-		Cognito: CognitoConfig{
-			Region:      defaultCognitoRegion,
-			UserPoolID:  defaultCognitoUserPoolID,
-			AppClientID: defaultCognitoAppClientID,
 		},
 
 		Redis: RedisConfig{
@@ -97,8 +88,6 @@ func NewConfig(options ...func(*Config)) Config {
 //
 // - OTEL_DISABLE, OTEL_OTLP_EXPORTER_ENDPOINT, OTEL_OTLP_EXPORTER_INSECURE
 //
-// - COGNITO_REGION, COGNITO_USER_POOL_ID, COGNITO_APP_CLIENT_ID
-//
 // - REDIS_ADDR, REDIS_PASSWORD, REDIS_DB
 //
 // - NSC_SUBMIT_URL, NSC_TOKEN_URL, NSC_CLIENT_SECRET, NSC_CLIENT_ID, NSC_ACCOUNT_ID
@@ -117,10 +106,6 @@ func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
 		setFromEnv(&cfg.Otel.Disable, "OTEL_DISABLE"),
 		setFromEnv(&cfg.Otel.OtlpExporter.Endpoint, "OTEL_OTLP_EXPORTER_ENDPOINT"),
 		setFromEnv(&cfg.Otel.OtlpExporter.Insecure, "OTEL_OTLP_EXPORTER_INSECURE"),
-
-		setFromEnv(&cfg.Cognito.Region, "COGNITO_REGION"),
-		setFromEnv(&cfg.Cognito.UserPoolID, "COGNITO_USER_POOL_ID"),
-		setFromEnv(&cfg.Cognito.AppClientID, "COGNITO_APP_CLIENT_ID"),
 
 		setFromEnv(&cfg.Redis.Addr, "REDIS_ADDR"),
 		setFromEnv(&cfg.Redis.Password, "REDIS_PASSWORD"),

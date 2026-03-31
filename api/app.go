@@ -2,7 +2,6 @@ package api
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"runtime/debug"
 
@@ -107,16 +106,6 @@ func New(cfg *Config) (*fiber.App, error) {
 
 	if cfg.Core.SkipAuth {
 		app.Use(middleware.SkipAuthMiddleware())
-	} else {
-		verifier, err := middleware.NewCognitoVerifier(middleware.CognitoConfig{
-			Region:     cfg.Core.Cognito.Region,
-			UserPoolID: cfg.Core.Cognito.UserPoolID,
-			ClientID:   cfg.Core.Cognito.AppClientID,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("failed to initialize cognito middleware: %w", err)
-		}
-		app.Use(verifier.FiberMiddleware())
 	}
 
 	return app, nil

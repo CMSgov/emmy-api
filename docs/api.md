@@ -40,7 +40,12 @@ Redis-backed circuit breaker middleware.
 | `GET`  | `/api/edu`                     | NSC education verification scaffold    | `200` JSON  | Uses a hardcoded request payload in handler; not the v0 contract   |
 | `POST` | `/v0/veteran-disability-ratings` | Veteran disability status from v0 spec | `200` JSON  | Accepts caller-provided identity payload and matches the v0 route  |
 
-## Request/Response Models
+| Method | Path                  | Description                         | Success     | Notes |
+| ------ | --------------------- | ----------------------------------- | ----------- | ----- |
+| `GET`  | `/`                   | Liveness string                     | `200` text  | Returns `Backend running!` |
+| `GET`  | `/status`             | Redis health check                  | `200` empty | Uses 2s Redis ping timeout; wrapped by circuit breaker |
+| `GET`  | `/api-spec/v1/verify` | Bundled OpenAPI JSON artifact       | `200` JSON  | Returns `api-spec/dist/openapi.bundled.json` |
+| `GET`  | `/api/edu`            | Education verification passthrough  | `200` JSON  | Uses hardcoded request payload in handler; wrapped by circuit breaker |
 
 ### NSC Submit Request model (`pkg/education/models_request.go`)
 
@@ -78,6 +83,14 @@ type Response struct {
 ```bash
 curl -i http://localhost:8000/health
 ```
+
+### `/api-spec/v1/verify`
+
+```bash
+curl -i http://localhost:8000/api-spec/v1/verify
+```
+
+Returns the checked-in bundled OpenAPI JSON artifact with `Content-Type: application/json`.
 
 ## Example: `/api/edu` (auth skipped locally)
 
