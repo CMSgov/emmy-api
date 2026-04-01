@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "**/*.go"
+      - ".dockerignore"
+      - "Dockerfile"
+      - "go.mod"
+      - "go.sum"
+      - "public.jwk"
   workflow_dispatch:
 
 concurrency:
