@@ -2,8 +2,12 @@ package veteran
 
 import (
 	"context"
+	"crypto"
+	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
@@ -16,8 +20,6 @@ import (
 
 	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/google/uuid"
-	"github.com/lestrrat-go/jwx/v2/jwa"
-	"github.com/lestrrat-go/jwx/v2/jwt"
 	"golang.org/x/oauth2"
 )
 
@@ -148,24 +150,38 @@ func signedClientAssertion(cfg *core.VAConfig, now time.Time) (string, error) {
 		return "", err
 	}
 
-	token, err := jwt.NewBuilder().
-		Audience([]string{cfg.TokenAudience}).
-		Issuer(cfg.ClientID).
-		Subject(cfg.ClientID).
-		JwtID(strings.ToLower(uuid.NewString())).
-		IssuedAt(now).
-		Expiration(now.Add(clientAssertionLifetime)).
-		Build()
+	headerJSON, err := json.Marshal(map[string]string{
+		"alg": "RS256",
+		"typ": "JWT",
+	})
 	if err != nil {
-		return "", fmt.Errorf("build jwt claims: %w", err)
+		return "", fmt.Errorf("marshal jwt header: %w", err)
 	}
 
-	signed, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, key))
+	payloadJSON, err := json.Marshal(map[string]any{
+		"iss": cfg.ClientID,
+		"sub": cfg.ClientID,
+		"aud": cfg.TokenAudience,
+		"jti": strings.ToLower(uuid.NewString()),
+		"iat": now.Unix(),
+		"exp": now.Add(clientAssertionLifetime).Unix(),
+	})
+	if err != nil {
+		return "", fmt.Errorf("marshal jwt claims: %w", err)
+	}
+
+	encodedHeader := base64.RawURLEncoding.EncodeToString(headerJSON)
+	encodedPayload := base64.RawURLEncoding.EncodeToString(payloadJSON)
+	signingInput := encodedHeader + "." + encodedPayload
+
+	hash := sha256.Sum256([]byte(signingInput))
+	signature, err := rsa.SignPKCS1v15(rand.Reader, key, crypto.SHA256, hash[:])
 	if err != nil {
 		return "", fmt.Errorf("sign jwt: %w", err)
 	}
 
-	return string(signed), nil
+	encodedSignature := base64.RawURLEncoding.EncodeToString(signature)
+	return signingInput + "." + encodedSignature, nil
 }
 
 func loadRSAPrivateKey(path string) (*rsa.PrivateKey, error) {
