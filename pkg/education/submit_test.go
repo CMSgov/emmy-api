@@ -20,7 +20,7 @@ func TestLookupEnrollmentStatus_SuccessFallsBackToEnrolledOnPositiveHit(t *testi
 			Body: io.NopCloser(bytes.NewBufferString(`{
 				"status":{"code":"0","message":"Successful","severity":"Info"},
 				"transactionDetails":{"nscHit":"Y","transactionStatus":"CNF"},
-				"enrollmentDetails":{"currentEnrollmentStatus":"CC"}
+				"enrollmentDetails":[{"currentEnrollmentStatus":"CC"}]
 			}`)),
 		},
 	}
@@ -83,7 +83,7 @@ func TestLookupEnrollmentStatus_MapsSpecificEnrollmentStatus(t *testing.T) {
 			Header:     http.Header{"Content-Type": []string{"application/json"}},
 			Body: io.NopCloser(bytes.NewBufferString(`{
 				"transactionDetails":{"nscHit":"Y"},
-				"enrollmentDetails":{"currentEnrollmentStatus":"CC","enrollmentData":[{"enrollmentStatus":"H"}]}
+				"enrollmentDetails":[{"currentEnrollmentStatus":"CC","enrollmentData":[{"enrollmentStatus":"H"}]}]
 			}`)),
 		},
 	}
@@ -108,7 +108,7 @@ func TestLookupEnrollmentStatus_MapsLessThanHalfTimeToLessThanPartTime(t *testin
 			Header:     http.Header{"Content-Type": []string{"application/json"}},
 			Body: io.NopCloser(bytes.NewBufferString(`{
 				"transactionDetails":{"nscHit":"Y"},
-				"enrollmentDetails":{"currentEnrollmentStatus":"CC","enrollmentData":[{"enrollmentStatus":"L"}]}
+				"enrollmentDetails":[{"currentEnrollmentStatus":"CC","enrollmentData":[{"enrollmentStatus":"L"}]}]
 			}`)),
 		},
 	}
@@ -134,7 +134,7 @@ func TestLookupEnrollmentStatus_NoHitReturnsNotFound(t *testing.T) {
 			Body: io.NopCloser(bytes.NewBufferString(`{
 				"status":{"code":"0","message":"Successful","severity":"Info"},
 				"transactionDetails":{"nscHit":"N","transactionStatus":"CNF"},
-				"enrollmentDetails":{"currentEnrollmentStatus":"CN"}
+				"enrollmentDetails":[{"currentEnrollmentStatus":"CN"}]
 			}`)),
 		},
 	}
@@ -180,7 +180,7 @@ func TestLookupEnrollmentStatus_CurrentlyNotEnrolledReturnsNotFound(t *testing.T
 			Header:     http.Header{"Content-Type": []string{"application/json"}},
 			Body: io.NopCloser(bytes.NewBufferString(`{
 				"transactionDetails":{"nscHit":"Y","transactionStatus":"CNF"},
-				"enrollmentDetails":{"currentEnrollmentStatus":"CN"}
+				"enrollmentDetails":[{"currentEnrollmentStatus":"CN"}]
 			}`)),
 		},
 	}
@@ -195,4 +195,29 @@ func TestLookupEnrollmentStatus_CurrentlyNotEnrolledReturnsNotFound(t *testing.T
 		DateOfBirth: "1988-10-24",
 	})
 	require.ErrorIs(t, err, ErrNotFound)
+}
+
+func TestLookupEnrollmentStatus_NullEnrollmentDetails(t *testing.T) {
+	ft := &fakeTransport{
+		resp: &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     http.Header{"Content-Type": []string{"application/json"}},
+			Body: io.NopCloser(bytes.NewBufferString(`{
+				"transactionDetails":{"nscHit":"Y","transactionStatus":"CNF"},
+				"enrollmentDetails":null
+			}`)),
+		},
+	}
+
+	svc := New(&core.NSCConfig{SubmitURL: "https://example.test/submit"}, Options{
+		HTTPClient: ft,
+	})
+
+	out, err := svc.LookupEnrollmentStatus(context.Background(), Request{
+		FirstName:   "Lynette",
+		LastName:    "Oyola",
+		DateOfBirth: "1988-10-24",
+	})
+	require.NoError(t, err)
+	require.Equal(t, EnrollmentStatusEnrolled, out.EnrollmentStatus)
 }

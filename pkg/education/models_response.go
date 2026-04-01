@@ -19,7 +19,7 @@ type nscResponse struct {
 	Status              nscStatus              `json:"status"`
 	StudentInfoProvided nscStudentInfoProvided `json:"studentInfoProvided"`
 	TransactionDetails  nscTransactionDetails  `json:"transactionDetails"`
-	EnrollmentDetails   *nscEnrollmentDetails  `json:"enrollmentDetails"`
+	EnrollmentDetails   []nscEnrollmentDetails `json:"enrollmentDetails"`
 }
 
 type nscClientData struct {
