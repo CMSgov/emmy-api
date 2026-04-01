@@ -2,6 +2,10 @@
 
 An API that provides a unified, standard interface to the data sources needed to verify community engagement for the purpose of evaluating Medicaid eligibility.
 
+### Using the API
+
+[Click here for the steps](docs/guides/01-getting-started.md) to begin using the data sources available through the API and see the specification of what kind of data is available.
+
 ## About the Project
 
 This project evolved out of the [IVaaS](https://github.com/DSACMS/iv-cbv-payroll "IVaaS repository") tool for consent based verification. As the need for more complex forms of validation developed, it became clear that providing a way for agencies to integrate directly with an API was becoming increasingly useful, particularly for ex parte renewals. The ultimate goals of this and related projects is to remove as much friction as possible between the applicant and receiving their benefits by reducing the burden placed on them to manually provide evidence of eligibility.
