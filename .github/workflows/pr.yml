@@ -6,8 +6,11 @@ permissions:
 on:
   workflow_dispatch:
   pull_request:
-    paths-ignore:
-      - "**/*.md"
+    paths:
+      - "**/*.go"
+      - ".golangci.yml"
+      - "go.mod"
+      - "go.sum"
 
 jobs:
   unit:
@@ -52,12 +55,3 @@ jobs:
           version: v2.5.0
           install-mode: goinstall
           only-new-issues: true
-
-  build:
-    name: build
-    runs-on: self-hosted
-    steps:
-      - name: Fetch Repository
-        uses: actions/checkout@v6
-      - name: Docker Build
-        run: docker build .

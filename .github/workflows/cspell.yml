@@ -8,6 +8,24 @@ on:
       - synchronize
       - reopened
       - ready_for_review
+    paths:
+      - "**/*.css"
+      - "**/*.go"
+      - "**/*.html"
+      - "**/*.js"
+      - "**/*.json"
+      - "**/*.md"
+      - "**/*.mjs"
+      - "**/*.py"
+      - "**/*.sh"
+      - "**/*.txt"
+      - "**/*.yaml"
+      - "**/*.yml"
+      - ".cspell.json"
+      - "Dockerfile"
+      - "Makefile"
+      - "README.md"
+      - "SECURITY.md"
 
 permissions:
   contents: read
@@ -54,7 +72,7 @@ jobs:
       - name: Run cspell
         uses: streetsidesoftware/cspell-action@v8
         with:
-          incremental_files_only: false
+          incremental_files_only: true
           check_dot_files: explicit
           report: typos
           verbose: true

@@ -1,0 +1,26 @@
+name: Docker Build
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "**/*.go"
+      - ".dockerignore"
+      - "Dockerfile"
+      - "go.mod"
+      - "go.sum"
+      - "public.jwk"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build
+    runs-on: self-hosted
+    steps:
+      - name: Fetch Repository
+        uses: actions/checkout@v6
+
+      - name: Docker Build
+        run: docker build .
