@@ -44,3 +44,9 @@ type Config struct {
 	NSC         NSCConfig
 	VA          VAConfig
 }
+
+type ctxKey int
+
+const (
+	RequestContextKey ctxKey = iota
+)
