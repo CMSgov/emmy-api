@@ -11,11 +11,11 @@ The Emmy API is a CMS-provided secure service that enables you to connect to and
 
 You must be able to:
 
-| Requirement                 | Details                                                                                                                       |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Obtain Credentials          | You must have worked with the CMS Emmy team to get onboarded and receive your API client ID and secret.                       |
-| Access Emmy API Endpoints   | The onboarding process will have provided you the endpoint URL. You must have outbound network/firewall access to this host.  |
-| Make HTTP POST (REST) Calls | Your system (or testing tool) must be capable of making HTTP POST calls where you can supply specific headers in the request. |
+| Requirement                 | Details                                                                                                                                                                         |
+| --------------------------- |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Obtain Credentials          | Reach out to [emmy@cms.hhs.gov](emmy@cms.hhs.gov), requesting a sandbox credential and working with the CMS emmy team to get onboarded and receive your client ID and secret via encrypted channel. |
+| Access Emmy API Endpoints   | The onboarding process will have provided you the endpoint URL. You must have outbound network/firewall access to this host.                                                    |
+| Make HTTP POST (REST) Calls | Your system (or testing tool) must be capable of making HTTP POST calls where you can supply specific headers in the request.                                                   |
 
 When you onboard with the CMS Emmy team, you will obtain credentials. You will use the values you received in this guide:
 

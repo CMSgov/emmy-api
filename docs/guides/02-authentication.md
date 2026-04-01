@@ -61,12 +61,3 @@ curl --location --request POST '<API_BASE>/api/v0/education-enrollments' \
     "dateOfBirth": "1988-10-24"
 }'
 ```
-
-## VA Upstream Token Flow
-
-The Emmy API examples above describe Emmy's own bearer-token usage. If you are
-working with VA's Veteran Service History and Eligibility sandbox credentials,
-VA uses a different client-credentials pattern: you sign a JWT with your RSA
-private PEM and send it as `client_assertion`.
-
-See [Getting a VA Access Token with a Client ID and PEM Key](04-va-veteran-verification-token.md).
