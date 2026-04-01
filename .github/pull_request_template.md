@@ -21,6 +21,7 @@
 - [ ] **Security & Privacy:** I have reviewed the changes for potential security or privacy risks (e.g., PII handling).
 - [ ] **Contract Compliance:** If the public API contract changed, I have verified that it is reflected in `api-spec/` and follows the organization's standards.
 - [ ] **Code Quality:** The code is clean, well-tested, and follows the established patterns in the codebase.
+- [ ] **Code Quality:** The code has unit and integration tests that cover relevant code changes.
 
 ## Evidence of Testing
 <!-- Provide evidence of your bench testing here (e.g., `go test` output, CURL results, etc.) -->
