@@ -54,7 +54,7 @@ depends = ["bundle-api-spec", "validate-api-spec", "lint-api-spec"]
 description = "Build the Go server"
 run = "go build -o bin/apiserver ."
 
-[tasks.run]
+[tasks.serve]
 description = "Run the Go server locally"
 depends = ["build"]
 run = "bin/apiserver"

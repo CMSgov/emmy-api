@@ -42,7 +42,7 @@ func (s *service) LookupEnrollmentStatus(ctx context.Context, reqBody Request) (
 		return Response{}, fmt.Errorf("create submit request: %w", err)
 	}
 
-	req.Header.Set("Content-Type", "text/plain")
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
 	log.InfoContext(ctx, "nsc submit request prepared",
@@ -189,22 +189,28 @@ func isNSCNoHit(resp nscResponse) bool {
 }
 
 func isNSCNotCurrentlyEnrolled(resp nscResponse) bool {
-	if resp.EnrollmentDetails == nil {
+	if len(resp.EnrollmentDetails) == 0 {
 		return false
 	}
 
-	return strings.EqualFold(strings.TrimSpace(resp.EnrollmentDetails.CurrentEnrollmentStatus), "CN")
+	for _, detail := range resp.EnrollmentDetails {
+		if strings.EqualFold(strings.TrimSpace(detail.CurrentEnrollmentStatus), "CN") {
+			return true
+		}
+	}
+
+	return false
 }
 
 func resolveEnrollmentStatus(resp nscResponse) (EnrollmentStatus, bool) {
-	if resp.EnrollmentDetails != nil {
-		for _, item := range resp.EnrollmentDetails.EnrollmentData {
+	for _, detail := range resp.EnrollmentDetails {
+		for _, item := range detail.EnrollmentData {
 			if status, ok := normalizeEnrollmentStatus(item.EnrollmentStatus); ok {
 				return status, true
 			}
 		}
 
-		if status, ok := normalizeCurrentEnrollmentStatus(resp.EnrollmentDetails.CurrentEnrollmentStatus); ok {
+		if status, ok := normalizeCurrentEnrollmentStatus(detail.CurrentEnrollmentStatus); ok {
 			return status, true
 		}
 	}
@@ -306,17 +312,18 @@ func deadlineRemainingMillis(ctx context.Context) int64 {
 }
 
 func currentEnrollmentStatus(resp nscResponse) string {
-	if resp.EnrollmentDetails == nil {
+	if len(resp.EnrollmentDetails) == 0 {
 		return ""
 	}
 
-	return strings.TrimSpace(resp.EnrollmentDetails.CurrentEnrollmentStatus)
+	return strings.TrimSpace(resp.EnrollmentDetails[0].CurrentEnrollmentStatus)
 }
 
 func enrollmentRecordCount(resp nscResponse) int {
-	if resp.EnrollmentDetails == nil {
-		return 0
+	count := 0
+	for _, detail := range resp.EnrollmentDetails {
+		count += len(detail.EnrollmentData)
 	}
 
-	return len(resp.EnrollmentDetails.EnrollmentData)
+	return count
 }
