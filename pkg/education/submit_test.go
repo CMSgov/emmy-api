@@ -51,7 +51,7 @@ func TestLookupEnrollmentStatus_SuccessFallsBackToEnrolledOnPositiveHit(t *testi
 	require.True(t, ft.called)
 	require.NotNil(t, ft.req)
 	require.Equal(t, http.MethodPost, ft.req.Method)
-	require.Equal(t, "text/plain", ft.req.Header.Get("Content-Type"))
+	require.Equal(t, "application/json", ft.req.Header.Get("Content-Type"))
 	require.Equal(t, "application/json", ft.req.Header.Get("Accept"))
 
 	body, err := io.ReadAll(ft.req.Body)

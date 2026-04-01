@@ -42,7 +42,7 @@ func (s *service) LookupEnrollmentStatus(ctx context.Context, reqBody Request) (
 		return Response{}, fmt.Errorf("create submit request: %w", err)
 	}
 
-	req.Header.Set("Content-Type", "text/plain")
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
 	log.InfoContext(ctx, "nsc submit request prepared",
