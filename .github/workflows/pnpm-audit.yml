@@ -33,8 +33,6 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "lts/*"
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
 
       - name: Run pnpm audit
         run: pnpm audit --audit-level low
