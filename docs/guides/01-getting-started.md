@@ -40,7 +40,7 @@ To begin using the Emmy API, we will start with manual steps which ensure your c
 
 ### Step 1: Get an Authentication Token (JWT) with your Client Credentials
 
-To **authenticate** with the Emmy API, you will use your `<client_id>` and `<client_secret>` to obtain a token for all Emmy API operations. Once you obtain a token, you will use it to make all subsequent Emmy API requests. Tokens are short-lived and expire after a certain time. You can use this token as many times as you'd like until expiration, or you can generate a new token each time. 
+To **authenticate** with the Emmy API, you will use your `<client_id>` and `<client_secret>` to obtain a token for all Emmy API operations. Once you obtain a token, you will use it to make all subsequent Emmy API requests. Tokens are short-lived and expire after a certain time. You can use this token as many times as you'd like until expiration, or you can generate a new token each time.
 
 Obtaining a token requires that you use a **Basic Authentication** HTTP header. This means that you will join your `<client_id>` and `<client_secreet>` with a colon `:` and then Base64 encode the entire string. Follow the [Authentication Base64 Encoding](02-authentication.md#credential-format) instructions to build your credential string. We'll refer to the credential string that you generate as `<base64_credentials>`.
 
