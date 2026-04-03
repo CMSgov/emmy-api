@@ -6,26 +6,26 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
-	"github.com/DSACMS/verification-service-api/pkg/core"
-	"github.com/DSACMS/verification-service-api/pkg/education"
-	"github.com/DSACMS/verification-service-api/pkg/resilience"
+	"github.com/cmsgov/emmy-api/pkg/education"
+	"github.com/cmsgov/emmy-api/pkg/resilience"
 	"github.com/gofiber/fiber/v2"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 )
 
-var verificationTracer = otel.Tracer("verification-service-api/verification")
+var verificationTracer = otel.Tracer("emmy-api/verification")
 
-func EducationHandler(cfg *core.Config, edu education.EducationService, logger *slog.Logger) fiber.Handler {
-	const contextTimeout time.Duration = 5 * time.Second
+func EducationHandler(edu education.Service, logger *slog.Logger) fiber.Handler {
+	const contextTimeout time.Duration = 30 * time.Second
 
 	if logger == nil {
 		logger = slog.Default()
 	}
-	logger = logger.With(slog.String("handler", "TestEducationHandler"))
+	logger = logger.With(slog.String("handler", "EducationHandler"))
 
 	return func(c *fiber.Ctx) error {
 		ctx, verificationSpan := verificationTracer.Start(
@@ -40,22 +40,25 @@ func EducationHandler(cfg *core.Config, edu education.EducationService, logger *
 			attribute.String("http.method", c.Method()),
 		)
 
+		var reqBody education.Request
+		if err := c.BodyParser(&reqBody); err != nil {
+			verificationSpan.RecordError(err)
+			verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadRequest))
+			return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+		}
+
+		if missing := missingEducationIdentityField(reqBody); missing != "" {
+			err := fmt.Errorf("missing required field %s", missing)
+			verificationSpan.RecordError(err)
+			verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadRequest))
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		}
+
 		ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 		defer cancel()
 
 		ctx, decisionSpan := verificationTracer.Start(ctx, "decision.engine")
-
-		reqBody := education.Request{
-			AccountID:        cfg.NSC.AccountID,
-			OrganizationName: "Lynette",
-			DateOfBirth:      "1988-10-24",
-			LastName:         "Oyola",
-			FirstName:        "Lynette",
-			Terms:            "y",
-			EndClient:        "CMS",
-		}
-
-		result, err := edu.Submit(ctx, reqBody)
+		result, err := edu.LookupEnrollmentStatus(ctx, reqBody)
 		if err != nil {
 			decisionSpan.RecordError(err)
 			decisionSpan.SetStatus(codes.Error, "verification failed")
@@ -65,16 +68,17 @@ func EducationHandler(cfg *core.Config, edu education.EducationService, logger *
 
 			verificationSpan.RecordError(err)
 
-			status := fiber.StatusBadGateway
-			if errors.Is(err, resilience.ErrCircuitOpen) {
-				status = fiber.StatusServiceUnavailable
+			switch {
+			case errors.Is(err, education.ErrNotFound):
+				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusNotFound))
+				return c.SendStatus(fiber.StatusNotFound)
+			case errors.Is(err, resilience.ErrCircuitOpen):
+				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusServiceUnavailable))
+				return fiber.NewError(fiber.StatusServiceUnavailable, "education enrollment lookup unavailable")
+			default:
+				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadGateway))
+				return fiber.NewError(fiber.StatusBadGateway, "education enrollment lookup failed")
 			}
-			verificationSpan.SetStatus(codes.Error, http.StatusText(status))
-
-			return fiber.NewError(
-				status,
-				fmt.Sprintf("education verification failed: %v", err),
-			)
 		}
 
 		decisionSpan.SetStatus(codes.Ok, "decision completed")
@@ -82,5 +86,18 @@ func EducationHandler(cfg *core.Config, edu education.EducationService, logger *
 
 		verificationSpan.SetStatus(codes.Ok, "verification completed")
 		return c.Status(fiber.StatusOK).JSON(result)
+	}
+}
+
+func missingEducationIdentityField(req education.Request) string {
+	switch {
+	case strings.TrimSpace(req.FirstName) == "":
+		return "firstName"
+	case strings.TrimSpace(req.LastName) == "":
+		return "lastName"
+	case strings.TrimSpace(req.DateOfBirth) == "":
+		return "dateOfBirth"
+	default:
+		return ""
 	}
 }

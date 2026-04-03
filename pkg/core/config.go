@@ -7,23 +7,29 @@ import (
 
 const (
 	defaultConfigEnvironment    string = "development"
-	defaultConfigPort           int    = 8000
+	defaultConfigPort           int    = 3000
 	defaultSkipAuth             bool   = false
-	defaultOtelDisable          bool   = false
+	defaultOtelDisable          bool   = true
 	defaultOTLPExporterEndpoint string = "localhost:4317"
 	defaultOTLPInsecure         bool   = false
-	defaultCognitoRegion        string = "us-east-1"
-	defaultCognitoUserPoolID    string = "UNSET"
-	defaultCognitoAppClientID   string = "UNSET"
 	defaultRedisAddr            string = "localhost:6379"
 	defaultRedisPassword        string = ""
 	defaultRedisDB              int    = 0
+	defaultRedisUseTLS          bool   = true
+	defaultRedisInsecureSkip    bool   = false
+	defaultVATimeoutSeconds     int    = 5
 
 	keyNSCSubmitURL string = "NSC_SUBMIT_URL"
 	keyTokenURL     string = "NSC_TOKEN_URL"
 	keyClientSecret string = "NSC_CLIENT_SECRET"
 	keyClientID     string = "NSC_CLIENT_ID"
 	keyAccountID    string = "NSC_ACCOUNT_ID"
+	keyVABaseURL    string = "VA_BASE_URL"
+	keyVATokenURL   string = "VA_TOKEN_URL"
+	keyVAClientID   string = "VA_CLIENT_ID"
+	keyVAAudience   string = "VA_AUD"
+	keyVAKeyPath    string = "VA_PRIVATE_KEY_PATH"
+	keyVATimeout    string = "VA_TIMEOUT_SECONDS"
 )
 
 func DefaultConfig() Config {
@@ -40,16 +46,12 @@ func DefaultConfig() Config {
 			},
 		},
 
-		Cognito: CognitoConfig{
-			Region:      defaultCognitoRegion,
-			UserPoolID:  defaultCognitoUserPoolID,
-			AppClientID: defaultCognitoAppClientID,
-		},
-
 		Redis: RedisConfig{
-			Addr:     defaultRedisAddr,
-			Password: defaultRedisPassword,
-			DB:       defaultRedisDB,
+			Addr:               defaultRedisAddr,
+			Password:           defaultRedisPassword,
+			DB:                 defaultRedisDB,
+			UseTLS:             defaultRedisUseTLS,
+			InsecureSkipVerify: defaultRedisInsecureSkip,
 		},
 
 		NSC: NSCConfig{
@@ -58,6 +60,15 @@ func DefaultConfig() Config {
 			ClientSecret: getEnv(keyClientSecret, ""),
 			ClientID:     getEnv(keyClientID, ""),
 			AccountID:    getEnv(keyAccountID, ""),
+		},
+
+		VA: VAConfig{
+			BaseURL:        getEnv(keyVABaseURL, ""),
+			TokenURL:       getEnv(keyVATokenURL, ""),
+			ClientID:       getEnv(keyVAClientID, ""),
+			TokenAudience:  getEnv(keyVAAudience, ""),
+			PrivateKeyPath: getEnv(keyVAKeyPath, ""),
+			TimeoutSeconds: defaultVATimeoutSeconds,
 		},
 	}
 }
@@ -77,11 +88,11 @@ func NewConfig(options ...func(*Config)) Config {
 //
 // - OTEL_DISABLE, OTEL_OTLP_EXPORTER_ENDPOINT, OTEL_OTLP_EXPORTER_INSECURE
 //
-// - COGNITO_REGION, COGNITO_USER_POOL_ID, COGNITO_APP_CLIENT_ID
-//
 // - REDIS_ADDR, REDIS_PASSWORD, REDIS_DB
 //
 // - NSC_SUBMIT_URL, NSC_TOKEN_URL, NSC_CLIENT_SECRET, NSC_CLIENT_ID, NSC_ACCOUNT_ID
+//
+// - VA_BASE_URL, VA_TOKEN_URL, VA_CLIENT_ID, VA_AUD, VA_PRIVATE_KEY_PATH, VA_TIMEOUT_SECONDS
 //
 // Provided options are applied after env loading and override both defaults and env file values.
 func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
@@ -96,19 +107,24 @@ func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
 		setFromEnv(&cfg.Otel.OtlpExporter.Endpoint, "OTEL_OTLP_EXPORTER_ENDPOINT"),
 		setFromEnv(&cfg.Otel.OtlpExporter.Insecure, "OTEL_OTLP_EXPORTER_INSECURE"),
 
-		setFromEnv(&cfg.Cognito.Region, "COGNITO_REGION"),
-		setFromEnv(&cfg.Cognito.UserPoolID, "COGNITO_USER_POOL_ID"),
-		setFromEnv(&cfg.Cognito.AppClientID, "COGNITO_APP_CLIENT_ID"),
-
 		setFromEnv(&cfg.Redis.Addr, "REDIS_ADDR"),
 		setFromEnv(&cfg.Redis.Password, "REDIS_PASSWORD"),
 		setFromEnv(&cfg.Redis.DB, "REDIS_DB"),
+		setFromEnv(&cfg.Redis.UseTLS, "REDIS_USE_TLS"),
+		setFromEnv(&cfg.Redis.InsecureSkipVerify, "REDIS_INSECURE_SKIP_VERIFY"),
 
 		setFromEnv(&cfg.NSC.SubmitURL, "NSC_SUBMIT_URL"),
 		setFromEnv(&cfg.NSC.TokenURL, "NSC_TOKEN_URL"),
 		setFromEnv(&cfg.NSC.ClientSecret, "NSC_CLIENT_SECRET"),
 		setFromEnv(&cfg.NSC.ClientID, "NSC_CLIENT_ID"),
 		setFromEnv(&cfg.NSC.AccountID, "NSC_ACCOUNT_ID"),
+
+		setFromEnv(&cfg.VA.BaseURL, "VA_BASE_URL"),
+		setFromEnv(&cfg.VA.TokenURL, "VA_TOKEN_URL"),
+		setFromEnv(&cfg.VA.ClientID, "VA_CLIENT_ID"),
+		setFromEnv(&cfg.VA.TokenAudience, "VA_AUD"),
+		setFromEnv(&cfg.VA.PrivateKeyPath, "VA_PRIVATE_KEY_PATH"),
+		setFromEnv(&cfg.VA.TimeoutSeconds, "VA_TIMEOUT_SECONDS"),
 	)
 
 	for _, opt := range options {

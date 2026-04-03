@@ -7,11 +7,54 @@ jobs:
   scan-for-secrets:
     name: Run gitleaks
     runs-on: self-hosted
+    env:
+      GITLEAKS_VERSION: 8.30.0
+      RUNNER_TEMP: ${{ github.workspace }}/.runner-temp/gitleaks-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with: { fetch-depth: 0 }
 
-      - name: Check for GitLeaks
-        uses: gacts/gitleaks@v1
-        with:
-          config-path: .github/.gitleaks.toml
+      - name: Prepare GitLeaks temp directory
+        run: mkdir -p "$RUNNER_TEMP/bin"
+
+      - name: Install GitLeaks
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+          arch="$(uname -m)"
+
+          case "$arch" in
+            x86_64)
+              arch="x64"
+              ;;
+            arm64|aarch64)
+              arch="arm64"
+              ;;
+            *)
+              echo "Unsupported runner architecture: $arch" >&2
+              exit 1
+              ;;
+          esac
+
+          archive="gitleaks_${GITLEAKS_VERSION}_${os}_${arch}.tar.gz"
+          url="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${archive}"
+
+          curl --fail --silent --show-error --location "$url" --output "$RUNNER_TEMP/$archive"
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP/bin" gitleaks
+          chmod +x "$RUNNER_TEMP/bin/gitleaks"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Run GitLeaks
+        shell: bash
+        run: |
+          set -euo pipefail
+          gitleaks detect --source . \
+            --config .github/.gitleaks.toml \
+            --report-format sarif \
+            --report-path "$RUNNER_TEMP/gitleaks.sarif"
+
+      - name: Clean up GitLeaks temp directory
+        if: always()
+        run: rm -rf "$RUNNER_TEMP"

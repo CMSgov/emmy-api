@@ -49,7 +49,7 @@ For simplicity, we'll use `curl` to showcase getting an access token. From a ter
 ```bash
 curl --location '<AUTH_BASE>' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
---header 'Authorization: Basic <BASE64_CREDENTIALS>' \
+--user '<CLIENT_ID>:<CLIENT_SECRET>' \
 --data-urlencode 'grant_type=client_credentials'
 ```
 
@@ -63,7 +63,9 @@ After successfully running this command, a JSON response which contains your fre
 }
 ```
 
-Copy the `access_token` value (this will be a long string of text) from the response. Now you are ready to [prepare your request payload](01-getting-started.md#step-2-prepare-your-request-payload) and call an Emmy API endpoint!
+Copy the `access_token` value from the response. Now you are ready to
+[prepare your request payload](01-getting-started.md#step-2-prepare-your-request-payload)
+and call an Emmy API endpoint.
 
 _(Review the [Authentication Guide](02-authentication.md) for more details on authenticating. Also consider browsing the [Postman Examples](../examples/v1/postman.md) or [curl Examples](../examples/v1/curl.md) for more help using these tools.)_
 

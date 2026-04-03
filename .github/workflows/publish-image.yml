@@ -1,0 +1,112 @@
+name: Publish Docker Image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.go"
+      - ".dockerignore"
+      - "Dockerfile"
+      - "go.mod"
+      - "go.sum"
+      - "public.jwk"
+  workflow_dispatch:
+
+concurrency:
+  group: publish-image-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  CONTAINER_NAME: ${{ vars.ECS_CONTAINER_NAME || 'emmy-api' }}
+  IMAGE_REPOSITORY: ${{ vars.EMMY_IMAGE_REPO || 'artifactory.cloud.cms.gov/emmy-docker/emmy-api' }}
+  PLATFORMS: ${{ vars.DOCKER_PLATFORMS || 'linux/amd64' }}
+
+jobs:
+  publish:
+    name: push image
+    runs-on: self-hosted
+    outputs:
+      image_tag: ${{ steps.image-metadata.outputs.image_tag }}
+      image_uri: ${{ steps.image-metadata.outputs.image_uri }}
+      latest_image_uri: ${{ steps.image-metadata.outputs.latest_image_uri }}
+    steps:
+      - name: Fetch Repository
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Derive image metadata
+        id: image-metadata
+        shell: bash
+        run: |
+          echo "image_tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "image_uri=${IMAGE_REPOSITORY}:${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "latest_image_uri=${IMAGE_REPOSITORY}:latest" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to Artifactory
+        uses: docker/login-action@v3
+        with:
+          registry: artifactory.cloud.cms.gov
+          username: ${{ secrets.ARTIFACTORY_USERNAME }}
+          password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+
+      - name: Push Docker image
+        env:
+          IMAGE_URI: ${{ steps.image-metadata.outputs.image_uri }}
+          LATEST_IMAGE_URI: ${{ steps.image-metadata.outputs.latest_image_uri }}
+        run: docker buildx build -t "$IMAGE_URI" -t "$LATEST_IMAGE_URI" --platform "$PLATFORMS" --push .
+
+  deploy:
+    name: deploy ${{ matrix.env_name }}
+    needs: publish
+    runs-on: self-hosted
+    environment: ${{ matrix.env_name }}
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        env_name:
+          - dev
+          # - test
+    steps:
+      - name: Fetch Repository
+        uses: actions/checkout@v6
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME || format('arn:aws:iam::{0}:role/{1}', vars.AWS_ACCOUNT_ID, vars.AWS_ROLE_NAME) }}
+
+      - name: Fetch current task definition
+        env:
+          TASK_FAMILY: emmy-${{ matrix.env_name }}-api
+        run: aws ecs describe-task-definition --task-definition "$TASK_FAMILY" --query taskDefinition --output json > task-definition.json
+
+      - name: Render updated task definition
+        id: render-task-definition
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ needs.publish.outputs.latest_image_uri }}
+
+      - name: Deploy updated task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        env:
+          ECS_CLUSTER: emmy-${{ matrix.env_name }}
+          ECS_SERVICE: emmy-${{ matrix.env_name }}-api
+        with:
+          task-definition: ${{ steps.render-task-definition.outputs.task-definition }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          service: ${{ env.ECS_SERVICE }}
+          force-new-deployment: true
+          wait-for-service-stability: true

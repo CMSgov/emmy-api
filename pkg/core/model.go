@@ -10,16 +10,12 @@ type OtelConfig struct {
 	Disable      bool
 }
 
-type CognitoConfig struct {
-	Region      string
-	UserPoolID  string
-	AppClientID string
-}
-
 type RedisConfig struct {
-	Addr     string
-	Password string
-	DB       int
+	Addr               string
+	Password           string
+	DB                 int
+	UseTLS             bool
+	InsecureSkipVerify bool
 }
 
 type NSCConfig struct {
@@ -30,12 +26,27 @@ type NSCConfig struct {
 	AccountID    string
 }
 
+type VAConfig struct {
+	BaseURL        string
+	TokenURL       string
+	ClientID       string
+	TokenAudience  string
+	PrivateKeyPath string
+	TimeoutSeconds int
+}
+
 type Config struct {
-	Cognito     CognitoConfig
 	Environment string
 	Otel        OtelConfig
 	Port        int
 	SkipAuth    bool
 	Redis       RedisConfig
 	NSC         NSCConfig
+	VA          VAConfig
 }
+
+type ctxKey int
+
+const (
+	RequestContextKey ctxKey = iota
+)

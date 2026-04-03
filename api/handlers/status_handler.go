@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	redisLocal "github.com/DSACMS/verification-service-api/pkg/redis"
+	redisLocal "github.com/cmsgov/emmy-api/pkg/redis"
 	"github.com/gofiber/fiber/v2"
 	goredis "github.com/redis/go-redis/v9"
 )

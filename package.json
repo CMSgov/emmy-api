@@ -1,23 +1,56 @@
 {
-  "name": "verification-service-api",
+  "name": "emmy-api",
   "private": true,
   "scripts": {
     "bundle:api-spec": "redocly bundle api-spec/v0/openapi.yaml -o api-spec/v0/dist/openapi.bundled.json",
     "validate:api-spec": "swagger-cli validate api-spec/v0/dist/openapi.bundled.yaml",
     "lint:api-spec": "spectral lint api-spec/v0/dist/openapi.bundled.yaml --ruleset .spectral.yaml",
+    "lint:markdown": "markdownlint-cli2 \"**/*.md\" \"**/*.MD\" \"#node_modules\" \"#.github\" --fix",
     "fmt": "prettier --write .",
     "check:fmt": "prettier --check .",
-    "check:schemas": "node scripts/validate-json-schemas.mjs"
+    "check:schemas": "node scripts/validate-json-schemas.mjs",
+    "check:spelling": "cspell ."
   },
   "devDependencies": {
     "@apidevtools/swagger-cli": "^4.0.4",
-    "@redocly/cli": "^1.34.5",
+    "@cspell/dict-companies": "^3.2.11",
+    "@cspell/dict-css": "^4.1.1",
+    "@cspell/dict-data-science": "^2.0.13",
+    "@cspell/dict-docker": "^1.1.17",
+    "@cspell/dict-en-common-misspellings": "^2.1.12",
+    "@cspell/dict-en-gb": "^5.0.27",
+    "@cspell/dict-en_us": "^4.4.33",
+    "@cspell/dict-filetypes": "^3.0.18",
+    "@cspell/dict-fullstack": "^3.2.9",
+    "@cspell/dict-golang": "^6.0.26",
+    "@cspell/dict-html": "^4.0.15",
+    "@cspell/dict-k8s": "^1.0.12",
+    "@cspell/dict-markdown": "^2.0.16",
+    "@cspell/dict-node": "^5.0.9",
+    "@cspell/dict-npm": "^5.2.38",
+    "@cspell/dict-people-names": "^1.1.16",
+    "@cspell/dict-python": "^4.2.26",
+    "@cspell/dict-redis": "^1.0.7",
+    "@cspell/dict-shell": "^1.1.2",
+    "@cspell/dict-software-terms": "^5.2.2",
+    "@cspell/dict-sql": "^2.2.1",
+    "@cspell/dict-typescript": "^3.2.3",
+    "@redocly/cli": "^2.25.4",
     "@stoplight/spectral-cli": "^6.15.0",
     "ajv": "^8.18.0",
-    "ajv-cli": "^5.0.0",
     "ajv-formats": "^3.0.1",
+    "cspell": "^9.7.0",
     "glob": "^13.0.6",
-    "prettier": "^3.6.2",
+    "markdownlint-cli2": "^0.22.0",
+    "prettier": "^3.8.1",
     "typescript": "^6.0.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "markdownlint-cli2>smol-toml": "1.6.1",
+      "@stoplight/spectral-ruleset-bundler>rollup": "2.80.0",
+      "@stoplight/spectral-core>minimatch": "3.1.5",
+      "lodash": "4.18.0"
+    }
   }
 }

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Docs Feature"
+  short_description: "Standardize docs/features authoring"
+  default_prompt: "Use $docs-feature to add or update a docs/features entry with the repo template and synchronized README index."

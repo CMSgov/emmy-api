@@ -3,10 +3,19 @@ services:
     build: .
     environment:
       OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector:4317
+      REDIS_ADDR: redis:6379
+      REDIS_USE_TLS: "false"
     ports:
       - "8000:8000"
     depends_on:
       - otel-collector
+      - redis
+
+  redis:
+    image: redis:7
+    restart: always
+    ports:
+      - "6379:6379"
 
   jaeger-all-in-one:
     image: jaegertracing/all-in-one:latest

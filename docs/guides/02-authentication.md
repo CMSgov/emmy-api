@@ -1,19 +1,63 @@
 # Authenticating with the Emmy API
 
-## Credential Format
+## OAuth 2.0 Client Credentials
 
-HTTP Basic authentication is a simple HTTP header that supplies a Base64-encoded version of a username and password to the server. The two values are joined by a colon (:) and then encoded.
+The v0 contract uses the `OAuth2ClientCredentials` security scheme. Clients
+obtain an access token from the configured token endpoint and then present that
+token as a bearer token on API requests.
 
-To perform this, simply create the following text (substituting the `client_id` and `client_secret` values with your actual credentials):
+For the checked-in v0 spec, the security scheme is defined in
+`api-spec/v0/openapi.yaml` with this token URL:
 
-```json
-<client_id>:<client_secret>
+```text
+https://api.dev.emmy.cms.gov/oauth2/token
 ```
 
-Now HTTP Basic authentication requires that string to be Base64 encoded. This can be easily accomplished in most coding languages. However, for simplicity, we will use a "live" online encoder that does NOT send content over the wire. **Note that you should never use this with sensitive values, such as Production credentials.** You should never share your `client_id` or `client_secret`.
+Your environment-specific onboarding materials may give you a different
+`auth_base`; use the values provided for your environment when making real
+requests.
 
-An online encoder such as [www.base64.sh](https://www.base64.sh/) makes quick work of Base64 encoding. Simply put the string you built earlier into the **INPUT:** side and then press the **[ENCODE]** button. You will see your Base64-encoded credentials on the **OUTPUT:** side.
+## Token Request Example
 
-![Example Base64 Encoding](../assets/screenshots/base64.sh.example.png)
+The Postman examples in this repository use HTTP Basic auth to send the client
+credentials during the client-credentials token exchange. The equivalent `curl`
+request is:
 
-You now have Base64 credentials you can use for authorization!
+```bash
+curl --location '<AUTH_BASE>' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--user '<CLIENT_ID>:<CLIENT_SECRET>' \
+--data-urlencode 'grant_type=client_credentials'
+```
+
+A successful response returns a bearer token:
+
+```json
+{
+    "access_token": "<ACCESS_TOKEN>",
+    "expires_in": 3600,
+    "token_type": "Bearer"
+}
+```
+
+## Using the Access Token
+
+Once you have an access token, send it on Emmy API requests as an
+`Authorization` header:
+
+```text
+Authorization: Bearer <ACCESS_TOKEN>
+```
+
+Example:
+
+```bash
+curl --location --request POST '<API_BASE>/api/v0/education-enrollments' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
+--data '{
+    "firstName": "Lynette",
+    "lastName": "Oyola",
+    "dateOfBirth": "1988-10-24"
+}'
+```

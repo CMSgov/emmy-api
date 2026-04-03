@@ -1,13 +1,27 @@
-# COMMUNITY.md
+# Community
 
-verification-services-api is supported by a dedicated team of individuals fulfilling various roles to ensure its success, security, and alignment with government standards and agency goals.
+This repository does not currently publish a formal maintainer or project-owner
+roster in tracked files. The channels below are the observable support and
+contribution contacts on the current branch.
 
-## Project Members
+## Contact Channels
 
-<!-- TODO: Who are the points of contact in your project who are responsible/accountable for the project? This can often be an engineering or design manager or leader, who may or may not be the primary maintainers of the project.
+| Area | Contact or channel | Repository evidence |
+| :--- | :----------------- | :------------------ |
+| General open source and policy questions | `opensource@cms.hhs.gov` | Referenced in `README.md` and `CONTRIBUTING.md` |
+| Security disclosures | [Bugcrowd CMS VDP](https://bugcrowd.com/cms-vdp) and [SECURITY.md](SECURITY.md) | Referenced in `README.md`, `CONTRIBUTING.md`, and `SECURITY.md` |
+| Code changes, bugs, and review discussion | GitHub issues and pull requests for this repository | Contribution workflow in `CONTRIBUTING.md` |
 
-Roles to include, but not limited to: Project Owner, Technical Lead, Developers/Contributors, Community Manager, Security Team, Policy Advisor, Contracting Officer's Representative, Compliance Officer, Procurement Officer -->
+## Observable Contributors
 
-| Role   | Name    | Affiliation    |
-| :----- | :------ | :------------- |
-| {role} | {names} | {affiliations} |
+The current git history shows contributions from:
+
+- Jake Shilling
+- Jeff Greenland
+- Imhotep Benjamin
+- Jan (`dx-gov`)
+- `decause-gov`
+- `iannorriswork`
+
+This list reflects observable commit authors on the current branch, not a
+formal ownership or approval model.

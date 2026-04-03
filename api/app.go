@@ -1,14 +1,14 @@
 package api
 
 import (
+	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 	"runtime/debug"
 
-	"github.com/DSACMS/verification-service-api/api/middleware"
-	"github.com/DSACMS/verification-service-api/api/routes"
-	"github.com/DSACMS/verification-service-api/pkg/core"
+	"github.com/cmsgov/emmy-api/api/middleware"
+	"github.com/cmsgov/emmy-api/api/routes"
+	"github.com/cmsgov/emmy-api/pkg/core"
 
 	"go.opentelemetry.io/otel/codes"
 
@@ -18,17 +18,32 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	slogfiber "github.com/samber/slog-fiber"
 
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 
+func RequestIDToUserContext() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		rid := c.Get(fiber.HeaderXRequestID)
+		if rid == "" {
+			rid = uuid.NewString()
+		}
+
+		ctx := context.WithValue(c.UserContext(), core.RequestContextKey, rid)
+		c.SetUserContext(ctx)
+
+		return c.Next()
+	}
+}
+
 func errorHandler(logger *slog.Logger, otel core.OtelService) fiber.ErrorHandler {
 	handleFiberError := func(ctx *fiber.Ctx, err *fiber.Error) error {
-		span := otel.SpanFromContext(ctx.Context())
+		span := otel.SpanFromContext(ctx.UserContext())
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Message)
 
 		logger.ErrorContext(
-			ctx.Context(),
+			ctx.UserContext(),
 			"fiber error",
 			"code", err.Code,
 			"message", err.Message,
@@ -52,7 +67,7 @@ func stackTraceHandler(logger *slog.Logger) func(*fiber.Ctx, any) {
 	return func(c *fiber.Ctx, e any) {
 		stack := debug.Stack()
 		logger.ErrorContext(
-			c.Context(),
+			c.UserContext(),
 			"panic!",
 			"stack", stack,
 			"err", e,
@@ -81,6 +96,17 @@ func New(cfg *Config) (*fiber.App, error) {
 
 	app := fiber.New(fiberConfig)
 
+	app.Use(RequestIDToUserContext())
+
+	app.Use(slogfiber.NewWithConfig(
+		cfg.Logger,
+		slogfiber.Config{
+			WithRequestID: true,
+			WithSpanID:    true,
+			WithTraceID:   true,
+		},
+	))
+
 	app.Use(recover.New(recover.Config{
 		EnableStackTrace:  true,
 		StackTraceHandler: stackTraceHandler(cfg.Logger),
@@ -94,30 +120,12 @@ func New(cfg *Config) (*fiber.App, error) {
 
 	app.Use(otelfiber.Middleware())
 
-	app.Use(slogfiber.NewWithConfig(
-		cfg.Logger,
-		slogfiber.Config{
-			WithRequestID: true,
-			WithSpanID:    true,
-			WithTraceID:   true,
-		},
-	))
+
+	routes.StatusRouter(app, cfg.Core, cfg.Redis, logger)
 
 	if cfg.Core.SkipAuth {
 		app.Use(middleware.SkipAuthMiddleware())
-	} else {
-		verifier, err := middleware.NewCognitoVerifier(middleware.CognitoConfig{
-			Region:     cfg.Core.Cognito.Region,
-			UserPoolID: cfg.Core.Cognito.UserPoolID,
-			ClientID:   cfg.Core.Cognito.AppClientID,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("failed to initialize cognito middleware: %w", err)
-		}
-		app.Use(verifier.FiberMiddleware())
 	}
-
-	routes.StatusRouter(app, cfg.Core, cfg.Redis, logger)
 
 	return app, nil
 }

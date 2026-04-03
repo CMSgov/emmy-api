@@ -38,7 +38,7 @@ aws ecs describe-task-definition \
   --task-definition "$task_family" \
   --output json > "$task_definition_json"
 
-container_name="${CONTAINER_NAME:-}"
+container_name="${CONTAINER_NAME:-emmy-api}"
 if [[ -z "$container_name" ]]; then
   matching_container_count="$(
     jq --arg task_family "$task_family" '[.taskDefinition.containerDefinitions[] | select(.name == $task_family)] | length' "$task_definition_json"
@@ -115,6 +115,7 @@ aws ecs update-service \
   --cluster "$cluster_name" \
   --service "$service_name" \
   --task-definition "$new_task_definition_arn" \
+  --force-new-deployment \
   --output json >/dev/null
 
 echo "Waiting for service $service_name to become stable"

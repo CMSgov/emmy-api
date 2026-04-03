@@ -28,6 +28,10 @@
     "ssn": {
       "$ref": "./ssn.schema.json",
       "description": "Social Security number when available."
+    },
+    "address": {
+      "$ref": "./address.schema.json",
+      "description": "Postal address when a lookup requires demographic matching instead of SSN matching."
     }
   }
 }

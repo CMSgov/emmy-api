@@ -76,7 +76,7 @@ Rule: Public API behavior is implemented to match the merged spec. The implement
 
 ### Versioning and Deprecation
 
-- Versioning strategy: URL path versioning (`/v1`, `/v2`) for public endpoints.
+- Versioning strategy: URL path versioning (`/v0`, future `/v1`, `/v2`) for public endpoints.
 - Breaking change policy: never break a published major version in place.
 - Deprecation policy: minimum 6-month notice with `Deprecation` and `Sunset` headers (RFC 8594).
 - Changelog policy: update `CHANGELOG.md` from `oasdiff` output on each merged spec PR.
@@ -111,12 +111,16 @@ Recommended structure:
 
 ```text
 api-spec/
-  openapi.yaml
-  components/
-  paths/
+  v0/
+    openapi.yaml
+    dist/
+      openapi.bundled.json
   dist/
-    openapi.bundled.yaml
-    openapi.bundled.json
+    v0/
+      openapi.json
+schema/
+  v0/
+    *.schema.json
 .spectral.yaml
 docs/planning/public-api-data-model-design-first.md
 ```
@@ -126,15 +130,17 @@ Contract boundary:
 - Include only public API request/response models and public endpoint behavior.
 - Do not include internal DTOs, persistence entities, or internal service payloads unless externally visible.
 
-Current EDU contract conventions in this repo:
+Current v0 contract conventions in this repo:
 
-- Public path: `POST /v1/edu`
+- Public paths:
+  - `POST /api/v0/education-enrollments`
+  - `POST /api/v0/veteran-disability-ratings`
 - OpenAPI version: `3.1.0`
-- Security model: HTTP bearer auth plus required `X-EMMY-Consent-Token` header on the EDU operation
-- Request model style: narrow public request wrapper with reusable component schemas and `additionalProperties: false`
-- Success response model style: normalized business outcome model instead of downstream vendor payload passthrough
-- Error model style: reusable RFC 7807-style `ProblemDetails` schema with shared response components and named examples for each documented failure mode
-- Current documented EDU error responses: `400`, `401`, `403`, `429`, `502`, and `503`
+- Security model: global OAuth 2.0 client-credentials security scheme
+- Request model style: flat reusable `Identity` schema from `schema/v0/identity.schema.json`
+- Education success response model: `enrollmentStatus`
+- Veteran success response model: `combinedDisabilityRating`
+- Current documented responses: `200` success responses only
 
 This repo’s recent spec updates reinforce the design-first rule that public docs
 must track the contract as written in reusable OpenAPI components, not internal
@@ -144,11 +150,11 @@ service behavior or superseded response envelopes.
 
 ### 1. Author or Update the Spec
 
-- Create or update `api-spec/openapi.yaml` (and referenced files).
+- Create or update `api-spec/v0/openapi.yaml`.
 - Keep schema components reusable and explicitly named.
 - Prefer explicit `operationId`, `summary`, response schemas, and examples.
-- Define shared error responses as reusable components when the same problem
-  schema is returned across operations.
+- Update `schema/v0/` first when the change affects shared request or response
+  data structures.
 - Keep public success payloads normalized and implementation-agnostic.
 
 ### 2. Bundle, Validate, and Lint
@@ -193,20 +199,20 @@ rules:
 
 ```bash
 # Internal/dev preview
-npx swagger-ui-watcher api-spec/openapi.yaml --no-open
+npx swagger-ui-watcher api-spec/v0/openapi.yaml --no-open
 
 # Public docs build (ReDoc CLI example)
-npx redoc-cli build api-spec/dist/openapi.bundled.yaml -o api-spec/dist/index.html
+npx redoc-cli build api-spec/v0/dist/openapi.bundled.json -o api-spec/v0/dist/index.html
 ```
 
 ### 4. Run Mock Server
 
 ```bash
 # Mock server from contract
-npx @stoplight/prism-cli mock api-spec/dist/openapi.bundled.yaml
+npx @stoplight/prism-cli mock api-spec/v0/dist/openapi.bundled.json
 
 # Proxy validation against a running environment
-npx @stoplight/prism-cli proxy api-spec/dist/openapi.bundled.yaml https://api.example.gov
+npx @stoplight/prism-cli proxy api-spec/v0/dist/openapi.bundled.json https://api.example.gov
 ```
 
 ### 5. Generate Go Types and Server Interfaces
@@ -224,7 +230,7 @@ output: internal/api/api.gen.go
 Generate code:
 
 ```bash
-go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest -config oapi-codegen.yaml api-spec/dist/openapi.bundled.yaml
+go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest -config oapi-codegen.yaml api-spec/v0/dist/openapi.bundled.json
 ```
 
 Team rule: choose one strategy and document it in `README.md`:
@@ -238,7 +244,7 @@ Do not mix strategies across services.
 
 ```bash
 # Example against local server
-schemathesis run --url http://localhost:8080 api-spec/dist/openapi.bundled.yaml
+schemathesis run --url http://localhost:8080 api-spec/v0/dist/openapi.bundled.json
 ```
 
 Use Schemathesis for contract conformance and edge-case generation. Keep separate hand-written integration tests for business logic and authorization behavior.
@@ -249,7 +255,7 @@ After a spec PR merges, publish all of the following from the merged contract:
 
 1. Documentation site (ReDoc or Swagger UI) on a stable URL.
 1. Mock endpoint (Prism) for consumer integration.
-1. Bundled machine-readable artifacts (`openapi.bundled.yaml`, `openapi.bundled.json`).
+1. Bundled machine-readable artifacts for the published API version.
 1. Generated Go server types/interfaces (and client SDKs if applicable).
 1. Changelog entry from `oasdiff` output.
 
@@ -257,23 +263,23 @@ After a spec PR merges, publish all of the following from the merged contract:
 
 ```yaml
 - name: Bundle OpenAPI
-  run: npx @redocly/cli bundle api-spec/openapi.yaml -o api-spec/dist/openapi.bundled.yaml
+  run: npx @redocly/cli bundle api-spec/v0/openapi.yaml -o api-spec/v0/dist/openapi.bundled.json
 
 - name: Validate OpenAPI
-  run: npx @apidevtools/swagger-cli validate api-spec/dist/openapi.bundled.yaml
+  run: npx @apidevtools/swagger-cli validate api-spec/v0/dist/openapi.bundled.json
 
 - name: Lint OpenAPI
-  run: npx @stoplight/spectral-cli lint api-spec/dist/openapi.bundled.yaml --ruleset .spectral.yaml
+  run: npx @stoplight/spectral-cli lint api-spec/v0/dist/openapi.bundled.json --ruleset .spectral.yaml
 
 - name: Prepare base spec
   run: |
       git fetch --no-tags --depth=1 origin ${{ github.base_ref }}
-      git show origin/${{ github.base_ref }}:api-spec/openapi.yaml > /tmp/openapi.base.yaml
-      npx @redocly/cli bundle /tmp/openapi.base.yaml -o /tmp/openapi.base.bundled.yaml
+      git show origin/${{ github.base_ref }}:api-spec/v0/openapi.yaml > /tmp/openapi.base.yaml
+      npx @redocly/cli bundle /tmp/openapi.base.yaml -o /tmp/openapi.base.bundled.json
 
 - name: Detect breaking changes
   if: ${{ !contains(github.event.pull_request.labels.*.name, 'breaking-change-approved') }}
-  run: oasdiff breaking /tmp/openapi.base.bundled.yaml api-spec/dist/openapi.bundled.yaml --fail-on ERR
+  run: oasdiff breaking /tmp/openapi.base.bundled.json api-spec/v0/dist/openapi.bundled.json --fail-on ERR
 ```
 
 Implementation note: use a stable "base spec" artifact from `main` in CI (download artifact or check out base commit) before running `oasdiff`.
@@ -281,8 +287,8 @@ Implementation note: use a stable "base spec" artifact from `main` in CI (downlo
 ## Selected Governance Defaults
 
 - Spec format: OpenAPI 3.1 YAML
-- Canonical artifact: `api-spec/openapi.yaml`
-- Machine artifact: bundled YAML + JSON in `api-spec/dist/`
+- Canonical artifact: `api-spec/v0/openapi.yaml`
+- Machine artifact: versioned bundled JSON under `api-spec/v0/dist/` and `api-spec/dist/v0/`
 - Public docs renderer: ReDoc
 - Internal debugging renderer: Swagger UI
 - Linter: Spectral + repo-owned ruleset

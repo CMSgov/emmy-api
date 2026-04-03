@@ -3,11 +3,13 @@ package education
 import (
 	"context"
 	"encoding/json"
+	"io"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/DSACMS/verification-service-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/stretchr/testify/require"
 )
 
@@ -49,7 +51,8 @@ func TestNSCHTTPClient_PreservesAuthOnRedirect(t *testing.T) {
 		TokenURL:     ts.URL + "/token",
 	}
 
-	client := nscHTTPClient(context.Background(), cfg)
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	client := nscHTTPClient(context.Background(), cfg, logger)
 
 	req, err := http.NewRequest("GET", ts.URL+"/submit", nil)
 	require.NoError(t, err)

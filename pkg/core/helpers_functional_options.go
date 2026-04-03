@@ -63,21 +63,3 @@ func WithOtelDisable(value ...bool) func(*Config) {
 		c.Otel.Disable = val
 	}
 }
-
-func WithCognitoRegion(region string) func(*Config) {
-	return func(c *Config) {
-		c.Cognito.Region = region
-	}
-}
-
-func WithCognitoUserPoolID(userPoolID string) func(*Config) {
-	return func(c *Config) {
-		c.Cognito.UserPoolID = userPoolID
-	}
-}
-
-func WithCognitoAppClientID(appClientID string) func(*Config) {
-	return func(c *Config) {
-		c.Cognito.AppClientID = appClientID
-	}
-}

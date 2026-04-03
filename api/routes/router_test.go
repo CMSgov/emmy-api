@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/DSACMS/verification-service-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
@@ -32,10 +32,48 @@ func TestRegisterRoutes_RegistersOpenAPISpecEndpoint(t *testing.T) {
 	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
-	expectedBody, err := os.ReadFile(filepath.Join("..", "..", "api-spec", "dist", "openapi.bundled.json"))
+	expectedBody, err := os.ReadFile(filepath.Join("..", "..", "api-spec", "v0", "dist", "openapi.bundled.json"))
 	require.NoError(t, err)
 
 	require.Equal(t, fiber.StatusOK, resp.StatusCode)
 	require.Contains(t, resp.Header.Get(fiber.HeaderContentType), fiber.MIMEApplicationJSON)
 	require.JSONEq(t, string(expectedBody), string(body))
+}
+
+func TestRegisterRoutes_RegistersVeteranDisabilityEndpoint(t *testing.T) {
+	app := fiber.New()
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	rdb := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
+
+	RegisterRoutes(app, &core.Config{}, rdb, logger)
+
+	routes := app.GetRoutes(true)
+	for _, route := range routes {
+		if route.Method == http.MethodPost && route.Path == "/api/v0/veteran-disability-ratings" {
+			return
+		}
+	}
+
+	t.Fatalf("expected POST /api/v0/veteran-disability-ratings to be registered")
+}
+
+func TestRegisterRoutes_RegistersEducationEnrollmentsEndpoint(t *testing.T) {
+	app := fiber.New()
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	rdb := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
+
+	RegisterRoutes(app, &core.Config{}, rdb, logger)
+
+	routes := app.GetRoutes(true)
+	for _, route := range routes {
+		if route.Method == http.MethodPost && route.Path == "/api/v0/education-enrollments" {
+			return
+		}
+	}
+
+	t.Fatalf("expected POST /api/v0/education-enrollments to be registered")
 }

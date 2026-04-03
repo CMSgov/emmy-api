@@ -1,0 +1,7 @@
+interface:
+  display_name: "Docs Agent MD"
+  short_description: "Keep AGENTS.md aligned with repo truth"
+  default_prompt: "Use $docs-agent-md to refresh this repo's AGENTS.md from current branch truth, checking for a same-day docs audit first."
+
+policy:
+  allow_implicit_invocation: false
