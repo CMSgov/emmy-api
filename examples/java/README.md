@@ -1,6 +1,7 @@
 # Java JWT Token Example
 
 A simple Java console application that demonstrates:
+
 1. Making an HTTP POST request to obtain a JWT bearer token
 2. Using the bearer token in a HTTP Authorization header
 3. Making an authenticated HTTP POST request with JSON body to an Emmy API endpoint
@@ -9,7 +10,7 @@ A simple Java console application that demonstrates:
 ## Requirements
 
 - Java 11 or higher
-- Maven 3.6+ (https://maven.apache.org/install.html)
+- Maven 3.6+ [https://maven.apache.org/install.html](https://maven.apache.org/install.html)
 
 ## Configuration
 
@@ -31,7 +32,7 @@ mvn compile exec:java -Dexec.mainClass="EmmyApiAuthAndRequestExample" -Djdk.inte
 
 ## Example Output
 
-```
+```bash
 Step 1: Obtaining JWT token...
 Token obtained successfully!
 Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ...
@@ -44,11 +45,13 @@ API Response:
 ## How It Works
 
 ### Step 1: Obtain JWT Token
+
 - Encodes username and password in Base64 format
 - Sends a POST request to `TOKEN_ENDPOINT` with `Authorization: Basic <encoded-credentials>` header
 - Parses the JSON response and extracts the `token` field
 
 ### Step 2: Call API with Bearer Token
+
 - Uses the JWT token from Step 1
 - Sends a POST request to `API_ENDPOINT` with:
   - `Authorization: Bearer <token>` header
@@ -56,6 +59,7 @@ API Response:
 - Prints the response to console
 
 ### Key Features
+
 - Uses Java's built-in `HttpClient` (Java 11+) - no additional HTTP libraries needed
 - Automatic Base64 encoding for Basic authentication
 - JSON parsing with Gson

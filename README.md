@@ -3,6 +3,7 @@
 The Emmy API is a backend data service designed to equip states with the automated verification capabilities needed to determine if an applicant has met H.R. 1 Community Engagement (CE) standards.
 
 ## Quick Links
+
 - **[Technical Guide to Getting Started](docs/guides/01-getting-started.md)** (✅ Implementers start here!)
   - [Usage Examples](docs/guides/03-usage-examples.md)
   - [Emmy API Specifications (Swagger)](https://cmsgov.github.io/emmy-api/swagger-ui/)

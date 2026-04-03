@@ -1,6 +1,7 @@
 # C# JWT Token Example
 
 A simple .NET console application that demonstrates:
+
 1. Making an HTTP POST request to obtain a JWT token using Basic authentication
 2. Using the token in a Bearer Authorization header
 3. Making an authenticated GET request with a JSON body
@@ -28,7 +29,7 @@ dotnet run
 
 ## Example Output
 
-```
+```bash
 Step 1: Obtaining JWT token...
 Token obtained successfully!
 Token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -41,12 +42,14 @@ API Response:
 ## How It Works
 
 ### Step 1: Obtain JWT Token
+
 - Encodes `ClientId:ClientSecret` in Base64
 - Sends a POST to `AuthBase` with `Authorization: Basic <encoded>` header
 - Sends `grant_type=client_credentials` as a form-urlencoded body (standard OAuth 2.0 client credentials flow)
 - Parses the JSON response and extracts the `access_token` field
 
 ### Step 2: Call API with Bearer Token
+
 - Uses the JWT token from Step 1
 - Sends a GET request to `ApiEndpoint` with:
   - `Authorization: Bearer <token>` header
@@ -54,6 +57,7 @@ API Response:
 - Prints the response to the console
 
 ### Key Features
+
 - Uses .NET's built-in `HttpClient` and `System.Text.Json` — no additional libraries needed
 - Accepts self-signed certificates and invalid SANs via `ServerCertificateCustomValidationCallback`
 - Top-level statements keep the code minimal and readable
