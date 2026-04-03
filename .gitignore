@@ -7,3 +7,7 @@ dump.rdb
 .postman
 .envrc
 node_modules
+
+examples/java/target/
+examples/csharp/bin/
+examples/csharp/obj/

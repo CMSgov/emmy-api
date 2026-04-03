@@ -1,20 +1,23 @@
-# Verification Service API
+# Emmy API Verification Service
 
-An API that provides a unified, standard interface to the data sources needed to verify community engagement for the purpose of evaluating Medicaid eligibility.
+The Emmy API is a backend data service designed to equip states with the automated verification capabilities needed to determine if an applicant has met H.R. 1 Community Engagement (CE) standards.
 
-### Using the API
+## Quick Links
 
-[Click here for the steps](docs/guides/01-getting-started.md) to begin using the data sources available through the API and see the specification of what kind of data is available.
+- **[Technical Guide to Getting Started](docs/guides/01-getting-started.md)** (✅ Implementers start here!)
+  - [Usage Examples](docs/guides/03-usage-examples.md)
+  - [Emmy API Specifications (Swagger)](https://cmsgov.github.io/emmy-api/swagger-ui/)
+- **[About Emmy Software](https://cms.gov/eligibility-made-easy)**
+  - [Emmy API Stakeholder Overview](https://cms.gov/eligibility-made-easy) (➡️ Great for decision-makers & teams)
+  - [Interested in the **Emmy App** instead?](https://github.com/DSACMS/iv-cbv-payroll)
+- [Developer and Repo Information](#local-development)
+  - [Emmy API Repo Homepage](https://github.com/DSACMS/iv-cbv-payroll)
 
 ## About the Project
 
 This project evolved out of the [IVaaS](https://github.com/DSACMS/iv-cbv-payroll "IVaaS repository") tool for consent based verification. As the need for more complex forms of validation developed, it became clear that providing a way for agencies to integrate directly with an API was becoming increasingly useful, particularly for ex parte renewals. The ultimate goals of this and related projects is to remove as much friction as possible between the applicant and receiving their benefits by reducing the burden placed on them to manually provide evidence of eligibility.
 
-Current repository-focused documentation starts with:
-
-- [docs/overview.md](docs/overview.md) for runtime shape and system context
-- [docs/setup.md](docs/setup.md) for local setup, testing, and tooling
-- [api-spec/README.md](api-spec/README.md) for the contract-first API workflow
+The Emmy API serves as a "Decision Brain" for the state. It does not replace the state's eligibility system; instead, it feeds it the definitive "Verified/Not Verified" signals needed to clear the backlog.
 
 ## Core Team
 

@@ -1,33 +1,30 @@
 # Postman Collections
 
-This directory contains Postman workspace exports used during earlier v1
-integration experiments.
+This directory contains Postman collections and environment configurations for
+exploring, testing, and integrating with the **Emmy API** (v0).
 
-## Current Status
+These collections complement the [Getting Started Guide](../../docs/guides/01-getting-started.md) in this repository.
 
-- These files are **not** the source of truth for the current public contract.
-- The intended public API contract for this branch lives in
-  `api-spec/v0/openapi.yaml` and `schema/v0/`.
-- Some requests in this directory still use older v1 paths and should be
-  treated as legacy reference material until they are refreshed.
+## Getting Started
 
-## What Lives Here
+### Prerequisites
 
-- `v1/postman/collections/`: legacy request definitions
-- `v1/postman/environments/`: example environment variables for local/manual use
+- [Postman](https://www.postman.com/downloads/) (Desktop or Web) — v10 or later recommended
+- A running instance of the API, or access to the staging environment
+- Valid API credentials (see [Authentication Guide](../../docs/guides/02-authentication.md))
 
-## Working Guidance
+## Importing the Collection & Environment
 
-- Prefer the docs under `docs/guides/` and the versioned OpenAPI contract under
-  `api-spec/v0/` when building new integrations.
-- If these Postman exports are updated, keep them aligned with the checked-in
-  contract rather than the current runtime scaffolding.
-- Never commit real client credentials, access tokens, or other secrets in
-  environment exports.
+1. Open **Postman**
+2. Click **Import** (top-left)
+3. Select or drag-and-drop the desired files from this directory:
+   - `collections/v0`
+4. In the top-right environment dropdown, create a new environment
+5. You're ready to make requests!
 
-## Related Resources
+---
 
-- `docs/guides/01-getting-started.md`
-- `docs/guides/02-authentication.md`
-- `docs/guides/03-usage-examples.md`
-- `api-spec/v0/openapi.yaml`
+## Environment Variables
+
+Populate the variable values in your local Postman environment using the values shared with you during onboarding.
+

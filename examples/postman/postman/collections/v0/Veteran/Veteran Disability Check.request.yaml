@@ -1,0 +1,18 @@
+$kind: http-request
+name: Veteran Disability Check
+url: "{{api_base}}veteran-disability-ratings"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "firstName": "Alfredo",
+        "lastName": "Armstrong",
+        "dateOfBirth": "1993-06-08",
+        "ssn": "796-01-2476"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{access_token}}"
+order: 1774983852307
