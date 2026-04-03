@@ -375,3 +375,27 @@ func mapLegacyEnrollmentStatus(respBytes []byte) (SchoolEnrollmentStatus, error)
 		return "", fmt.Errorf("unsupported legacy nsc status code %q", legacy.Status.Code)
 	}
 }
+
+type legacySubmitResponse struct {
+	Status legacySubmitStatus `json:"status"`
+}
+
+type legacySubmitStatus struct {
+	Code string `json:"code"`
+}
+
+func mapLegacyEnrollmentStatus(respBytes []byte) (SchoolEnrollmentStatus, error) {
+	var legacy legacySubmitResponse
+	if err := json.Unmarshal(respBytes, &legacy); err != nil {
+		return "", fmt.Errorf("decode legacy nsc response: %w", err)
+	}
+
+	switch legacy.Status.Code {
+	case "0":
+		return SchoolEnrollmentStatusEnrolled, nil
+	case "":
+		return "", fmt.Errorf("enrollmentStatus is required")
+	default:
+		return "", fmt.Errorf("unsupported legacy nsc status code %q", legacy.Status.Code)
+	}
+}
