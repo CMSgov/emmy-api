@@ -16,40 +16,41 @@ import com.google.gson.JsonParser;
  * 2. HTTP POST using JWT Bearer token with JSON body
  * 3. Printing response to console
  */
-public class JwtTokenExample {
+public class EmmyApiAuthAndRequestExample {
 
     // ============================================================
     // CONFIGURATION - Change these variables to match your needs
     // ============================================================
 
     // Update these variables with your actual values.
-    private static final String AUTH_BASE = "https://us-east-1xcpcizvmn.auth.us-east-1.amazoncognito.com/oauth2/token";
-    private static final String CLIENT_ID = "7v1o4kgtd9dmkhvcm9ghpvk2vb";
-    private static final String CLIENT_SECRET = "4jo0c6aeq96fefbpnr3hu098boppe42skk2ful1ok51ofe371nc";
-    private static final String API_ENDPOINT = "https://api.dev.emmy.cms.gov/enrollment";
+    private static final String AUTH_BASE = "https://emmy-prod.auth.us-east-1.amazoncognito.com/oauth2/token";
+    private static final String CLIENT_ID = "6ja5f2dijpkc1g764tu65ontbu";
+    private static final String CLIENT_SECRET = "oi06m4572eup96rtp2l8h2s48j3f4ngmvcqdl59qme8avnq3nk5";
+    private static final String API_ENDPOINT = "https://api.emmy.cms.gov/api/v0/education-enrollments";
 
     // JSON request body for the sample API call for student enrollment.
-    private static final String REQUEST_BODY = "{\n" + //
+    private static final String REQUEST_BODY_ENROLLMENT = "{\n" + //
             "    \"firstName\": \"Lynette\",\n" + //
             "    \"lastName\": \"Oyola\",\n" + //
             "    \"dateOfBirth\": \"1988-10-24\"\n" + //
             "}";
 
-    // ============================================================
-    // Main method
-    // ============================================================
-
+    /**
+     * This is the main entry point for this example application.
+     * @param args
+     */
     public static void main(String[] args) {
         try {
-            // Step 1: Get JWT token using Basic authentication
+
+            // Step 1: Get JWT bearer token using Basic authentication
             System.out.println("Step 1: Obtaining JWT token...");
             String token = getJwtToken();
             System.out.println("Token obtained successfully!");
             System.out.println("Token: " + token);
             System.out.println();
 
-            // Step 2: Call API endpoint with Bearer token
-            System.out.println("Step 2: Calling API with Bearer token...");
+            // Step 2: Call an Emmy API endpoint with Bearer token
+            System.out.println("Step 2: Calling Emmy API with Bearer token...");
             String response = callApiWithToken(token);
             System.out.println("API Response:");
             System.out.println(response);
@@ -64,7 +65,8 @@ public class JwtTokenExample {
      * Step 1: Make HTTP POST request to get JWT token using Basic authentication
      */
     private static String getJwtToken() throws Exception {
-        // Create Basic Auth header
+
+      // Create Basic Auth header
         String credentials = CLIENT_ID + ":" + CLIENT_SECRET;
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
         String basicAuthHeader = "Basic " + encodedCredentials;
@@ -78,6 +80,8 @@ public class JwtTokenExample {
                 .build();
 
         // Send request with a client that accepts self-signed certificates
+        // NOTE: In production, you should use a properly configured HttpClient with
+        // valid SSL certificates!
         HttpClient client = createTrustAllCertificatesClient();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -96,19 +100,21 @@ public class JwtTokenExample {
      * Step 2: Make HTTP POST request to API endpoint with Bearer token and JSON body
      */
     private static String callApiWithToken(String token) throws Exception {
-        // Create Bearer Auth header
+
+      // Create Bearer Auth header
         String bearerAuthHeader = "Bearer " + token;
 
-        // Create HTTP request with JSON body
-        // Note: .GET() does not accept a body, so .method() is used instead
+        // POST the HTTP request with JSON body
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI(API_ENDPOINT))
                 .header("Authorization", bearerAuthHeader)
                 .header("Content-Type", "application/json")
-                .method("GET", HttpRequest.BodyPublishers.ofString(REQUEST_BODY))
+                .method("POST", HttpRequest.BodyPublishers.ofString(REQUEST_BODY_ENROLLMENT))
                 .build();
 
         // Send request with a client that accepts self-signed certificates
+        // NOTE: In production, you should use a properly configured HttpClient with
+        // valid SSL certificates!
         HttpClient client = createTrustAllCertificatesClient();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -125,7 +131,8 @@ public class JwtTokenExample {
      * WARNING: This is ONLY for development/testing. Never use in production!
      */
     private static HttpClient createTrustAllCertificatesClient() throws Exception {
-        // Create a trust manager that accepts all certificates
+
+      // Create a trust manager that accepts all certificates
         TrustManager[] trustAllCerts = new TrustManager[]{
             new X509TrustManager() {
                 public X509Certificate[] getAcceptedIssuers() {
@@ -142,7 +149,8 @@ public class JwtTokenExample {
 
         // Disable hostname verification and endpoint identification
         // Note: This is a workaround for Java's HttpClient which doesn't expose
-        // hostname verification settings directly in the API
+        // hostname verification settings directly in the API.
+        // Note: You also need to use the Java environment setting: -Djdk.internal.httpclient.disableHostnameVerification=true
         try {
             javax.net.ssl.SSLParameters sslParams = sslContext.getDefaultSSLParameters();
             sslParams.setEndpointIdentificationAlgorithm(null);

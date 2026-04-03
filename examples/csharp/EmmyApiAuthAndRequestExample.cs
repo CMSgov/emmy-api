@@ -1,5 +1,4 @@
 using System.Net.Http.Headers;
-using System.Net.Security;
 using System.Text;
 using System.Text.Json;
 
@@ -8,13 +7,13 @@ using System.Text.Json;
 // ============================================================
 
 // Update these variables with your actual values.
-const string AuthBase = "https://us-east-1xcpcizvmn.auth.us-east-1.amazoncognito.com/oauth2/token";
-const string ClientId = "7v1o4kgtd9dmkhvcm9ghpvk2vb";
-const string ClientSecret = "4jo0c6aeq96fefbpnr3hu098boppe42skk2ful1ok51ofe371nc";
-const string ApiEndpoint = "https://api.dev.emmy.cms.gov/enrollment";
+const string AuthBase = "https://emmy-prod.auth.us-east-1.amazoncognito.com/oauth2/token";
+const string ClientId = "6ja5f2dijpkc1g764tu65ontbu";
+const string ClientSecret = "oi06m4572eup96rtp2l8h2s48j3f4ngmvcqdl59qme8avnq3nk5";
+const string ApiEndpoint = "https://api.emmy.cms.gov/api/v0/education-enrollments";
 
 // JSON request body for the sample API call for student enrollment.
-const string RequestBody = """
+const string RequestBody_Enrollment = """
     {
         "firstName": "Lynette",
         "lastName": "Oyola",
@@ -22,8 +21,9 @@ const string RequestBody = """
     }
     """;
 
+
 // ============================================================
-// Main logic
+// This is the main entry point for this example application.
 // ============================================================
 
 try
@@ -36,7 +36,7 @@ try
     Console.WriteLine();
 
     // Step 2: Call API endpoint with Bearer token
-    Console.WriteLine("Step 2: Calling API with Bearer token...");
+    Console.WriteLine("Step 2: Calling Emmy API with Bearer token...");
     string response = await CallApiWithTokenAsync(token);
     Console.WriteLine("API Response:");
     Console.WriteLine(response);
@@ -47,12 +47,14 @@ catch (Exception ex)
     Console.Error.WriteLine(ex.StackTrace);
 }
 
-// ============================================================
-// Step 1: POST to token endpoint using Basic auth
-// ============================================================
-
+/// <summary>
+/// Step 1: Make HTTP POST request to get JWT token using Basic authentication
+/// </summary>
 async Task<string> GetJwtTokenAsync()
 {
+    // Send request with a client that accepts self-signed certificates
+    // NOTE: In production, you should use a properly configured HttpClient with
+    // valid SSL certificates!
     using HttpClient client = CreateTrustAllCertificatesClient();
 
     // Build Basic Auth header
@@ -80,22 +82,23 @@ async Task<string> GetJwtTokenAsync()
         ?? throw new Exception("access_token not found in response.");
 }
 
-// ============================================================
-// Step 2: GET with JSON body using Bearer token
-// ============================================================
-
+/// <summary>
+/// Step 2: Make HTTP POST request to API endpoint with Bearer token and JSON body
+/// </summary>
 async Task<string> CallApiWithTokenAsync(string token)
 {
+    // Send request with a client that accepts self-signed certificates
+    // NOTE: In production, you should use a properly configured HttpClient with
+    // valid SSL certificates!
     using HttpClient client = CreateTrustAllCertificatesClient();
 
     // Set Bearer auth header
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-    // GET with a body requires a custom HttpRequestMessage
-    // Note: GET with a body is non-standard; .NET requires explicit use of HttpRequestMessage
-    var requestMessage = new HttpRequestMessage(HttpMethod.Get, ApiEndpoint)
+    // POST the HTTP request with JSON body
+    var requestMessage = new HttpRequestMessage(HttpMethod.Post, ApiEndpoint)
     {
-        Content = new StringContent(RequestBody, Encoding.UTF8, "application/json")
+        Content = new StringContent(RequestBody_Enrollment, Encoding.UTF8, "application/json")
     };
 
     HttpResponseMessage response = await client.SendAsync(requestMessage);
@@ -108,11 +111,10 @@ async Task<string> CallApiWithTokenAsync(string token)
     return await response.Content.ReadAsStringAsync();
 }
 
-// ============================================================
-// Helper: HttpClient that accepts self-signed / invalid SAN certs
-// WARNING: ONLY for development/testing. Never use in production!
-// ============================================================
-
+/// <summary>
+/// Creates an HttpClient that accepts all SSL certificates, including self-signed and those with invalid SANs.
+/// WARNING: This should ONLY be used for development and testing purposes. Do NOT use this in production environments.
+/// </summary>
 HttpClient CreateTrustAllCertificatesClient()
 {
     var handler = new HttpClientHandler

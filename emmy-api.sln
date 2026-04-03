@@ -6,7 +6,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{B3
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "csharp", "csharp", "{06E8C8A7-A0E8-98DE-8946-9CF52B15DA27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JwtTokenExample", "examples\csharp\JwtTokenExample.csproj", "{C89EC243-8CBD-D016-D0FA-7257E53127AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmmyApiAuthAndRequestExample", "examples\csharp\EmmyApiAuthAndRequestExample.csproj", "{C89EC243-8CBD-D016-D0FA-7257E53127AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

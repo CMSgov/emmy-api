@@ -1,9 +1,9 @@
 # Java JWT Token Example
 
 A simple Java console application that demonstrates:
-1. Making an HTTP POST request to obtain a JWT token
-2. Using the token in a Bearer Authorization header
-3. Making an authenticated HTTP POST request with JSON body
+1. Making an HTTP POST request to obtain a JWT bearer token
+2. Using the bearer token in a HTTP Authorization header
+3. Making an authenticated HTTP POST request with JSON body to an Emmy API endpoint
 4. Printing the response to the console
 
 ## Requirements
@@ -11,23 +11,23 @@ A simple Java console application that demonstrates:
 - Java 11 or higher
 - Maven 3.6+ (https://maven.apache.org/install.html)
 
-## Running with Maven
-
-This command compiles and runs this example, disabling any hostname verification so that you can test with self-signed SSL certificates. **Note that you would never want to do this in a Production environment.**
-
-```bash
-mvn compile exec:java -Dexec.mainClass="JwtTokenExample" -Djdk.internal.httpclient.disableHostnameVerification=true
-```
-
 ## Configuration
 
-Update the following constants in `src/main/java/JwtTokenExample.java` to match your environment:
+Update the following constants in the section marked **CONFIGURATION** in the `EmmyApiAuthAndRequestExample.java` file to match your environment:
 
 - `TOKEN_ENDPOINT` - URL to the authentication endpoint that returns a JWT token
 - `USERNAME` - Username for Basic authentication
 - `PASSWORD` - Password for Basic authentication
 - `API_ENDPOINT` - URL to the API endpoint that accepts the Bearer token
 - `REQUEST_BODY` - JSON body to send with the second request
+
+## Running with Maven
+
+This command compiles and runs this example, disabling any hostname verification so that you can test with self-signed SSL certificates. **Note that you would never want to do this in a Production environment.**
+
+```bash
+mvn compile exec:java -Dexec.mainClass="EmmyApiAuthAndRequestExample" -Djdk.internal.httpclient.disableHostnameVerification=true
+```
 
 ## Example Output
 

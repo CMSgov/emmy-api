@@ -12,22 +12,13 @@ A simple .NET console application that demonstrates:
 
 ## Configuration
 
-Update the following constants at the top of `JwtTokenExample.cs` to match your environment:
+Update the following constants in the section marked **CONFIGURATION** in the `EmmyApiAuthAndRequestExample.cs` file to match your environment:
 
 - `AuthBase` - URL to the authentication endpoint that returns a JWT token
 - `ClientId` - Client ID for Basic authentication
 - `ClientSecret` - Client secret for Basic authentication
 - `ApiEndpoint` - URL to the API endpoint that accepts the Bearer token
 - `RequestBody` - JSON body to send with the API request
-
-Example:
-```csharp
-const string AuthBase = "https://your-auth-server.com/oauth2/token";
-const string ClientId = "your-client-id";
-const string ClientSecret = "your-client-secret";
-const string ApiEndpoint = "https://api.your-server.com/v1/endpoint";
-const string RequestBody = """{ "field": "value" }""";
-```
 
 ## Running
 

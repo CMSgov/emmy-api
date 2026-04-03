@@ -1,14 +1,15 @@
 $kind: http-request
 name: Enrollment Verification
-url: "{{api_base}}enrollment"
-method: GET
+url: "{{api_base}}education-enrollments"
+method: POST
 body:
   type: json
   content: |-
     {
         "firstName": "Lynette",
         "lastName": "Oyola",
-        "dateOfBirth": "1988-10-24"
+        "dateOfBirth": "1988-10-24",
+        "caseReferenceId": "UT-21345"
     }
 auth:
   type: bearer

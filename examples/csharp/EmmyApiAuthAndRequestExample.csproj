@@ -5,7 +5,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>JwtTokenExample</AssemblyName>
+    <AssemblyName>EmmyApiAuthAndRequestExample</AssemblyName>
   </PropertyGroup>
 
 </Project>
