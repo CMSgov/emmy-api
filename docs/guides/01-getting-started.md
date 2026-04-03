@@ -44,7 +44,7 @@ To **authenticate** with the Emmy API, you will use your `<client_id>` and `<cli
 
 Obtaining a token requires that you use a **Basic Authentication** HTTP header. This means that you will join your `<client_id>` and `<client_secreet>` with a colon `:` and then Base64 encode the entire string. Follow the [Authentication Base64 Encoding](02-authentication.md#credential-format) instructions to build your credential string. We'll refer to the credential string that you generate as `<base64_credentials>`.
 
-For simplicity, we'll use `curl` to showcase getting an access token. From a terminal or command prompt, run the `curl` command below ([how do I install `curl`?](../examples/v0/curl.md#installing-curl)) by substituting the appropriate variables (shown ```<IN_BRACKETS>``` below) with their actual values:
+For simplicity, we'll use `curl` to showcase getting an access token. From a terminal or command prompt, run this `curl` command ([how do I install `curl`?](../examples/v0/curl.md#installing-curl)) by substituting the appropriate variables (shown ```<IN_BRACKETS>``` below) with their actual values:
 
 ```bash
 curl --location '<AUTH_BASE>' \
@@ -76,10 +76,8 @@ In the [API specs for `/v0/education-enrollments`](https://cmsgov.github.io/emmy
 ```json
 {
   "firstName": "Lynette",
-  "middleName": "Marie",
   "lastName": "Oyola",
-  "dateOfBirth": "1988-10-24",
-  "ssn": "123-45-6789"
+  "dateOfBirth": "1988-10-24"
 }
 ```
 
@@ -95,22 +93,22 @@ In this step, we will again use the `curl` tool to make a request to the Emmy AP
 This request is slightly more complex since it now has HTTP authorization, a content body, and a different endpoint. Use this example by substituting the values for your environment:
 
 ```bash
-curl --location --request GET '<API_BASE>/v0/education-enrollments' \
+curl --location --request POST '<API_BASE>/v0/education-enrollments' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data '{
   "firstName": "Lynette",
-  "middleName": "Marie",
   "lastName": "Oyola",
-  "dateOfBirth": "1988-10-24",
-  "ssn": "123-45-6789"
+  "dateOfBirth": "1988-10-24"
 }'
 ```
 
 After a moment, the Emmy API will provide a verification response for the applicant identifying information you provided.
 
+(Note that if you are testing an endpoint which might have a self-signed certificate, you can use the `-k` option on the `curl` command to accept the certificate and proceed.)
+
 ## Next Steps
 
 Now that you have completed an end-to-end test of using the Emmy API, you can use these lessons learned to connect to and use the API in your own application.
 
-- [Visit the Emmy API examples](https://github.com/CMSgov/emmy-api/tree/main/examples)
+- [Visit the Emmy API examples](../../examples/README.md)

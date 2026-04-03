@@ -7,10 +7,10 @@ using System.Text.Json;
 // ============================================================
 
 // Update these variables with your actual values.
-const string AuthBase = "https://emmy-prod.auth.us-east-1.amazoncognito.com/oauth2/token";
-const string ClientId = "6ja5f2dijpkc1g764tu65ontbu";
-const string ClientSecret = "oi06m4572eup96rtp2l8h2s48j3f4ngmvcqdl59qme8avnq3nk5";
-const string ApiEndpoint = "https://api.emmy.cms.gov/api/v0/education-enrollments";
+const string AuthBase = "https://onboarding_authentication_endpoint";
+const string ClientId = "your_client_id_here";
+const string ClientSecret = "your_client_secret_here";
+const string ApiEndpoint = "https://onboarding_emmy_api_endpoint/api/v0/education-enrollments";
 
 // JSON request body for the sample API call for student enrollment.
 const string RequestBody_Enrollment = """

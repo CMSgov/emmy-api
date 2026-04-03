@@ -23,10 +23,10 @@ public class EmmyApiAuthAndRequestExample {
     // ============================================================
 
     // Update these variables with your actual values.
-    private static final String AUTH_BASE = "https://emmy-prod.auth.us-east-1.amazoncognito.com/oauth2/token";
-    private static final String CLIENT_ID = "6ja5f2dijpkc1g764tu65ontbu";
-    private static final String CLIENT_SECRET = "oi06m4572eup96rtp2l8h2s48j3f4ngmvcqdl59qme8avnq3nk5";
-    private static final String API_ENDPOINT = "https://api.emmy.cms.gov/api/v0/education-enrollments";
+    private static final String AUTH_BASE = "https://onboarding_authentication_endpoint";
+    private static final String CLIENT_ID = "your_client_id_here";
+    private static final String CLIENT_SECRET = "your_client_secret_here";
+    private static final String API_ENDPOINT = "https://onboarding_emmy_api_endpoint/api/v0/education-enrollments";
 
     // JSON request body for the sample API call for student enrollment.
     private static final String REQUEST_BODY_ENROLLMENT = "{\n" + //

@@ -9,6 +9,9 @@ values:
   - key: api_base
     value: '{{base_url}}{{api_version}}'
     enabled: true
+  - key: auth_base
+    value: ''
+    enabled: true
   - key: client_id
     value: ''
     enabled: true
@@ -19,8 +22,5 @@ values:
     value: ''
     enabled: true
   - key: token_expiry
-    value: ''
-    enabled: true
-  - key: auth_base
     value: ''
     enabled: true
