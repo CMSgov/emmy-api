@@ -24,4 +24,4 @@ echo 'export PATH="/opt/homebrew/opt/curl/bin:$PATH"' >> ~/.zshrc
 
 Windows environments will generally have `curl` available in the latest versions. You should be able to open a command prompt and use it out of the box.
 
-Note that in Windows, you will need to use double quotes (") to specify paramters, rather than single quote as in MacOS or Linux.
+Note that in Windows, you will need to use double quotes (") to specify parameters, rather than single quote as in MacOS or Linux.
