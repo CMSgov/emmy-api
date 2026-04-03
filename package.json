@@ -35,15 +35,22 @@
     "@cspell/dict-software-terms": "^5.2.2",
     "@cspell/dict-sql": "^2.2.1",
     "@cspell/dict-typescript": "^3.2.3",
-    "@redocly/cli": "^1.34.5",
+    "@redocly/cli": "^2.25.4",
     "@stoplight/spectral-cli": "^6.15.0",
     "ajv": "^8.18.0",
-    "ajv-cli": "^5.0.0",
     "ajv-formats": "^3.0.1",
     "cspell": "^9.7.0",
     "glob": "^13.0.6",
     "markdownlint-cli2": "^0.22.0",
-    "prettier": "^3.6.2",
+    "prettier": "^3.8.1",
     "typescript": "^6.0.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "markdownlint-cli2>smol-toml": "1.6.1",
+      "@stoplight/spectral-ruleset-bundler>rollup": "2.80.0",
+      "@stoplight/spectral-core>minimatch": "3.1.5",
+      "lodash": "4.18.0"
+    }
   }
 }
