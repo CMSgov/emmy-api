@@ -111,7 +111,7 @@ func (s *service) LookupEnrollmentStatus(ctx context.Context, reqBody Request) (
 			slog.String("body_snippet", snippet),
 		)
 
-		return EducationResponse{}, fmt.Errorf("nsc submit failed: status=%d", resp.StatusCode)
+		return Response{}, fmt.Errorf("nsc submit failed: status=%d", resp.StatusCode)
 	}
 
 	var out nscResponse
@@ -336,7 +336,7 @@ type legacySubmitStatus struct {
 	Code string `json:"code"`
 }
 
-func mapLegacyEnrollmentStatus(respBytes []byte) (SchoolEnrollmentStatus, error) {
+func mapLegacyEnrollmentStatus(respBytes []byte) (EnrollmentStatus, error) {
 	var legacy legacySubmitResponse
 	if err := json.Unmarshal(respBytes, &legacy); err != nil {
 		return "", fmt.Errorf("decode legacy nsc response: %w", err)
@@ -344,7 +344,7 @@ func mapLegacyEnrollmentStatus(respBytes []byte) (SchoolEnrollmentStatus, error)
 
 	switch legacy.Status.Code {
 	case "0":
-		return SchoolEnrollmentStatusEnrolled, nil
+		return EnrollmentStatusEnrolled, nil
 	case "":
 		return "", fmt.Errorf("enrollmentStatus is required")
 	default:

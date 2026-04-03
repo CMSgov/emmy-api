@@ -221,3 +221,27 @@ func TestLookupEnrollmentStatus_NullEnrollmentDetails(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, EnrollmentStatusEnrolled, out.EnrollmentStatus)
 }
+
+func TestMapLegacyEnrollmentStatus_CodeZeroReturnsEnrolled(t *testing.T) {
+	status, err := mapLegacyEnrollmentStatus([]byte(`{"status":{"code":"0"}}`))
+	require.NoError(t, err)
+	require.Equal(t, EnrollmentStatusEnrolled, status)
+}
+
+func TestMapLegacyEnrollmentStatus_MissingCodeReturnsError(t *testing.T) {
+	status, err := mapLegacyEnrollmentStatus([]byte(`{"status":{}}`))
+	require.Equal(t, EnrollmentStatus(""), status)
+	require.ErrorContains(t, err, "enrollmentStatus is required")
+}
+
+func TestMapLegacyEnrollmentStatus_UnsupportedCodeReturnsError(t *testing.T) {
+	status, err := mapLegacyEnrollmentStatus([]byte(`{"status":{"code":"99"}}`))
+	require.Equal(t, EnrollmentStatus(""), status)
+	require.ErrorContains(t, err, `unsupported legacy nsc status code "99"`)
+}
+
+func TestMapLegacyEnrollmentStatus_InvalidJSONReturnsError(t *testing.T) {
+	status, err := mapLegacyEnrollmentStatus([]byte(`{`))
+	require.Equal(t, EnrollmentStatus(""), status)
+	require.ErrorContains(t, err, "decode legacy nsc response")
+}

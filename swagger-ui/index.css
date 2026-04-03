@@ -14,3 +14,10 @@ body {
     margin: 0;
     background: #fafafa;
 }
+
+/* Keep button growth anchored on the left edge so hover expansion moves right only. */
+.swagger-ui .btn,
+.swagger-ui .grow,
+.swagger-ui .grow-large {
+    transform-origin: left center;
+}
