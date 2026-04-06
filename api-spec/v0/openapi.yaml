@@ -238,9 +238,41 @@ components:
           country: USA
     VeteranDisabilityStatusResponseExample:
       value:
-        combinedDisabilityRating: 70
+        combinedDisabilityRating: 40
         rawData:
           data:
             attributes:
-              combined_disability_rating: 70
+              combined_disability_rating: 40
+              combined_effective_date: "2012-08-01"
+              individual_ratings:
+                - decision: 1151 Granted
+                  diagnostic_text: Renal Failure
+                  diagnostic_type_code: "0520"
+                  diagnostic_type_name: Paralysis of the sciatic nerve
+                  disability_rating_id: "1071465"
+                  effective_date: "2018-09-21"
+                  rating_end_date: "2122-08-27"
+                  rating_percentage: 80
+                  static_ind: true
+                - decision: Service Connected
+                  diagnostic_text: DM Type II
+                  diagnostic_type_code: "9411"
+                  diagnostic_type_name: Post traumatic stress disorder
+                  disability_rating_id: "1071466"
+                  effective_date: "2018-02-14"
+                  rating_end_date: "2122-08-27"
+                  rating_percentage: 50
+                  static_ind: true
+                - decision: Service Connected
+                  diagnostic_text: DM Type II
+                  diagnostic_type_code: "9411"
+                  diagnostic_type_name: Post traumatic stress disorder
+                  disability_rating_id: "1071466"
+                  effective_date: "2020-02-20"
+                  rating_end_date: "2122-08-27"
+                  rating_percentage: 30
+                  static_ind: true
+              legal_effective_date: "2012-07-01"
+            id: 1012667145V762142
+            type: disability_ratings
         dataSource: Veteran's Affairs
