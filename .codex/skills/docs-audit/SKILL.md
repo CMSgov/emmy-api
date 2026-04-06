@@ -9,7 +9,7 @@ description: Perform repository documentation accuracy audits that compare docs 
 
 Set these values before auditing:
 
-- `report_date=<YYYY-MM-DD_hh:mm:ss>`
+- `report_date=<YYYY-MM-DD_hh-mm-ss>`
 - `scope=root docs + docs/**/*.md` by default (expand only when explicitly requested)
 
 Use current checked-out branch files as source of truth.
