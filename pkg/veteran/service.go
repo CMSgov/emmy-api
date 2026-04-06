@@ -53,7 +53,9 @@ type Address struct {
 }
 
 type Response struct {
-	CombinedDisabilityRating int `json:"combinedDisabilityRating"`
+	CombinedDisabilityRating int    `json:"combinedDisabilityRating"`
+	RawData                  any    `json:"rawData"`
+	DataSource               string `json:"dataSource"`
 }
 
 type service struct {
@@ -127,7 +129,8 @@ func (s *service) LookupDisabilityRating(ctx context.Context, reqBody Request) (
 		}
 	}
 
-	body, err := json.Marshal(toDisabilityRatingRequest(reqBody))
+	vaReq := toDisabilityRatingRequest(reqBody)
+	body, err := json.Marshal(vaReq)
 	if err != nil {
 		return Response{}, fmt.Errorf("marshal disability rating body: %w", err)
 	}
@@ -180,6 +183,11 @@ func (s *service) LookupDisabilityRating(ctx context.Context, reqBody Request) (
 
 	return Response{
 		CombinedDisabilityRating: out.Data.Attributes.CombinedDisabilityRating,
+		RawData: map[string]any{
+			"reqBody":    reqBody,
+			"dataSource": "Veteran's Affairs",
+		},
+		DataSource: "Veteran's Affairs",
 	}, nil
 }
 

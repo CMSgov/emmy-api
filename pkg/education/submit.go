@@ -176,6 +176,8 @@ func translateNSCResponse(resp nscResponse) (Response, error) {
 
 	return Response{
 		EnrollmentStatus: status,
+		RawData:          resp,
+		DataSource:       "National Student Clearinghouse",
 	}, nil
 }
 

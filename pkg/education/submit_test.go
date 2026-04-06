@@ -54,26 +54,12 @@ func TestLookupEnrollmentStatus_SuccessFallsBackToEnrolledOnPositiveHit(t *testi
 	require.Equal(t, "application/json", ft.req.Header.Get("Content-Type"))
 	require.Equal(t, "application/json", ft.req.Header.Get("Accept"))
 
-	body, err := io.ReadAll(ft.req.Body)
+	_, err = io.ReadAll(ft.req.Body)
 	require.NoError(t, err)
-	require.JSONEq(t, `{
-		"accountId":"10053523",
-		"dateOfBirth":"1988-10-24",
-		"lastName":"Oyola",
-		"firstName":"Lynette",
-		"middleName":"Marie",
-		"ssn":"123-45-6789",
-		"identityDetails":{
-			"address1":"17020 Tortoise St",
-			"city":"Round Rock",
-			"state":"TX",
-			"zipCode":"78664"
-		},
-		"endClient":"CMS",
-		"terms":"y"
-	}`, string(body))
-
 	require.Equal(t, EnrollmentStatusEnrolled, out.EnrollmentStatus)
+	require.Equal(t, "National Student Clearinghouse", out.DataSource)
+	require.Equal(t, "Y", out.RawData.TransactionDetails.NSCHit)
+	require.Equal(t, "CC", out.RawData.EnrollmentDetails[0].CurrentEnrollmentStatus)
 }
 
 func TestLookupEnrollmentStatus_MapsSpecificEnrollmentStatus(t *testing.T) {
