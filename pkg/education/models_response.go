@@ -11,7 +11,7 @@ const (
 
 type Response struct {
 	EnrollmentStatus EnrollmentStatus `json:"enrollmentStatus"`
-	RawData          nscResponse      `json:"rawData"`
+	RawData          any              `json:"rawData"`
 	DataSource       string           `json:"dataSource"`
 }
 

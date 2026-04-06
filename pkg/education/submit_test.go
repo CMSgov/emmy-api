@@ -58,8 +58,14 @@ func TestLookupEnrollmentStatus_SuccessFallsBackToEnrolledOnPositiveHit(t *testi
 	require.NoError(t, err)
 	require.Equal(t, EnrollmentStatusEnrolled, out.EnrollmentStatus)
 	require.Equal(t, "National Student Clearinghouse", out.DataSource)
-	require.Equal(t, "Y", out.RawData.TransactionDetails.NSCHit)
-	require.Equal(t, "CC", out.RawData.EnrollmentDetails[0].CurrentEnrollmentStatus)
+
+	rawData, ok := out.RawData.(map[string]any)
+	require.True(t, ok, "RawData should be a map[string]any")
+	transactionDetails := rawData["transactionDetails"].(map[string]any)
+	require.Equal(t, "Y", transactionDetails["nscHit"])
+	enrollmentDetails := rawData["enrollmentDetails"].([]any)
+	firstDetail := enrollmentDetails[0].(map[string]any)
+	require.Equal(t, "CC", firstDetail["currentEnrollmentStatus"])
 }
 
 func TestLookupEnrollmentStatus_MapsSpecificEnrollmentStatus(t *testing.T) {

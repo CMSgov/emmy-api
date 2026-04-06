@@ -199,22 +199,7 @@
           },
           "rawData": {
             "type": "object",
-            "description": "Raw request and source data. Includes the original request body and the data source identifier.\n",
-            "required": [
-              "reqBody",
-              "dataSource"
-            ],
-            "properties": {
-              "reqBody": {
-                "type": "object",
-                "description": "The original identity request body."
-              },
-              "dataSource": {
-                "type": "string",
-                "description": "The source of the disability rating data.",
-                "example": "Veteran's Affairs"
-              }
-            }
+            "description": "Raw response data from Veteran's Affairs."
           },
           "dataSource": {
             "type": "string",
@@ -474,22 +459,11 @@
         "value": {
           "combinedDisabilityRating": 70,
           "rawData": {
-            "reqBody": {
-              "firstName": "Lynette",
-              "middleName": "Marie",
-              "lastName": "Oyola",
-              "dateOfBirth": "1988-10-24",
-              "ssn": "123-45-6789",
-              "address": {
-                "street1": "17020 Tortoise St",
-                "street2": "Apt 4B",
-                "city": "Round Rock",
-                "state": "TX",
-                "postalCode": "78664",
-                "country": "USA"
+            "data": {
+              "attributes": {
+                "combined_disability_rating": 70
               }
-            },
-            "dataSource": "Veteran's Affairs"
+            }
           },
           "dataSource": "Veteran's Affairs"
         }

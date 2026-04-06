@@ -112,13 +112,12 @@ func TestLookupDisabilityRating_Success(t *testing.T) {
 
 	require.Equal(t, 70, out.CombinedDisabilityRating)
 	require.Equal(t, "Veteran's Affairs", out.DataSource)
+
 	rawData, ok := out.RawData.(map[string]any)
-	require.True(t, ok)
-	require.Equal(t, "Veteran's Affairs", rawData["dataSource"])
-	reqMap, ok := rawData["reqBody"].(Request)
-	require.True(t, ok)
-	require.Equal(t, "Lynette", reqMap.FirstName)
-	require.Equal(t, "123-45-6789", reqMap.SSN)
+	require.True(t, ok, "RawData should be a map[string]any")
+	data := rawData["data"].(map[string]any)
+	attributes := data["attributes"].(map[string]any)
+	require.Equal(t, float64(70), attributes["combined_disability_rating"])
 }
 
 func TestLookupDisabilityRating_AddressOnlySuccess(t *testing.T) {
@@ -155,13 +154,12 @@ func TestLookupDisabilityRating_AddressOnlySuccess(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 80, out.CombinedDisabilityRating)
 	require.Equal(t, "Veteran's Affairs", out.DataSource)
+
 	rawData, ok := out.RawData.(map[string]any)
-	require.True(t, ok)
-	require.Equal(t, "Veteran's Affairs", rawData["dataSource"])
-	reqMap, ok := rawData["reqBody"].(Request)
-	require.True(t, ok)
-	require.Equal(t, "Lynette", reqMap.FirstName)
-	require.Equal(t, "17020 Tortoise St", reqMap.Address.Street1)
+	require.True(t, ok, "RawData should be a map[string]any")
+	data := rawData["data"].(map[string]any)
+	attributes := data["attributes"].(map[string]any)
+	require.Equal(t, float64(80), attributes["combined_disability_rating"])
 
 	reqBody, err := io.ReadAll(ft.req.Body)
 	require.NoError(t, err)

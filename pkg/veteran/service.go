@@ -181,13 +181,15 @@ func (s *service) LookupDisabilityRating(ctx context.Context, reqBody Request) (
 		return Response{}, fmt.Errorf("decode disability rating response: %w", err)
 	}
 
+	var rawBody any
+	if err := json.Unmarshal(respBytes, &rawBody); err != nil {
+		return Response{}, fmt.Errorf("decode raw disability rating body: %w", err)
+	}
+
 	return Response{
 		CombinedDisabilityRating: out.Data.Attributes.CombinedDisabilityRating,
-		RawData: map[string]any{
-			"reqBody":    reqBody,
-			"dataSource": "Veteran's Affairs",
-		},
-		DataSource: "Veteran's Affairs",
+		RawData:                  rawBody,
+		DataSource:               "Veteran's Affairs",
 	}, nil
 }
 
