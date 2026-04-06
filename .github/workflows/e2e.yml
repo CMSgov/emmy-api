@@ -1,0 +1,54 @@
+name: End-to-End Test Verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      emmy_env:
+        description: 'Emmy Environment (dev, uat, demo)'
+        required: true
+        type: choice
+        options:
+          - dev
+          - uat
+          - demo
+        default: 'uat'
+      emmy_api_url:
+        description: 'Override Emmy API URL (e.g., https://api.uat.emmy.cms.gov/api/v0)'
+        required: false
+      emmy_api_cognito_url:
+        description: 'Override Emmy API Cognito Token URL'
+        required: false
+
+jobs:
+  e2e:
+    name: Run E2E Tests
+    runs-on: self-hosted
+    steps:
+      - name: Fetch Repository
+        uses: actions/checkout@v6
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: false # The script has no Gemfile, it uses standard libraries only
+
+      - name: Run E2E Tests
+        env:
+          CLIENT_ID: >-
+            ${{ github.event.inputs.emmy_env == 'dev' && secrets.CLIENT_ID_DEV ||
+                github.event.inputs.emmy_env == 'uat' && secrets.CLIENT_ID_UAT ||
+                github.event.inputs.emmy_env == 'demo' && secrets.CLIENT_ID_DEMO }}
+          SECRET_ID: >-
+            ${{ github.event.inputs.emmy_env == 'dev' && secrets.SECRET_ID_DEV ||
+                github.event.inputs.emmy_env == 'uat' && secrets.SECRET_ID_UAT ||
+                github.event.inputs.emmy_env == 'demo' && secrets.SECRET_ID_DEMO }}
+          EMMY_ENV: ${{ github.event.inputs.emmy_env }}
+          EMMY_API_URL: ${{ github.event.inputs.emmy_api_url }}
+          EMMY_API_COGNITO_URL: ${{ github.event.inputs.emmy_api_cognito_url }}
+        run: |
+          if [ -z "$CLIENT_ID" ] || [ -z "$SECRET_ID" ]; then
+            echo "Error: CLIENT_ID or SECRET_ID secrets not set in repository."
+            exit 1
+          fi
+          ruby scripts/end_to_end_tests.rb
