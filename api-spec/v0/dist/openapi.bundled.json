@@ -198,7 +198,7 @@
           },
           "rawData": {
             "type": "object",
-            "description": "Raw response data from Veteran's Affairs."
+            "description": "Raw response data from Veterans Affairs."
           },
           "dataSource": {
             "$ref": "#/components/schemas/data_source.schema",
@@ -357,7 +357,7 @@
         "type": "string",
         "enum": [
           "National Student Clearinghouse",
-          "Veteran's Affairs"
+          "Veterans Affairs"
         ]
       },
       "combined_disability_rating.schema": {
@@ -513,7 +513,7 @@
               "type": "disability_ratings"
             }
           },
-          "dataSource": "Veteran's Affairs"
+          "dataSource": "Veterans Affairs"
         }
       }
     }

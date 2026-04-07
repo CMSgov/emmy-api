@@ -157,7 +157,7 @@ components:
           description: VA combined disability rating for the identified person.
         rawData:
           type: object
-          description: Raw response data from Veteran's Affairs.
+          description: Raw response data from Veterans Affairs.
         dataSource:
           $ref: ../../schema/v0/data_source.schema.json
           description: The source of the disability rating data.
@@ -273,4 +273,4 @@ components:
               legal_effective_date: "2012-07-01"
             id: 1012667145V762142
             type: disability_ratings
-        dataSource: Veteran's Affairs
+        dataSource: Veterans Affairs

@@ -4,5 +4,5 @@ type DataSource string
 
 const (
 	DataSourceNSC DataSource = "National Student Clearinghouse"
-	DataSourceVA  DataSource = "Veteran's Affairs"
+	DataSourceVA  DataSource = "Veterans Affairs"
 )

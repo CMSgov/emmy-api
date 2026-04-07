@@ -6,6 +6,6 @@
   "type": "string",
   "enum": [
     "National Student Clearinghouse",
-    "Veteran's Affairs"
+    "Veterans Affairs"
   ]
 }
