@@ -1,17 +1,18 @@
-# Emmy API Verification Service
+# Eligibility Made Easy (Emmy) API Verification Service
 
-The Emmy API is a backend data service designed to equip states with the automated verification capabilities needed to determine if an applicant has met H.R. 1 Community Engagement (CE) standards.
+The Emmy API is a backend data service connecting to federal and commercial data sources to help facilitate eligibility determination for state agencies.
 
 ## Quick Links
 
-- **[Technical Guide to Getting Started](docs/guides/01-getting-started.md)** (✅ Implementers start here!)
+- **[About Emmy Software](https://cms.gov/eligibility-made-easy)**
+  - [Emmy API Overview](https://cms.gov/eligibility-made-easy)
+  - [Emmy Application Github](https://github.com/DSACMS/iv-cbv-payroll)
+
+- **[Technical Guide to Getting Started](docs/guides/01-getting-started.md)**
   - [Usage Examples](docs/guides/03-usage-examples.md)
   - [Emmy API Specifications (Swagger)](https://cmsgov.github.io/emmy-api/swagger-ui/)
-- **[About Emmy Software](https://cms.gov/eligibility-made-easy)**
-  - [Emmy API Stakeholder Overview](https://cms.gov/eligibility-made-easy) (➡️ Great for decision-makers & teams)
-  - [Interested in the **Emmy App** instead?](https://github.com/DSACMS/iv-cbv-payroll)
+
 - [Developer and Repo Information](#local-development)
-  - [Emmy API Repo Homepage](https://github.com/DSACMS/iv-cbv-payroll)
 
 ## About the Project
 
