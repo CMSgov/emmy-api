@@ -172,7 +172,16 @@
           },
           "rawData": {
             "type": "object",
-            "description": "Raw response data from the National Student Clearinghouse."
+            "description": "Raw response data",
+            "properties": {
+              "data": {
+                type: "string"
+              },
+              "ContentType": {
+                "type": "string",
+                "examples": ["application/json","application/pdf"]
+              }
+            }
           },
           "dataSource": {
             "type": "string",
