@@ -172,21 +172,11 @@
           },
           "rawData": {
             "type": "object",
-            "description": "Raw response data",
-            "properties": {
-              "data": {
-                type: "string"
-              },
-              "ContentType": {
-                "type": "string",
-                "examples": ["application/json","application/pdf"]
-              }
-            }
+            "description": "Raw response data from the National Student Clearinghouse."
           },
           "dataSource": {
-            "type": "string",
-            "description": "The source of the enrollment data.",
-            "example": "National Student Clearinghouse"
+            "$ref": "#/components/schemas/data_source.schema",
+            "description": "The source of the enrollment data."
           }
         }
       },
@@ -211,9 +201,8 @@
             "description": "Raw response data from Veteran's Affairs."
           },
           "dataSource": {
-            "type": "string",
-            "description": "The source of the disability rating data.",
-            "example": "Veteran's Affairs"
+            "$ref": "#/components/schemas/data_source.schema",
+            "description": "The source of the disability rating data."
           }
         }
       },
@@ -358,6 +347,17 @@
         "examples": [
           "FULL_TIME",
           "ENROLLED"
+        ]
+      },
+      "data_source.schema": {
+        "$id": "https://emmy.cms.gov/schemas/v0/data_source.json",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Data Source",
+        "description": "The source of the verification data.",
+        "type": "string",
+        "enum": [
+          "National Student Clearinghouse",
+          "Veteran's Affairs"
         ]
       },
       "combined_disability_rating.schema": {

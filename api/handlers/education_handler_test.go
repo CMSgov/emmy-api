@@ -58,7 +58,7 @@ func TestEducationHandler_Success(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, fiber.StatusOK, resp.StatusCode)
-	require.JSONEq(t, `{"enrollmentStatus":"ENROLLED"}`, string(body))
+	require.JSONEq(t, `{"enrollmentStatus":"ENROLLED", "dataSource":"", "rawData":null}`, string(body))
 	require.Equal(t, 1, service.calls)
 	require.Equal(t, "Lynette", service.lastReq.FirstName)
 	require.Equal(t, "Marie", service.lastReq.MiddleName)

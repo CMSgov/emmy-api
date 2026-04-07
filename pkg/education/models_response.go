@@ -1,5 +1,9 @@
 package education
 
+import (
+	"github.com/cmsgov/emmy-api/pkg/core"
+)
+
 type EnrollmentStatus string
 
 const (
@@ -12,7 +16,7 @@ const (
 type Response struct {
 	EnrollmentStatus EnrollmentStatus `json:"enrollmentStatus"`
 	RawData          any              `json:"rawData"`
-	DataSource       string           `json:"dataSource"`
+	DataSource       core.DataSource  `json:"dataSource"`
 }
 
 type nscResponse struct {

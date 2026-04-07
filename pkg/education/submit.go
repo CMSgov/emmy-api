@@ -187,7 +187,7 @@ func translateNSCResponse(resp nscResponse, rawBody any) (Response, error) {
 	return Response{
 		EnrollmentStatus: status,
 		RawData:          rawBody,
-		DataSource:       "National Student Clearinghouse",
+		DataSource:       core.DataSourceNSC,
 	}, nil
 }
 

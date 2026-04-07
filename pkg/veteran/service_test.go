@@ -111,7 +111,7 @@ func TestLookupDisabilityRating_Success(t *testing.T) {
 	}`, string(reqBody))
 
 	require.Equal(t, 70, out.CombinedDisabilityRating)
-	require.Equal(t, "Veteran's Affairs", out.DataSource)
+	require.Equal(t, core.DataSourceVA, out.DataSource)
 
 	rawData, ok := out.RawData.(map[string]any)
 	require.True(t, ok, "RawData should be a map[string]any")
@@ -153,7 +153,7 @@ func TestLookupDisabilityRating_AddressOnlySuccess(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.Equal(t, 80, out.CombinedDisabilityRating)
-	require.Equal(t, "Veteran's Affairs", out.DataSource)
+	require.Equal(t, core.DataSourceVA, out.DataSource)
 
 	rawData, ok := out.RawData.(map[string]any)
 	require.True(t, ok, "RawData should be a map[string]any")

@@ -57,7 +57,7 @@ func TestLookupEnrollmentStatus_SuccessFallsBackToEnrolledOnPositiveHit(t *testi
 	_, err = io.ReadAll(ft.req.Body)
 	require.NoError(t, err)
 	require.Equal(t, EnrollmentStatusEnrolled, out.EnrollmentStatus)
-	require.Equal(t, "National Student Clearinghouse", out.DataSource)
+	require.Equal(t, core.DataSourceNSC, out.DataSource)
 
 	rawData, ok := out.RawData.(map[string]any)
 	require.True(t, ok, "RawData should be a map[string]any")

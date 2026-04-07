@@ -140,9 +140,8 @@ components:
           type: object
           description: Raw response data from the National Student Clearinghouse.
         dataSource:
-          type: string
+          $ref: ../../schema/v0/data_source.schema.json
           description: The source of the enrollment data.
-          example: National Student Clearinghouse
     GetVeteranDisabilityStatusRequest:
       $ref: ../../schema/v0/identity.schema.json
     VeteranDisabilityStatusResponse:
@@ -160,9 +159,8 @@ components:
           type: object
           description: Raw response data from Veteran's Affairs.
         dataSource:
-          type: string
+          $ref: ../../schema/v0/data_source.schema.json
           description: The source of the disability rating data.
-          example: Veteran's Affairs
   examples:
     GetEducationEnrollmentRequestExample:
       value:

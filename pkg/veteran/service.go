@@ -53,9 +53,9 @@ type Address struct {
 }
 
 type Response struct {
-	CombinedDisabilityRating int    `json:"combinedDisabilityRating"`
-	RawData                  any    `json:"rawData"`
-	DataSource               string `json:"dataSource"`
+	CombinedDisabilityRating int             `json:"combinedDisabilityRating"`
+	RawData                  any             `json:"rawData"`
+	DataSource               core.DataSource `json:"dataSource"`
 }
 
 type service struct {
@@ -189,7 +189,7 @@ func (s *service) LookupDisabilityRating(ctx context.Context, reqBody Request) (
 	return Response{
 		CombinedDisabilityRating: out.Data.Attributes.CombinedDisabilityRating,
 		RawData:                  rawBody,
-		DataSource:               "Veteran's Affairs",
+		DataSource:               core.DataSourceVA,
 	}, nil
 }
 
