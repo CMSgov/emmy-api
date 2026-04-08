@@ -15,7 +15,7 @@ on:
 jobs:
   unit:
     name: test
-    runs-on: "emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
+    runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     services:
       redis:
         image: redis:7-alpine
@@ -40,7 +40,7 @@ jobs:
 
   golangci:
     name: lint
-    runs-on: "emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
+    runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     steps:
       - uses: actions/checkout@v6
 

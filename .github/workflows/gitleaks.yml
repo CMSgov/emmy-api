@@ -6,7 +6,7 @@ on:
 jobs:
   scan-for-secrets:
     name: Run gitleaks
-    runs-on: "emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
+    runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     env:
       GITLEAKS_VERSION: 8.30.0
       RUNNER_TEMP: ${{ github.workspace }}/.runner-temp/gitleaks-${{ github.run_id }}-${{ github.run_attempt }}
