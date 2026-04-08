@@ -20,7 +20,7 @@ import (
 )
 
 type fakeEducationService struct {
-	response education.EducationResponse
+	response education.Response
 	err      error
 	calls    int
 	lastReq  education.Request

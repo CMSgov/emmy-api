@@ -15,6 +15,11 @@ import (
 	"github.com/cmsgov/emmy-api/pkg/core"
 )
 
+var (
+	errLegacyEnrollmentStatusRequired = errors.New("enrollmentStatus is required")
+	errUnsupportedLegacyNSCStatusCode = errors.New("unsupported legacy nsc status code")
+)
+
 func (s *service) LookupEnrollmentStatus(ctx context.Context, reqBody Request) (Response, error) {
 	if s.opts.Timeout > 0 {
 		if _, hasDeadline := ctx.Deadline(); !hasDeadline {
@@ -111,7 +116,7 @@ func (s *service) LookupEnrollmentStatus(ctx context.Context, reqBody Request) (
 			slog.String("body_snippet", snippet),
 		)
 
-		return EducationResponse{}, fmt.Errorf("nsc submit failed: status=%d", resp.StatusCode)
+		return Response{}, fmt.Errorf("nsc submit failed: status=%d", resp.StatusCode)
 	}
 
 	var out nscResponse
@@ -164,6 +169,7 @@ func toNSCRequest(cfg *core.NSCConfig, reqBody Request) nscRequest {
 	return out
 }
 
+//nolint:gocritic // Keeping value semantics is acceptable for this internal translation helper.
 func translateNSCResponse(resp nscResponse) (Response, error) {
 	if isNSCNoHit(resp) || isNSCNotCurrentlyEnrolled(resp) {
 		return Response{}, ErrNotFound
@@ -346,56 +352,8 @@ func mapLegacyEnrollmentStatus(respBytes []byte) (EnrollmentStatus, error) {
 	case "0":
 		return EnrollmentStatusEnrolled, nil
 	case "":
-		return "", fmt.Errorf("enrollmentStatus is required")
+		return "", errLegacyEnrollmentStatusRequired
 	default:
-		return "", fmt.Errorf("unsupported legacy nsc status code %q", legacy.Status.Code)
-	}
-}
-
-type legacySubmitResponse struct {
-	Status legacySubmitStatus `json:"status"`
-}
-
-type legacySubmitStatus struct {
-	Code string `json:"code"`
-}
-
-func mapLegacyEnrollmentStatus(respBytes []byte) (SchoolEnrollmentStatus, error) {
-	var legacy legacySubmitResponse
-	if err := json.Unmarshal(respBytes, &legacy); err != nil {
-		return "", fmt.Errorf("decode legacy nsc response: %w", err)
-	}
-
-	switch legacy.Status.Code {
-	case "0":
-		return SchoolEnrollmentStatusEnrolled, nil
-	case "":
-		return "", fmt.Errorf("enrollmentStatus is required")
-	default:
-		return "", fmt.Errorf("unsupported legacy nsc status code %q", legacy.Status.Code)
-	}
-}
-
-type legacySubmitResponse struct {
-	Status legacySubmitStatus `json:"status"`
-}
-
-type legacySubmitStatus struct {
-	Code string `json:"code"`
-}
-
-func mapLegacyEnrollmentStatus(respBytes []byte) (SchoolEnrollmentStatus, error) {
-	var legacy legacySubmitResponse
-	if err := json.Unmarshal(respBytes, &legacy); err != nil {
-		return "", fmt.Errorf("decode legacy nsc response: %w", err)
-	}
-
-	switch legacy.Status.Code {
-	case "0":
-		return SchoolEnrollmentStatusEnrolled, nil
-	case "":
-		return "", fmt.Errorf("enrollmentStatus is required")
-	default:
-		return "", fmt.Errorf("unsupported legacy nsc status code %q", legacy.Status.Code)
+		return "", fmt.Errorf("%w %q", errUnsupportedLegacyNSCStatusCode, legacy.Status.Code)
 	}
 }

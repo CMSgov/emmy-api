@@ -53,6 +53,7 @@ type Address struct {
 }
 
 type Response struct {
+	//nolint:tagliatelle // External API contract uses camelCase.
 	CombinedDisabilityRating int `json:"combinedDisabilityRating"`
 }
 
