@@ -6,7 +6,7 @@ The Emmy API is a backend data service connecting to federal and commercial data
 
 - **[About Emmy Software](https://cms.gov/eligibility-made-easy)**
   - [Emmy API Overview](https://cms.gov/eligibility-made-easy)
-  - [Emmy Application Github](https://github.com/DSACMS/iv-cbv-payroll)
+  - [Emmy Application Github](https://github.com/DSACMS/iv-cbv-payroll/blob/main/README.md)
 
 - **[Technical Guide to Getting Started](docs/guides/01-getting-started.md)**
   - [Usage Examples](docs/guides/03-usage-examples.md)
@@ -16,9 +16,9 @@ The Emmy API is a backend data service connecting to federal and commercial data
 
 ## About the Project
 
-This project evolved out of the [IVaaS](https://github.com/DSACMS/iv-cbv-payroll "IVaaS repository") tool for consent based verification. As the need for more complex forms of validation developed, it became clear that providing a way for agencies to integrate directly with an API was becoming increasingly useful, particularly for ex parte renewals. The ultimate goals of this and related projects is to remove as much friction as possible between the applicant and receiving their benefits by reducing the burden placed on them to manually provide evidence of eligibility.
+The Emmy API is a part of a suite of open-source toll developed by the Centers for Medicare & Medicaid Services (CMS). Emmy supports states in implementing the new Medicaid eligibility and renewal community engagement requirements under the Working Families Tax Cut legislation.
 
-The Emmy API serves as a "Decision Brain" for the state. It does not replace the state's eligibility system; instead, it feeds it the definitive "Verified/Not Verified" signals needed to clear the backlog.
+Emmy suite of tools do not replace a state’s existing eligibility system — rather, it offers streamlined, efficient ways to help states implement the new community engagement requirements.
 
 ## Core Team
 
