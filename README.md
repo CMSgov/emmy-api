@@ -18,7 +18,7 @@ The Emmy API is a backend data service connecting to federal and commercial data
 
 The Emmy API is a part of a suite of open-source toll developed by the Centers for Medicare & Medicaid Services (CMS). Emmy supports states in implementing the new Medicaid eligibility and renewal community engagement requirements under the Working Families Tax Cut legislation.
 
-Emmy suite of tools do not replace a state’s existing eligibility system — rather, it offers streamlined, efficient ways to help states implement the new community engagement requirements.
+Emmy suite of tools do not replace a state's existing eligibility system — rather, it offers streamlined, efficient ways to help states implement the new community engagement requirements.
 
 ## Core Team
 
@@ -93,7 +93,7 @@ For more information about our Security, Vulnerability, and Responsible Disclosu
 
 A Software Bill of Materials (SBOM) is a formal record containing the details and supply chain relationships of various components used in building software.
 
-In the spirit of [Executive Order 14028 - Improving the Nation’s Cyber Security](https://www.gsa.gov/technology/it-contract-vehicles-and-purchasing-programs/information-technology-category/it-security/executive-order-14028), the current dependency graph for this repository is available at:
+In the spirit of [Executive Order 14028 - Improving the Nation's Cyber Security](https://www.gsa.gov/technology/it-contract-vehicles-and-purchasing-programs/information-technology-category/it-security/executive-order-14028), the current dependency graph for this repository is available at:
 [https://github.com/CMSgov/emmy-api/network/dependencies](https://github.com/CMSgov/emmy-api/network/dependencies)
 
 For more information and resources about SBOMs, visit: [https://www.cisa.gov/sbom](https://www.cisa.gov/sbom).
