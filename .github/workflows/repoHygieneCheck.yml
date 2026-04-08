@@ -8,7 +8,7 @@ on:
 jobs:
   check-first-run:
     name: Check For First Run
-    runs-on: "codebuild-emmy-prod-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
+    runs-on: "emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     outputs:
       {% raw %}
       should_run: ${{ steps.check.outputs.should_run }}
@@ -59,7 +59,7 @@ jobs:
     {% raw %}
     if: needs.check-first-run.outputs.should_run == 'true'
     {% endraw %}
-    runs-on: "codebuild-emmy-prod-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
+    runs-on: "emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     permissions:
       contents: write
       pull-requests: write

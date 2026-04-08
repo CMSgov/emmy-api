@@ -17,7 +17,7 @@ permissions:
 jobs:
   build:
     name: build
-    runs-on: "codebuild-emmy-prod-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
+    runs-on: "emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     steps:
       - name: Fetch Repository
         uses: actions/checkout@v6
