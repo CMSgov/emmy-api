@@ -1,0 +1,11 @@
+{
+  "$id": "https://emmy.cms.gov/schemas/v0/data_source.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Data Source",
+  "description": "The source of the verification data.",
+  "type": "string",
+  "enum": [
+    "National Student Clearinghouse",
+    "Veterans Affairs"
+  ]
+}

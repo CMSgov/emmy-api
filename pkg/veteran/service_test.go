@@ -111,6 +111,13 @@ func TestLookupDisabilityRating_Success(t *testing.T) {
 	}`, string(reqBody))
 
 	require.Equal(t, 70, out.CombinedDisabilityRating)
+	require.Equal(t, core.DataSourceVA, out.DataSource)
+
+	rawData, ok := out.RawData.(map[string]any)
+	require.True(t, ok, "RawData should be a map[string]any")
+	data := rawData["data"].(map[string]any)
+	attributes := data["attributes"].(map[string]any)
+	require.Equal(t, float64(70), attributes["combined_disability_rating"])
 }
 
 func TestLookupDisabilityRating_AddressOnlySuccess(t *testing.T) {
@@ -146,6 +153,13 @@ func TestLookupDisabilityRating_AddressOnlySuccess(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.Equal(t, 80, out.CombinedDisabilityRating)
+	require.Equal(t, core.DataSourceVA, out.DataSource)
+
+	rawData, ok := out.RawData.(map[string]any)
+	require.True(t, ok, "RawData should be a map[string]any")
+	data := rawData["data"].(map[string]any)
+	attributes := data["attributes"].(map[string]any)
+	require.Equal(t, float64(80), attributes["combined_disability_rating"])
 
 	reqBody, err := io.ReadAll(ft.req.Body)
 	require.NoError(t, err)

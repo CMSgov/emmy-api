@@ -125,13 +125,23 @@ func (s *service) LookupEnrollmentStatus(ctx context.Context, reqBody Request) (
 		return Response{}, fmt.Errorf("decode nsc response: %w", err)
 	}
 
+	var rawBody any
+	if err := json.Unmarshal(respBytes, &rawBody); err != nil {
+		log.ErrorContext(ctx, "nsc submit raw decode failed",
+			slog.Any("error", err),
+			slog.Duration("latency", latency),
+			slog.String("body_snippet", snippet),
+		)
+		return Response{}, fmt.Errorf("decode raw nsc response: %w", err)
+	}
+
 	log.InfoContext(ctx, "nsc submit decoded successfully",
 		slog.String("status_code", strings.TrimSpace(out.Status.Code)),
 		slog.String("current_enrollment_status", currentEnrollmentStatus(out)),
 		slog.Int("enrollment_records", enrollmentRecordCount(out)),
 	)
 
-	return translateNSCResponse(out)
+	return translateNSCResponse(out, rawBody)
 }
 
 func toNSCRequest(cfg *core.NSCConfig, reqBody Request) nscRequest {
@@ -164,7 +174,7 @@ func toNSCRequest(cfg *core.NSCConfig, reqBody Request) nscRequest {
 	return out
 }
 
-func translateNSCResponse(resp nscResponse) (Response, error) {
+func translateNSCResponse(resp nscResponse, rawBody any) (Response, error) {
 	if isNSCNoHit(resp) || isNSCNotCurrentlyEnrolled(resp) {
 		return Response{}, ErrNotFound
 	}
@@ -176,6 +186,8 @@ func translateNSCResponse(resp nscResponse) (Response, error) {
 
 	return Response{
 		EnrollmentStatus: status,
+		RawData:          rawBody,
+		DataSource:       core.DataSourceNSC,
 	}, nil
 }
 
