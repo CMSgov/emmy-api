@@ -1,6 +1,6 @@
 # Eligibility Made Easy (Emmy) API Verification Service
 
-The Emmy API is a backend data service connecting to federal and commercial data sources to help facilitate eligibility determination for state agencies.
+The Emmy API is a backend data service that connects to federal and commercial data sources to facilitate eligibility determination for state agencies.
 
 ## Quick Links
 
@@ -16,9 +16,9 @@ The Emmy API is a backend data service connecting to federal and commercial data
 
 ## About the Project
 
-The Emmy API is a part of a suite of open-source toll developed by the Centers for Medicare & Medicaid Services (CMS). Emmy supports states in implementing the new Medicaid eligibility and renewal community engagement requirements under the Working Families Tax Cut legislation.
+The Emmy API is a part of a suite of open-source tools developed by the Centers for Medicare & Medicaid Services (CMS). Emmy supports states in implementing the new Medicaid eligibility and renewal community engagement requirements under the Working Families Tax Cut legislation.
 
-Emmy suite of tools do not replace a state's existing eligibility system — rather, it offers streamlined, efficient ways to help states implement the new community engagement requirements.
+Emmy's suite of tools does not replace a state's existing eligibility system — rather, it offers streamlined, efficient ways to help states implement the new community engagement requirements.
 
 ## Core Team
 
