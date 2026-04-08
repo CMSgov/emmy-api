@@ -45,6 +45,9 @@ if err != nil {
 
 ## Edge Cases Handled Today
 
+- Invalid JSON request bodies return `400`.
+- Missing required identity fields (`firstName`, `lastName`, `dateOfBirth`)
+  return `400`.
 - Optional timeout injection if caller context has no deadline.
 - Non-2xx NSC response returns wrapped error with status code.
 - Long error body logging is truncated (800 chars).
@@ -60,11 +63,11 @@ if err != nil {
 
 ## Future Improvements
 
-- Accept caller-provided request payload in HTTP handler.
-- Add validation for required request fields before submit.
 - Introduce retry policy with bounded backoff for transient 5xx errors.
 - Add contract tests against NSC sandbox with fixtures.
 
 ## Assumptions
 
-- **Medium confidence:** Current handler payload is a scaffold for integration testing, not final business API behavior.
+- **High confidence:** The current runtime binds caller-provided identity input
+  and returns a reduced `enrollmentStatus` response rather than exposing the
+  upstream NSC response directly.

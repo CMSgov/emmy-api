@@ -1,5 +1,11 @@
 # Getting Started with the Emmy API
 
+This guide follows the checked-in v0 OpenAPI contract in
+`api-spec/v0/openapi.yaml`. The current Go runtime on this branch wires the two
+POST verification routes shown below, but it does not yet implement the
+bearer-token validator described by the contract. For local development, the
+repo example environment uses `SKIP_AUTH=true`.
+
 The Emmy API is a CMS-provided secure service that enables you to connect to and retrieve information about Medicaid members in order to assist your state in determining eligibility. This is a **REST API** that sends and receives **JSON** data.
 
 **With the Emmy API, you are able to:**

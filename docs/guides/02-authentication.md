@@ -1,5 +1,9 @@
 # Authenticating with the Emmy API
 
+This page documents the checked-in v0 contract authentication model. The
+current Go runtime on this branch does not yet enforce bearer-token validation
+in-process; local development typically runs with `SKIP_AUTH=true`.
+
 ## OAuth 2.0 Client Credentials
 
 The v0 contract uses the `OAuth2ClientCredentials` security scheme. Clients

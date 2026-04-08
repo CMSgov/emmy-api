@@ -24,7 +24,8 @@ controls, and resilience patterns without scanning a single flat list.
 
 | Component | Purpose | Functionality |
 |---|---|---|
-| [Cognito Auth](security/cognito-auth.md) | Document Cognito access-token validation middleware. | Covers token header/claims checks, local context propagation, and auth-related edge cases. |
+| [Skip Auth Identity](security/skip-auth-identity.md) | Document the local identity middleware used when `SKIP_AUTH=true`. | Covers injected Fiber locals, override headers, and the boundary between local bypass behavior and the contract-first auth model. |
+| [VA Veteran Verification Token](security/va-veteran-verification-token.md) | Document the VA JWT client-assertion token exchange used by the veteran integration. | Covers the PEM-key token flow and the env vars needed by the veteran runtime path. |
 
 ## Resilience
 

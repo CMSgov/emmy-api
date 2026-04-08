@@ -41,7 +41,7 @@ Observed entry points:
 - `main.go`
 - `api.New`
 - `routes.RegisterRoutes`
-- `api-spec/openapi.yaml`
+- `api-spec/v0/openapi.yaml`
 
 Observed deployment helpers:
 

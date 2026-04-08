@@ -1,6 +1,9 @@
 # Emmy API Typical Usage Examples
 
 These examples mirror the checked-in v0 public contract.
+The current Go runtime wires these POST routes, but bearer-token enforcement is
+still a contract-first expectation rather than a runtime middleware behavior on
+this branch.
 
 ## Education Verification
 
