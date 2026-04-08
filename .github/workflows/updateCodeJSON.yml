@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   update-code-json:
-    runs-on: self-hosted
+    runs-on: "codebuild-emmy-prod-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

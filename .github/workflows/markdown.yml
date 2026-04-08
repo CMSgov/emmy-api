@@ -10,7 +10,7 @@ jobs:
   markdownlint:
     permissions:
       contents: read
-    runs-on: self-hosted
+    runs-on: "codebuild-emmy-prod-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     steps:
       - name: Fetch Repository
         uses: actions/checkout@v6

@@ -15,7 +15,7 @@ on:
 jobs:
   unit:
     name: test
-    runs-on: self-hosted
+    runs-on: "codebuild-emmy-prod-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     services:
       redis:
         image: redis:7-alpine
@@ -40,7 +40,7 @@ jobs:
 
   golangci:
     name: lint
-    runs-on: self-hosted
+    runs-on: "codebuild-emmy-prod-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     steps:
       - uses: actions/checkout@v6
 
