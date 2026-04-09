@@ -9,14 +9,12 @@ set -e
 
 # Configuration (Defaults)
 CLIENT_ID="${CLIENT_ID:-6lqtiagq4o3n5bsa3s5mad5h7l}"
-SECRET_ID="${SECRET_ID:}"
 AUTH_BASE="${AUTH_BASE:-https://emmy-uat.auth.us-east-1.amazoncognito.com/oauth2/token}"
 API_BASE="${API_BASE:-https://api.uat.emmy.cms.gov}"
 
 # Paths to collection
-COLLECTION_YAML="examples/postman/v1/postman/collections/emmy-api-v1/emmy.yaml"
-COLLECTION_JSON="examples/postman/v1/postman/collections/emmy-api-v1/emmy.json"
-
+COLLECTION_YAML="examples/postman/emmy.yaml"
+COLLECTION_JSON="examples/postman/emmy.json"
 echo "Starting E2E Test Flow (Using Newman and emmy.yaml)..."
 echo "----------------------------------------------------"
 
