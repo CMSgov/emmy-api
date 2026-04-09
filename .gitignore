@@ -11,3 +11,8 @@ node_modules
 examples/java/target/
 examples/csharp/bin/
 examples/csharp/obj/
+
+swagger-site/*
+!swagger-site/index.html
+!swagger-site/swagger-initializer.js
+!swagger-site/README.md
