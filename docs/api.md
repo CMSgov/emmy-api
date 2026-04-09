@@ -10,23 +10,21 @@ caveats.
 
 ## Authentication Behavior
 
-- When `SKIP_AUTH=false`, Cognito middleware is enabled globally.
-- Middleware reads access token from header: `x-amzn-oidc-accesstoken`.
-- Token checks include:
-  - valid signature via JWKS
-  - issuer match
-  - `token_use=access`
-  - `client_id` claim equals configured app client ID
-
-If auth fails, response is `401 Unauthorized`.
-This applies to `/api/edu` and `/api/v0/veteran-disability-ratings` when auth is
-enabled. `/health` is registered before the auth middleware and remains
-unauthenticated in the current branch.
+- The checked-in v0 contract declares OAuth 2.0 bearer auth in
+  `api-spec/v0/openapi.yaml`.
+- The current Go runtime on this branch does not register Cognito or bearer-token
+  verification middleware.
+- When `SKIP_AUTH=true`, the app attaches `SkipAuthMiddleware`, which injects a
+  stable local identity into Fiber locals using optional `x-skip-auth-*`
+  override headers.
+- `/health` is registered before that development middleware and remains
+  unauthenticated.
 
 ## Circuit Breaker Behavior
 
-`/health`, `/api/edu`, and `/api/v0/veteran-disability-ratings` are wrapped by
-Redis-backed circuit breaker middleware.
+`/health`, `POST /api/v0/education-enrollments`, and
+`POST /api/v0/veteran-disability-ratings` are wrapped by Redis-backed
+circuit-breaker middleware.
 
 - On breaker deny/open state: `503 Service Unavailable`.
 - On Redis state read failures with fail-open (default): request is allowed.
@@ -36,45 +34,29 @@ Redis-backed circuit breaker middleware.
 | Method | Path                           | Description                            | Success     | Notes                                                              |
 | ------ | ------------------------------ | -------------------------------------- | ----------- | ------------------------------------------------------------------ |
 | `GET`  | `/`                            | Liveness string                        | `200` text  | Returns `Backend running!`                                         |
-| `GET`  | `/health`                      | Redis health check                     | `200` empty | Registered before auth middleware; pings Redis with 2s timeout    |
-| `GET`  | `/api/edu`                     | NSC education verification scaffold    | `200` JSON  | Uses a hardcoded request payload in handler; not the v0 contract   |
-| `POST` | `/api/v0/veteran-disability-ratings` | Veteran disability status from v0 spec | `200` JSON  | Accepts caller-provided identity payload and matches the v0 route  |
+| `GET`  | `/health`                      | Redis health check                     | `200` empty | Registered before skip-auth middleware; pings Redis with 2s timeout |
+| `GET`  | `/api-spec/v1/verify`          | Bundled OpenAPI JSON artifact         | `200` JSON  | Returns the checked-in spec artifact served by `OpenAPISpecHandler` |
+| `POST` | `/api/v0/education-enrollments` | Education enrollment verification      | `200` JSON  | Parses caller JSON and returns `enrollmentStatus`                   |
+| `POST` | `/api/v0/veteran-disability-ratings` | Veteran disability status from v0 spec | `200` JSON  | Accepts caller-provided identity payload and returns rating data    |
 
-| Method | Path                  | Description                         | Success     | Notes |
-| ------ | --------------------- | ----------------------------------- | ----------- | ----- |
-| `GET`  | `/`                   | Liveness string                     | `200` text  | Returns `Backend running!` |
-| `GET`  | `/status`             | Redis health check                  | `200` empty | Uses 2s Redis ping timeout; wrapped by circuit breaker |
-| `GET`  | `/api-spec/v1/verify` | Bundled OpenAPI JSON artifact       | `200` JSON  | Returns `api-spec/dist/openapi.bundled.json` |
-| `GET`  | `/api/edu`            | Education verification passthrough  | `200` JSON  | Uses hardcoded request payload in handler; wrapped by circuit breaker |
-
-### NSC Submit Request model (`pkg/education/models_request.go`)
+### Education request model (`pkg/education/models_request.go`)
 
 ```go
 type Request struct {
-    AccountID        string `json:"accountId"`
-    OrganizationName string `json:"organizationName,omitempty"`
-    CaseReferenceID  string `json:"caseReferenceId,omitempty"`
-    ContactEmail     string `json:"contactEmail,omitempty"`
-    DateOfBirth      string `json:"dateOfBirth"`
-    LastName         string `json:"lastName"`
-    FirstName        string `json:"firstName"`
-    SSN              string `json:"ssn,omitempty"`
-    IdentityDetails  []IdentityDetails `json:"identityDetails,omitempty"`
-    EndClient        string `json:"endClient"`
-    PreviousNames    []PreviousName `json:"previousNames,omitempty"`
-    Terms            string `json:"terms"`
+    FirstName   string   `json:"firstName"`
+    MiddleName  string   `json:"middleName,omitempty"`
+    LastName    string   `json:"lastName"`
+    DateOfBirth string   `json:"dateOfBirth"`
+    SSN         string   `json:"ssn,omitempty"`
+    Address     *Address `json:"address,omitempty"`
 }
 ```
 
-### NSC Submit Response model (`pkg/education/models_response.go`)
+### Education response model (`pkg/education/models_response.go`)
 
 ```go
 type Response struct {
-    ClientData          ClientDataResponse          `json:"clientData"`
-    IdentityDetails     []IdentityDetailsResponse   `json:"identityDetails"`
-    Status              StatusResponse              `json:"status"`
-    StudentInfoProvided StudentInfoProvidedResponse `json:"studentInfoProvided"`
-    TransactionDetails  TransactionDetailsResponse  `json:"transactionDetails"`
+    EnrollmentStatus EnrollmentStatus `json:"enrollmentStatus"`
 }
 ```
 
@@ -84,18 +66,26 @@ type Response struct {
 curl -i http://localhost:8000/health
 ```
 
-### `/api-spec/v1/verify`
+## Example: `/api-spec/v1/verify`
 
 ```bash
 curl -i http://localhost:8000/api-spec/v1/verify
 ```
 
-Returns the checked-in bundled OpenAPI JSON artifact with `Content-Type: application/json`.
+Returns the checked-in bundled OpenAPI artifact with `Content-Type:
+application/json`.
 
-## Example: `/api/edu` (auth skipped locally)
+## Example: `/api/v0/education-enrollments`
 
 ```bash
-curl -i http://localhost:8000/api/edu
+curl -i --request POST http://localhost:8000/api/v0/education-enrollments \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "firstName": "Lynette",
+    "lastName": "Oyola",
+    "dateOfBirth": "1988-10-24",
+    "ssn": "123-45-6789"
+  }'
 ```
 
 ## Example: `/api/v0/veteran-disability-ratings`
@@ -103,7 +93,6 @@ curl -i http://localhost:8000/api/edu
 ```bash
 curl -i --request POST http://localhost:8000/api/v0/veteran-disability-ratings \
   --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer <ACCESS_TOKEN>' \
   --data '{
     "firstName": "Lynette",
     "lastName": "Oyola",
@@ -120,14 +109,14 @@ curl -i --request POST http://localhost:8000/api/v0/veteran-disability-ratings \
 
 ## Current-State Caveats
 
-- `/api/edu` currently does not accept caller-provided payload; it submits a hardcoded sample request from handler code.
 - `main` now injects Redis into `api.New`, so the health route has the Redis client it expects.
-- The intended public contract for this branch is versioned under `api-spec/v0/`, and the veteran disability route matches that contract while `/api/edu` remains a runtime-only scaffold.
+- The intended public contract for this branch is versioned under `api-spec/v0/`, and both versioned POST routes are registered in the current runtime.
+- The current runtime docs do not imply active bearer-token enforcement because no Cognito or bearer verification middleware is wired on this branch.
 - Error response bodies come from Fiber error handling and may be plain text.
 
 ## Assumptions
 
 - **High confidence:** This page is a runtime reference, not the public API
   contract reference.
-- **Medium confidence:** `/api/edu` will be removed or reshaped as the runtime
-  converges on the published v0 contract.
+- **Medium confidence:** The checked-in contract and runtime auth behavior are
+  still converging, so future auth-related docs may need another refresh.

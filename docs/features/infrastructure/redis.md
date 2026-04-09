@@ -75,7 +75,7 @@ if err := redisotel.InstrumentMetrics(rdb); err != nil {
 ## Assumptions
 
 - **High confidence:** Redis is an operational dependency for current startup and status-check behavior.
-- **High confidence:** There is an active wiring caveat on `main` where status route setup may receive nil Redis via `api.New` config path until Redis injection is corrected there.
+- **High confidence:** `main` now injects Redis into `api.New`, so the health route and circuit-breaker middleware share the same client dependency.
 
 ---
 

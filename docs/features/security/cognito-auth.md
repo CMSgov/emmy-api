@@ -1,16 +1,19 @@
-# Feature: Cognito Auth
+# Feature: Skip Auth Middleware
 
 ## Feature Overview
 
-Validates AWS Cognito access tokens for incoming requests when auth is enabled.
+Provides a stable local development identity when `SKIP_AUTH=true`.
 
 ## Business Logic
 
-- Read token from `x-amzn-oidc-accesstoken`.
-- Load JWKS from Cognito issuer URL.
-- Parse and validate JWT claims/signature.
-- Enforce `client_id` match with configured app client.
-- Add selected claims (`sub`, `username`, `scope`, `groups`) to Fiber locals.
+- Read optional override headers:
+  - `x-skip-auth-sub`
+  - `x-skip-auth-username`
+  - `x-skip-auth-scope`
+  - `x-skip-auth-groups`
+- Fall back to deterministic local defaults when override headers are absent.
+- Add `sub`, `username`, `scope`, and `groups` values to Fiber locals.
+- Continue request handling without external token verification.
 
 ## Package Location
 
@@ -19,45 +22,44 @@ Validates AWS Cognito access tokens for incoming requests when auth is enabled.
 
 ## Key Structs and Interfaces
 
-- `CognitoConfig`
-- `CognitoVerifier`
-- `NewCognitoVerifier`
-- `FiberMiddleware`
+- `SkipAuthMiddleware`
+- `parseGroups`
 
 ## Real Code Excerpt
 
 ```go
-tok, err := jwt.Parse(
-    []byte(raw),
-    jwt.WithKeySet(keyset),
-    jwt.WithValidate(true),
-    jwt.WithIssuer(v.issuer),
-    jwt.WithClaimValue("token_use", "access"),
-)
-if err != nil {
-    return fiber.ErrUnauthorized
+scope := c.Get(skipAuthHeaderScope)
+if scope == "" {
+    scope = defaultSkipAuthScope
 }
+
+c.Locals("sub", sub)
+c.Locals("username", username)
+c.Locals("scope", scope)
+c.Locals("groups", groups)
 ```
 
 ## Edge Cases Handled Today
 
-- Missing token header returns `401`.
-- JWKS retrieval failures return unauthorized error.
-- Invalid or mismatched `client_id` returns `401`.
-- Config validation blocks startup if required cognito settings are missing.
+- Missing override headers still produce a stable local identity.
+- Empty `x-skip-auth-groups` values are filtered out after splitting on commas.
+- The middleware is only attached when `cfg.Core.SkipAuth` is true.
 
 ## Performance and Operational Considerations
 
-- JWKS uses `jwk.Cache` to avoid repeated key fetches.
-- Request-time auth check includes a 5-second context timeout.
-- Middleware is globally applied unless `SKIP_AUTH=true`.
+- The middleware is fully in-process and does not call an external identity
+  provider.
+- Local identity defaults make test and dev workflows deterministic.
+- The current branch does not implement Cognito JWT verification middleware.
 
 ## Future Improvements
 
-- Add explicit middleware unit/integration tests.
-- Support configurable token header name for proxy variations.
-- Improve unauthorized response detail for operator troubleshooting while preserving security posture.
+- Add a separate production auth middleware once runtime auth enforcement is
+  implemented.
+- Document how local identity locals should map to any future bearer-token
+  claims model.
 
 ## Assumptions
 
-- **High confidence:** Current claim checks are intentionally minimal and focused on access-token validity plus client binding.
+- **High confidence:** This page reflects the only auth-related middleware
+  currently wired in the Go application.

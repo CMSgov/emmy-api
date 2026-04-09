@@ -22,7 +22,7 @@ Provides education verification through NSC by submitting a structured JSON requ
 
 ## Key Structs and Interfaces
 
-- `EducationService`
+- `Service`
 - `HTTPTransport`
 - `Options`
 - `Request`
@@ -60,11 +60,11 @@ if err != nil {
 
 ## Future Improvements
 
-- Accept caller-provided request payload in HTTP handler.
 - Add validation for required request fields before submit.
 - Introduce retry policy with bounded backoff for transient 5xx errors.
 - Add contract tests against NSC sandbox with fixtures.
 
 ## Assumptions
 
-- **Medium confidence:** Current handler payload is a scaffold for integration testing, not final business API behavior.
+- **High confidence:** The current HTTP handler accepts caller-provided identity
+  payloads and passes them into the NSC service layer.
