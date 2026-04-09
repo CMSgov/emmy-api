@@ -67,7 +67,7 @@ Copy the `access_token` value from the response. Now you are ready to
 [prepare your request payload](01-getting-started.md#step-2-prepare-your-request-payload)
 and call an Emmy API endpoint.
 
-_(Review the [Authentication Guide](02-authentication.md) for more details on authenticating. Also consider browsing the [Postman Examples](../examples/v1/postman.md) or [curl Examples](../examples/v1/curl.md) for more help using these tools.)_
+_(Review the [Authentication Guide](02-authentication.md) for more details on authenticating. Also consider browsing the [Postman Examples](../examples/v0/postman.md) or [curl Examples](../examples/v0/curl.md) for more help using these tools.)_
 
 ### Step 2: Prepare your Request Payload
 
