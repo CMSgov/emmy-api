@@ -1,21 +1,21 @@
 # Getting Started with the Emmy API
 
-The Emmy API is a backend data service designed to equip states with the automated verification capabilities. This is a **REST API** that uses **JWT Tokens** to securely send and receive **JSON** data about the applicant.
+The Emmy API is a backend data service connecting to federal and commercial data sources to help facilitate eligibility determination for state agencies. This is a **REST API** that uses **JWT Tokens** to securely send and receive **JSON** data.
 
 **With the Emmy API, you are able to:**
 
 - ✅ Obtain student enrollment information
-- ✅ Verify veteran disability status
+- ✅ Verify veteran disability rating and status
 
 [Just looking for the API specs? Click here.](https://cmsgov.github.io/emmy-api/swagger-ui/)
 
 ## Technical Requirements & Prerequisites
 
-Review the requirements and prerequisites below to get started.
+To get started, review the requirements and prerequisites below.
 
 | Requirement                 | Details                                                                                                                       |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Obtain Credentials          | Contact the CMS Emmy team to get onboarded and receive your API client ID and secret. Send an email to [emmy@cms.hhs.gov](mailto:emmy@cms.hhs.gov) to start.                       |
+| Obtain Credentials          | Contact the CMS Emmy team to get onboarded and receive your API client ID and secret. Send an email to [emmy@cms.hhs.gov](mailto:emmy@cms.hhs.gov) with the subject line "Requesting Emmy API Credentials – [state or solution provider name]" to start.                       |
 | Access Emmy API Endpoints   | You will receive endpoints during onboarding. You must have outbound network &firewall access to this endpoint from your developer and hosting environment(s).  |
 | Make HTTP POST (REST) Calls | Your system (or testing tool) must be capable of making HTTP POST calls with JSON-formatted content bodies and specific headers in the request. |
 
@@ -40,7 +40,7 @@ To begin using the Emmy API, we will start with manual steps which ensure your c
 
 ### Step 1: Get an Authentication Token (JWT) with your Client Credentials
 
-To **authenticate** with the Emmy API, you will use your `<client_id>` and `<client_secret>` to obtain a token for all Emmy API operations. Once you obtain a token, you will use it to make all subsequent Emmy API requests. Tokens are short-lived and expire after a certain time. You can use this token as many times as you'd like until expiration, or you can generate a new token each time.
+To **authenticate** with the Emmy API, you will use your `<client_id>` and `<client_secret>` to obtain a token for all Emmy API operations. Once you obtain a token, you will use it to make all subsequent Emmy API requests. Tokens are short-lived and expire, typically after 60 minutes. You can use this token as many times as you'd like until expiration, or you can generate a new token each time.
 
 Obtaining a token requires that you use a **Basic Authentication** HTTP header. This means that you will join your `<client_id>` and `<client_secreet>` with a colon `:` and then Base64 encode the entire string. Follow the [Authentication Base64 Encoding](02-authentication.md#credential-format) instructions to build your credential string. We'll refer to the credential string that you generate as `<base64_credentials>`.
 
