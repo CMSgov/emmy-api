@@ -29,7 +29,7 @@ env:
 jobs:
   publish:
     name: push image
-    runs-on: self-hosted
+    runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     outputs:
       image_tag: ${{ steps.image-metadata.outputs.image_tag }}
       image_uri: ${{ steps.image-metadata.outputs.image_uri }}
@@ -65,7 +65,7 @@ jobs:
   deploy:
     name: deploy ${{ matrix.env_name }}
     needs: publish
-    runs-on: self-hosted
+    runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     environment: ${{ matrix.env_name }}
     permissions:
       contents: read
