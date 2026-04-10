@@ -160,24 +160,21 @@ service behavior or superseded response envelopes.
 ### 2. Bundle, Validate, and Lint
 
 ```bash
-# 1. Bundle the checked-in YAML and JSON artifacts (required for multi-file refs)
-./scripts/bundle-api-spec
-
-# 2. Validate OpenAPI structure
-./scripts/validate-api-spec
-
-# 3. Lint style and governance rules
-./scripts/lint-api-spec
-```
-
-Using `mise`, the same workflow is available as:
-
-```bash
+# Install pinned toolchain versions first
 mise install
+
+# Bundle, validate, and lint the checked-in OpenAPI contract
 mise run bundle-api-spec
 mise run validate-api-spec
 mise run lint-api-spec
-mise run check-api-spec
+```
+
+Or run the underlying Node-based scripts directly:
+
+```bash
+pnpm run bundle:api-spec
+pnpm run validate:api-spec
+pnpm run lint:api-spec
 ```
 
 Starter `.spectral.yaml` (commit and version in repo):

@@ -10,44 +10,36 @@ caveats.
 
 ## Authentication Behavior
 
-- When `SKIP_AUTH=false`, Cognito middleware is enabled globally.
-- Middleware reads access token from header: `x-amzn-oidc-accesstoken`.
-- Token checks include:
-  - valid signature via JWKS
-  - issuer match
-  - `token_use=access`
-  - `client_id` claim equals configured app client ID
-
-If auth fails, response is `401 Unauthorized`.
-This applies to `/api/edu` and `/api/v0/veteran-disability-ratings` when auth is
-enabled. `/health` is registered before the auth middleware and remains
-unauthenticated in the current branch.
+- The checked-in public contract in `api-spec/v0/openapi.yaml` requires bearer
+  tokens via `OAuth2ClientCredentials`.
+- The current runtime wiring in `api.New` does not register a Cognito or bearer
+  token enforcement middleware.
+- When `SKIP_AUTH=true`, `SkipAuthMiddleware` injects local identity values from
+  optional `x-skip-auth-*` headers into Fiber locals for routes registered
+  after that middleware.
+- `/health` is registered before `SkipAuthMiddleware`, so it remains an
+  unauthenticated health route in the current branch.
 
 ## Circuit Breaker Behavior
 
-`/health`, `/api/edu`, and `/api/v0/veteran-disability-ratings` are wrapped by
-Redis-backed circuit breaker middleware.
+`/health`, `POST /api/v0/education-enrollments`, and
+`POST /api/v0/veteran-disability-ratings` are wrapped by Redis-backed circuit
+breaker middleware.
 
 - On breaker deny/open state: `503 Service Unavailable`.
 - On Redis state read failures with fail-open (default): request is allowed.
 
 ## Runtime Endpoints
 
-| Method | Path                           | Description                            | Success     | Notes                                                              |
-| ------ | ------------------------------ | -------------------------------------- | ----------- | ------------------------------------------------------------------ |
-| `GET`  | `/`                            | Liveness string                        | `200` text  | Returns `Backend running!`                                         |
-| `GET`  | `/health`                      | Redis health check                     | `200` empty | Registered before auth middleware; pings Redis with 2s timeout    |
-| `GET`  | `/api/edu`                     | NSC education verification scaffold    | `200` JSON  | Uses a hardcoded request payload in handler; not the v0 contract   |
-| `POST` | `/api/v0/veteran-disability-ratings` | Veteran disability status from v0 spec | `200` JSON  | Accepts caller-provided identity payload and matches the v0 route  |
+| Method | Path | Description | Success | Notes |
+| ------ | ---- | ----------- | ------- | ----- |
+| `GET` | `/` | Liveness string | `200` text | Returns `Backend running!` |
+| `GET` | `/health` | Redis health check | `200` empty | Uses a 2-second Redis ping timeout and is wrapped by the circuit breaker |
+| `GET` | `/api-spec/v1/verify` | Bundled OpenAPI JSON artifact | `200` JSON | Returns `api-spec/v0/dist/openapi.bundled.json` |
+| `POST` | `/api/v0/education-enrollments` | Education enrollment lookup | `200` JSON | Parses caller-provided JSON into `education.Request` |
+| `POST` | `/api/v0/veteran-disability-ratings` | Veteran disability status from v0 spec | `200` JSON | Parses caller-provided JSON into `veteran.Request` |
 
-| Method | Path                  | Description                         | Success     | Notes |
-| ------ | --------------------- | ----------------------------------- | ----------- | ----- |
-| `GET`  | `/`                   | Liveness string                     | `200` text  | Returns `Backend running!` |
-| `GET`  | `/status`             | Redis health check                  | `200` empty | Uses 2s Redis ping timeout; wrapped by circuit breaker |
-| `GET`  | `/api-spec/v1/verify` | Bundled OpenAPI JSON artifact       | `200` JSON  | Returns `api-spec/dist/openapi.bundled.json` |
-| `GET`  | `/api/edu`            | Education verification passthrough  | `200` JSON  | Uses hardcoded request payload in handler; wrapped by circuit breaker |
-
-### NSC Submit Request model (`pkg/education/models_request.go`)
+### Education Submit Request model (`pkg/education/models_request.go`)
 
 ```go
 type Request struct {
@@ -66,7 +58,7 @@ type Request struct {
 }
 ```
 
-### NSC Submit Response model (`pkg/education/models_response.go`)
+### Education Submit Response model (`pkg/education/models_response.go`)
 
 ```go
 type Response struct {
@@ -84,18 +76,27 @@ type Response struct {
 curl -i http://localhost:8000/health
 ```
 
-### `/api-spec/v1/verify`
+## Example: `/api-spec/v1/verify`
 
 ```bash
 curl -i http://localhost:8000/api-spec/v1/verify
 ```
 
-Returns the checked-in bundled OpenAPI JSON artifact with `Content-Type: application/json`.
+Returns the checked-in bundled OpenAPI JSON artifact with
+`Content-Type: application/json`.
 
-## Example: `/api/edu` (auth skipped locally)
+## Example: `/api/v0/education-enrollments`
 
 ```bash
-curl -i http://localhost:8000/api/edu
+curl -i --request POST http://localhost:8000/api/v0/education-enrollments \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer <ACCESS_TOKEN>' \
+  --data '{
+    "firstName": "Lynette",
+    "lastName": "Oyola",
+    "dateOfBirth": "1988-10-24",
+    "ssn": "123-45-6789"
+  }'
 ```
 
 ## Example: `/api/v0/veteran-disability-ratings`
@@ -120,14 +121,18 @@ curl -i --request POST http://localhost:8000/api/v0/veteran-disability-ratings \
 
 ## Current-State Caveats
 
-- `/api/edu` currently does not accept caller-provided payload; it submits a hardcoded sample request from handler code.
-- `main` now injects Redis into `api.New`, so the health route has the Redis client it expects.
-- The intended public contract for this branch is versioned under `api-spec/v0/`, and the veteran disability route matches that contract while `/api/edu` remains a runtime-only scaffold.
+- The current runtime does not enforce the bearer-token auth described in the
+  public OpenAPI contract.
+- `main` injects Redis into `api.New`, so the health route and breaker
+  middleware share the same Redis dependency.
+- The intended public contract for this branch is versioned under
+  `api-spec/v0/`, and both versioned POST routes are registered in the current
+  runtime.
 - Error response bodies come from Fiber error handling and may be plain text.
 
 ## Assumptions
 
 - **High confidence:** This page is a runtime reference, not the public API
   contract reference.
-- **Medium confidence:** `/api/edu` will be removed or reshaped as the runtime
-  converges on the published v0 contract.
+- **High confidence:** `POST /api/v0/education-enrollments` is the current
+  education verification route in the runtime.

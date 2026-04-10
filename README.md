@@ -29,31 +29,10 @@ This project uses [pre-commit](https://pre-commit.com/ "pre-commit Docs") to reg
 pre-commit install
 ```
 
-For OpenAPI spec maintenance, the repo also includes utility scripts under
-`scripts/`:
-
-```sh
-# 1. Rebuild the bundled YAML and JSON artifacts from the design-time source spec
-./scripts/bundle-api-spec
-
-# 2. Validate the bundled YAML artifact
-./scripts/validate-api-spec
-
-# 3. Lint the bundled YAML artifact with the repo Spectral ruleset
-./scripts/lint-api-spec
-
-# 4. Lint hand-authored YAML files
-./scripts/lint-yaml-files
-
-# 5. Check formatting for contract YAML and JSON files
-./scripts/check-format-contract-files
-
-# 6. Compile standalone JSON Schemas
-./scripts/check-json-schemas
-
-# 7. Check for breaking OpenAPI changes against a base ref
-./scripts/check-openapi-breaking [base-ref]
-```
+For contract/spec maintenance, use the repo's `mise` tasks or the underlying
+`pnpm` scripts. The checked-in `scripts/` directory only contains a small set
+of shell helpers such as `check-format-contract-files`, `check-json-schemas`,
+`build-image`, `push-image`, and `deploy-ecs`.
 
 If you use [mise](https://mise.jdx.dev/), install the pinned runtimes from
 `mise.toml` and run:
@@ -70,6 +49,16 @@ You can also run each step individually with `mise run bundle-api-spec`,
 `mise run validate-api-spec`, `mise run lint-api-spec`,
 `mise run lint-yaml-files`, `mise run check-format-contract-files`,
 `mise run check-json-schemas`, and `mise run check-openapi-breaking`.
+
+Without `mise`, the same OpenAPI steps are exposed through `pnpm`:
+
+```sh
+pnpm run bundle:api-spec
+pnpm run validate:api-spec
+pnpm run lint:api-spec
+pnpm run check:fmt
+pnpm run check:schemas
+```
 
 ## Policies
 

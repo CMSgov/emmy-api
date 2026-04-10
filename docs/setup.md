@@ -4,7 +4,7 @@
 
 - Go `1.25.x` (`go.mod` sets `go 1.25`).
 - Docker and Docker Compose for containerized local workflows. The committed
-  compose file currently provides API and observability services only.
+  compose file currently provides API, Redis, and observability services.
 - Local Redis at `localhost:6379` for runtime health checks and several tests.
 
 ## Environment Variables
@@ -15,12 +15,14 @@
 |---|---|---|
 | Service | `ENVIRONMENT`, `PORT`, `SKIP_AUTH` | `development`, `3000`, `false` |
 | OTel | `OTEL_DISABLE`, `OTEL_OTLP_EXPORTER_ENDPOINT`, `OTEL_OTLP_EXPORTER_INSECURE` | `true`, `localhost:4317`, `false` |
-| Cognito | `COGNITO_REGION`, `COGNITO_USER_POOL_ID`, `COGNITO_APP_CLIENT_ID` | `us-east-1`, `UNSET`, `UNSET` |
 | Redis | `REDIS_ADDR`, `REDIS_PASSWORD`, `REDIS_DB`, `REDIS_USE_TLS`, `REDIS_INSECURE_SKIP_VERIFY` | `localhost:6379`, empty, `0`, `true`, `false` |
 | NSC | `NSC_SUBMIT_URL`, `NSC_TOKEN_URL`, `NSC_CLIENT_SECRET`, `NSC_CLIENT_ID`, `NSC_ACCOUNT_ID` | empty |
 | VA | `VA_BASE_URL`, `VA_TOKEN_URL`, `VA_CLIENT_ID`, `VA_AUD`, `VA_PRIVATE_KEY_PATH`, `VA_TIMEOUT_SECONDS` | empty, empty, empty, empty, empty, `5` |
 
 - The table above reflects code defaults from `pkg/core/config.go`.
+- The current config loader does not read Cognito-specific environment
+  variables; the checked-in public contract still documents bearer-token auth
+  separately in `docs/guides/02-authentication.md`.
 - `.env.example` overrides the local example port to `PORT=8000` and includes
   placeholders for VA veteran-verification credentials.
 - VA authentication uses a signed JWT client assertion, so the configured
@@ -128,7 +130,7 @@ go test ./...
 
 ## Telemetry Notes
 
-- OTel service is enabled unless `OTEL_DISABLE=true`.
+- OTel is disabled by default and can be enabled with `OTEL_DISABLE=false`.
 - OTel collector config: `otel-collector-config.yml`.
 - Prometheus scrape config: `prometheus.yml`.
 - Logger fanout can include OTEL log bridge via `core.NewLoggerWithOtel`.

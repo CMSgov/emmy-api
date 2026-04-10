@@ -21,16 +21,16 @@ Runtime dependencies in current implementation:
 - Fiber (`github.com/gofiber/fiber/v2`) for HTTP server and routing.
 - Redis (`github.com/redis/go-redis/v9`) for health checks and distributed circuit-breaker state.
 - NSC endpoints (`NSC_TOKEN_URL`, `NSC_SUBMIT_URL`) for education verification.
-- AWS Cognito JWKS/JWT validation for request authentication (when `SKIP_AUTH=false`).
 - OpenTelemetry OTLP exporter for tracing/metrics/log fanout.
+- Optional local identity injection via `SkipAuthMiddleware` when `SKIP_AUTH=true`.
 
 ## Key Packages
 
 - `main`: process bootstrap, env/config load, OTel startup, Redis client init, route registration, graceful shutdown.
 - `api`: Fiber app construction and shared middleware setup.
-- `api/routes`: endpoint registration (`/`, `/health`, `/api/edu`, `/api/v0/veteran-disability-ratings`).
+- `api/routes`: endpoint registration (`/`, `/health`, `/api-spec/v1/verify`, `/api/v0/education-enrollments`, `/api/v0/veteran-disability-ratings`).
 - `api/handlers`: HTTP handlers for Redis health, education scaffolding, and veteran verification.
-- `api/middleware`: Cognito auth and circuit-breaker middleware.
+- `api/middleware`: circuit-breaker middleware plus local skip-auth identity injection.
 - `pkg/core`: configuration, logger, OTel service abstractions/utilities.
 - `pkg/education`: NSC service abstraction and HTTP/OAuth submit flow.
 - `pkg/veteran`: VA service abstraction and JWT client-assertion flow.
@@ -49,32 +49,24 @@ Runtime dependencies in current implementation:
 ```mermaid
 flowchart TD
     A[Client] --> B[Fiber App]
-    B --> C[Recover + CORS + OTel + Slog middleware]
-    C --> D{SKIP_AUTH == false?}
-    D -->|Yes| E[Cognito JWT Verifier]
-    D -->|No| F[Route Handler]
-    E --> F
-
-    F --> G{Circuit Breaker Allow?}
-    G -->|No| H[503 Service Unavailable]
-
-    G -->|Yes: /health| I[Redis Ping]
-    I --> J[200 OK or Fiber Error]
-
-    G -->|Yes: /api/edu| K[EducationService.Submit]
-    K --> L[OAuth2 client credentials token]
-    L --> M[NSC submit endpoint]
-    M --> N[JSON response]
-
-    G -->|Yes: /api/v0/veteran-disability-ratings| V[VeteranService.LookupDisabilityRating]
-    V --> W[VA token exchange]
-    W --> X[VA disability endpoint]
-    X --> Y[JSON response]
-
-    B -.-> O[OpenTelemetry exporter]
-    I -.-> O
-    K -.-> O
-    V -.-> O
+    B --> C[Request ID + Slog + Recover + CORS + OTel]
+    C --> D{Path}
+    D -->|/health| E[Circuit Breaker]
+    E --> F[Redis Ping]
+    F --> G[200 OK or Fiber Error]
+    D -->|/api/v0/*| H{SKIP_AUTH == true?}
+    H -->|Yes| I[Inject local identity locals]
+    H -->|No| J[Route Handler]
+    I --> J
+    J --> K{Circuit Breaker Allow?}
+    K -->|No| L[503 Service Unavailable]
+    K -->|Yes: education| M[EducationService.LookupEnrollmentStatus]
+    M --> N[OAuth2 token + NSC submit]
+    N --> O[JSON response]
+    K -->|Yes: veteran| P[VeteranService.LookupDisabilityRating]
+    P --> Q[VA token exchange + lookup]
+    Q --> R[JSON response]
+    D -->|/ or /api-spec/v1/verify| S[Direct handler response]
 ```
 
 Current wiring caveat on `main`: `api.New` now receives a Redis client from
@@ -104,9 +96,8 @@ Initial requirements referenced `/docs/planing`; this repo standardizes on
 
 - **High confidence:** Redis is the only persistent/shared runtime store
   currently used by this service.
-- **High confidence:** `/api/edu` is presently implementation scaffolding and
-  should not be treated as the public contract for this branch.
-- **High confidence:** `POST /api/v0/veteran-disability-ratings` is the current
-  checked-in v0 contract path for veteran verification.
+- **High confidence:** `POST /api/v0/education-enrollments` and
+  `POST /api/v0/veteran-disability-ratings` are the current checked-in v0
+  contract paths.
 - **Medium confidence:** Additional verification domains beyond the current
   runtime routes may be introduced in future versions.

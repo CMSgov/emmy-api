@@ -42,19 +42,21 @@ The public contract in this branch is currently defined in
 
 ## Bundling And Checks
 
-Use the repo scripts from the project root:
+Use the supported task runners from the project root.
 
-```sh
-./scripts/bundle-api-spec
-./scripts/validate-api-spec
-./scripts/lint-api-spec
-```
-
-Or, with `mise`:
+With `mise`:
 
 ```sh
 mise install
 mise run check-api-spec
+```
+
+Or run the underlying `pnpm` scripts directly:
+
+```sh
+pnpm run bundle:api-spec
+pnpm run validate:api-spec
+pnpm run lint:api-spec
 ```
 
 Bundling produces checked-in versioned artifacts under `api-spec/v0/dist/` and

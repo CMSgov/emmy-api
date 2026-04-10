@@ -2,15 +2,18 @@
 
 ## Feature Overview
 
-Validates AWS Cognito access tokens for incoming requests when auth is enabled.
+Captures the intended Cognito access-token validation model for this repository.
+The current runtime branch does not register a Cognito verifier in `api.New`;
+it only provides `SkipAuthMiddleware` for local identity injection when
+`SKIP_AUTH=true`.
 
 ## Business Logic
 
-- Read token from `x-amzn-oidc-accesstoken`.
-- Load JWKS from Cognito issuer URL.
-- Parse and validate JWT claims/signature.
-- Enforce `client_id` match with configured app client.
-- Add selected claims (`sub`, `username`, `scope`, `groups`) to Fiber locals.
+- No Cognito validation path is currently wired into the request pipeline.
+- When `SKIP_AUTH=true`, the app can inject local `sub`, `username`, `scope`,
+  and `groups` values from `x-skip-auth-*` headers for downstream handlers.
+- Bearer-token and JWKS-backed validation remain deferred work relative to the
+  checked-in public contract.
 
 ## Package Location
 
@@ -19,45 +22,38 @@ Validates AWS Cognito access tokens for incoming requests when auth is enabled.
 
 ## Key Structs and Interfaces
 
-- `CognitoConfig`
-- `CognitoVerifier`
-- `NewCognitoVerifier`
-- `FiberMiddleware`
+- `SkipAuthMiddleware`
 
 ## Real Code Excerpt
 
 ```go
-tok, err := jwt.Parse(
-    []byte(raw),
-    jwt.WithKeySet(keyset),
-    jwt.WithValidate(true),
-    jwt.WithIssuer(v.issuer),
-    jwt.WithClaimValue("token_use", "access"),
-)
-if err != nil {
-    return fiber.ErrUnauthorized
+if cfg.Core.SkipAuth {
+    app.Use(middleware.SkipAuthMiddleware())
 }
 ```
 
 ## Edge Cases Handled Today
 
-- Missing token header returns `401`.
-- JWKS retrieval failures return unauthorized error.
-- Invalid or mismatched `client_id` returns `401`.
-- Config validation blocks startup if required cognito settings are missing.
+- The local skip-auth path supplies stable default identity values when callers
+  do not provide override headers.
+- Group overrides are parsed from a comma-separated header and empty values are
+  ignored.
 
 ## Performance and Operational Considerations
 
-- JWKS uses `jwk.Cache` to avoid repeated key fetches.
-- Request-time auth check includes a 5-second context timeout.
-- Middleware is globally applied unless `SKIP_AUTH=true`.
+- Runtime behavior is currently limited to local identity injection for
+  development and testing scenarios.
+- Public contract docs still describe bearer-token authentication even though
+  the verifier implementation is not wired into the current branch.
 
 ## Future Improvements
 
 - Add explicit middleware unit/integration tests.
+- Implement and wire a real bearer-token/Cognito verifier.
 - Support configurable token header name for proxy variations.
 - Improve unauthorized response detail for operator troubleshooting while preserving security posture.
 
 ## Assumptions
 
-- **High confidence:** Current claim checks are intentionally minimal and focused on access-token validity plus client binding.
+- **High confidence:** Cognito enforcement is currently documented intent, not
+  live runtime behavior, on this branch.
