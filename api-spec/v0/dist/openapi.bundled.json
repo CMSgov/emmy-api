@@ -12,7 +12,7 @@
   },
   "servers": [
     {
-      "url": "https://api.dev.emmy.cms.gov",
+      "url": "https://api.uat.emmy.cms.gov",
       "description": "Emmy development environment"
     },
     {
@@ -138,8 +138,10 @@
         "description": "OAuth 2.0 bearer token proving the client application is authorized to access the Verification Service API. Only the client credentials grant is supported.\n",
         "flows": {
           "clientCredentials": {
-            "tokenUrl": "https://api.dev.emmy.cms.gov/oauth2/token",
-            "scopes": {}
+            "tokenUrl": "https://emmy-uat.auth.us-east-1.amazoncognito.com/oauth2/token",
+            "scopes": {
+              "emmy-api/emmy-api-access": "access the Emmy Verification Service API"
+            }
           }
         }
       }
