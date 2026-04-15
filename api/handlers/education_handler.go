@@ -71,28 +71,36 @@ func EducationHandler(edu education.Service, reporter reporting.Reporter, logger
 			decisionSpan.SetStatus(codes.Error, "verification failed")
 			decisionSpan.End()
 
+			var statusCode int
+			switch {
+			case errors.Is(err, education.ErrNotFound):
+				statusCode = fiber.StatusNotFound
+				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusNotFound))
+			case errors.Is(err, resilience.ErrCircuitOpen):
+				statusCode = fiber.StatusServiceUnavailable
+				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusServiceUnavailable))
+			default:
+				statusCode = fiber.StatusBadGateway
+				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadGateway))
+			}
+
 			reporter.Report(c.Context(), reporting.ReportData{
 				Endpoint:   c.Path(),
 				Success:    false,
 				DataSource: "NSC",
 				ClientID:   clientID,
+				Timestamp:  time.Now(),
+				StatusCode: statusCode,
 			})
 
 			logger.ErrorContext(ctx, "education verification failed", slog.Any("error", err))
 
 			verificationSpan.RecordError(err)
 
-			switch {
-			case errors.Is(err, education.ErrNotFound):
-				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusNotFound))
+			if statusCode == fiber.StatusNotFound {
 				return c.SendStatus(fiber.StatusNotFound)
-			case errors.Is(err, resilience.ErrCircuitOpen):
-				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusServiceUnavailable))
-				return fiber.NewError(fiber.StatusServiceUnavailable, "education enrollment lookup unavailable")
-			default:
-				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadGateway))
-				return fiber.NewError(fiber.StatusBadGateway, "education enrollment lookup failed")
 			}
+			return fiber.NewError(statusCode, http.StatusText(statusCode))
 		}
 
 		decisionSpan.SetStatus(codes.Ok, "decision completed")
@@ -103,6 +111,8 @@ func EducationHandler(edu education.Service, reporter reporting.Reporter, logger
 			Success:    true,
 			DataSource: "NSC",
 			ClientID:   clientID,
+			Timestamp:  time.Now(),
+			StatusCode: fiber.StatusOK,
 		})
 
 		verificationSpan.SetStatus(codes.Ok, "verification completed")

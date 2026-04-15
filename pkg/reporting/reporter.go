@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -12,10 +13,12 @@ import (
 )
 
 type ReportData struct {
-	Endpoint   string `json:"endpoint"`
-	DataSource string `json:"data_source"`
-	ClientID   string `json:"client_id"`
-	Success    bool   `json:"success"`
+	Endpoint   string    `json:"endpoint"`
+	DataSource string    `json:"data_source"`
+	ClientID   string    `json:"client_id"`
+	Success    bool      `json:"success"`
+	Timestamp  time.Time `json:"timestamp"`
+	StatusCode int       `json:"status_code"`
 }
 
 type Reporter interface {
@@ -74,6 +77,8 @@ func (r *reporter) Report(ctx context.Context, data ReportData) {
 			slog.Bool("success", data.Success),
 			slog.String("data_source", data.DataSource),
 			slog.String("client_id", data.ClientID),
+			slog.Time("timestamp", data.Timestamp),
+			slog.Int("status_code", data.StatusCode),
 		)
 	}
 }

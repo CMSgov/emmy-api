@@ -59,6 +59,11 @@ func TestVeteranDisabilityHandler_Success(t *testing.T) {
 	require.JSONEq(t, `{"combinedDisabilityRating":70, "dataSource":"", "rawData":null}`, string(body))
 	require.Equal(t, 1, service.calls)
 	require.Equal(t, "123-45-6789", service.lastReq.SSN)
+
+	require.Len(t, reporter.calls, 1)
+	require.True(t, reporter.calls[0].Success)
+	require.Equal(t, "VA", reporter.calls[0].DataSource)
+	require.Equal(t, fiber.StatusOK, reporter.calls[0].StatusCode)
 }
 
 func TestVeteranDisabilityHandler_AddressOnlySuccess(t *testing.T) {

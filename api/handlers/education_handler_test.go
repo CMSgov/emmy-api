@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cmsgov/emmy-api/pkg/education"
 	"github.com/cmsgov/emmy-api/pkg/reporting"
@@ -77,6 +78,8 @@ func TestEducationHandler_Success(t *testing.T) {
 	require.Len(t, reporter.calls, 1)
 	require.True(t, reporter.calls[0].Success)
 	require.Equal(t, "NSC", reporter.calls[0].DataSource)
+	require.Equal(t, fiber.StatusOK, reporter.calls[0].StatusCode)
+	require.WithinDuration(t, time.Now(), reporter.calls[0].Timestamp, 2*time.Second)
 }
 
 func TestEducationHandler_InvalidJSONReturnsBadRequest(t *testing.T) {
