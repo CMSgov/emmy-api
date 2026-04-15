@@ -47,7 +47,7 @@ func TestSubjectMiddleware(t *testing.T) {
 	}{
 		{
 			name:           "No headers",
-			setupHeader:    func(req *http.Request) {},
+			setupHeader:    func(_ *http.Request) {},
 			expectedSub:    "unknown-subject",
 			expectedStatus: http.StatusOK,
 		},
