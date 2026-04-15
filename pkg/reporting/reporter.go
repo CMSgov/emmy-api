@@ -13,11 +13,11 @@ import (
 )
 
 type ReportData struct {
+	Timestamp  time.Time `json:"timestamp"`
 	Endpoint   string    `json:"endpoint"`
 	DataSource string    `json:"data_source"`
 	ClientID   string    `json:"client_id"`
 	Success    bool      `json:"success"`
-	Timestamp  time.Time `json:"timestamp"`
 	StatusCode int       `json:"status_code"`
 }
 
