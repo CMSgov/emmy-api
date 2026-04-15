@@ -8,7 +8,7 @@ type MockReporter struct {
 	ReportedData []ReportData
 }
 
-func (m *MockReporter) Report(ctx context.Context, data ReportData) {
+func (m *MockReporter) Report(_ context.Context, data ReportData) {
 	m.ReportedData = append(m.ReportedData, data)
 }
 
