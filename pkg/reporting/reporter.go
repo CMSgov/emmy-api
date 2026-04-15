@@ -22,7 +22,7 @@ type ReportData struct {
 }
 
 type Reporter interface {
-	Report(ctx context.Context, data ReportData)
+	Report(ctx context.Context, data *ReportData)
 }
 
 type reporter struct {
@@ -54,7 +54,7 @@ func NewReporter(ctx context.Context, cfg core.ReportingConfig, logger *slog.Log
 	}
 }
 
-func (r *reporter) Report(ctx context.Context, data ReportData) {
+func (r *reporter) Report(ctx context.Context, data *ReportData) {
 	if r.cfg.SQSQueueURL != "" && r.sqsClient != nil {
 		body, err := json.Marshal(data)
 		if err != nil {

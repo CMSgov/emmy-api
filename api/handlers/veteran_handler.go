@@ -93,7 +93,7 @@ func VeteranDisabilityHandler(service veteran.Service, reporter reporting.Report
 				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadGateway))
 			}
 
-			reporter.Report(c.Context(), reporting.ReportData{
+			reporter.Report(c.Context(), &reporting.ReportData{
 				Endpoint:   c.Path(),
 				Success:    false,
 				DataSource: "VA",
@@ -113,7 +113,7 @@ func VeteranDisabilityHandler(service veteran.Service, reporter reporting.Report
 		decisionSpan.SetStatus(codes.Ok, "decision completed")
 		decisionSpan.End()
 
-		reporter.Report(c.Context(), reporting.ReportData{
+		reporter.Report(c.Context(), &reporting.ReportData{
 			Endpoint:   c.Path(),
 			Success:    true,
 			DataSource: "VA",

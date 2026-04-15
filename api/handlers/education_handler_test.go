@@ -22,10 +22,10 @@ import (
 )
 
 type fakeReporter struct {
-	calls []reporting.ReportData
+	calls []*reporting.ReportData
 }
 
-func (r *fakeReporter) Report(_ context.Context, data reporting.ReportData) {
+func (r *fakeReporter) Report(_ context.Context, data *reporting.ReportData) {
 	r.calls = append(r.calls, data)
 }
 

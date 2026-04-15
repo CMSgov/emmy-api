@@ -5,15 +5,15 @@ import (
 )
 
 type MockReporter struct {
-	ReportedData []ReportData
+	ReportedData []*ReportData
 }
 
-func (m *MockReporter) Report(_ context.Context, data ReportData) {
+func (m *MockReporter) Report(_ context.Context, data *ReportData) {
 	m.ReportedData = append(m.ReportedData, data)
 }
 
 func NewMockReporter() *MockReporter {
 	return &MockReporter{
-		ReportedData: make([]ReportData, 0),
+		ReportedData: make([]*ReportData, 0),
 	}
 }

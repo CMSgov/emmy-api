@@ -84,7 +84,7 @@ func EducationHandler(edu education.Service, reporter reporting.Reporter, logger
 				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadGateway))
 			}
 
-			reporter.Report(c.Context(), reporting.ReportData{
+			reporter.Report(c.Context(), &reporting.ReportData{
 				Endpoint:   c.Path(),
 				Success:    false,
 				DataSource: "NSC",
@@ -106,7 +106,7 @@ func EducationHandler(edu education.Service, reporter reporting.Reporter, logger
 		decisionSpan.SetStatus(codes.Ok, "decision completed")
 		decisionSpan.End()
 
-		reporter.Report(c.Context(), reporting.ReportData{
+		reporter.Report(c.Context(), &reporting.ReportData{
 			Endpoint:   c.Path(),
 			Success:    true,
 			DataSource: "NSC",
