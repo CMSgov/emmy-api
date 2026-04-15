@@ -1,5 +1,10 @@
 # Authenticating with the Emmy API
 
+This guide reflects the checked-in v0 public contract. The current Go runtime
+does not yet enforce bearer-token validation in Fiber middleware, so treat the
+steps below as contract-first integration guidance rather than a statement about
+present runtime enforcement.
+
 ## OAuth 2.0 Client Credentials
 
 The v0 contract uses the `OAuth2ClientCredentials` security scheme. Clients

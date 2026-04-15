@@ -48,7 +48,7 @@ flowchart LR
 ## Interfaces and Abstractions
 
 - `pkg/education/service.go`
-  - `type EducationService interface { Submit(ctx context.Context, req Request) (Response, error) }`
+  - `type Service interface { LookupEnrollmentStatus(ctx context.Context, req Request) (Response, error) }`
   - `type HTTPTransport interface { Do(req *http.Request) (*http.Response, error) }`
 - `pkg/core/otel.go`
   - `type OtelService interface { SpanFromContext; LoggerProvider; Shutdown }`
@@ -64,7 +64,7 @@ without route-layer rewrites.
   - `runServer` starts `app.Listen` in a goroutine and selects on server error or signal context cancellation.
   - graceful shutdown uses `app.ShutdownWithTimeout(5 * time.Second)`.
 - Request lifecycle:
-  - handlers create per-request contexts with timeout (`/health`: 2s, `/api/edu`: 5s, `/api/v0/veteran-disability-ratings`: 5s).
+  - handlers create per-request contexts with timeout (`/health`: 2s, `/api/v0/education-enrollments`: 30s, `/api/v0/veteran-disability-ratings`: 5s).
 - Circuit-breaker middleware:
   - breaker registry map guarded with `sync.RWMutex`.
   - lazy breaker initialization via double-check lock pattern.
@@ -82,11 +82,13 @@ without route-layer rewrites.
 
 Ordered middleware in `api.New`:
 
-1. Recover
-2. CORS (`*` origin/headers/methods)
-3. OpenTelemetry Fiber middleware
-4. Structured request logging (trace/span/request IDs)
-5. Conditional Cognito auth middleware
+1. Request ID context propagation
+2. Structured request logging (trace/span/request IDs)
+3. Panic recovery
+4. CORS (`*` origin/headers/methods)
+5. OpenTelemetry Fiber middleware
+6. `GET /health` registration
+7. Conditional local skip-auth middleware when `SKIP_AUTH=true`
 
 ## Dependency Injection Pattern
 
@@ -102,10 +104,9 @@ injects it.
 
 ## Technical Caveats (Current State)
 
-- `/api/edu` handler builds a hardcoded request payload instead of binding user input.
-- `/health` is registered before the auth middleware, so it remains a runtime-only unauthenticated health route.
-- Current runtime routes are a mix of scaffold and contract-aligned paths: `GET /`, `GET /health`, `GET /api/edu`, and `POST /api/v0/veteran-disability-ratings`.
-- `GET /api/edu` remains runtime scaffolding, while `POST /api/v0/veteran-disability-ratings` matches the checked-in v0 contract in `api-spec/v0/openapi.yaml`.
+- `/health` is registered before the optional skip-auth middleware, so it does not depend on injected local identity.
+- Current runtime routes are `GET /`, `GET /health`, `GET /api-spec/v1/verify`, `POST /api/v0/education-enrollments`, and `POST /api/v0/veteran-disability-ratings`.
+- The public contract is maintained separately in `api-spec/v0/openapi.yaml`; runtime error bodies are still plain text from Fiber rather than a shared JSON error envelope.
 - Some tests require local Redis and fail when unavailable.
 
 ## Assumptions

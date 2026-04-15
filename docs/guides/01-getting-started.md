@@ -13,7 +13,7 @@ You must be able to:
 
 | Requirement                 | Details                                                                                                                                                                         |
 | --------------------------- |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Obtain Credentials          | Reach out to [emmy@cms.hhs.gov](emmy@cms.hhs.gov), requesting a sandbox credential and working with the CMS emmy team to get onboarded and receive your client ID and secret via encrypted channel. |
+| Obtain Credentials          | Reach out to [emmy@cms.hhs.gov](mailto:emmy@cms.hhs.gov), requesting a sandbox credential and working with the CMS emmy team to get onboarded and receive your client ID and secret via encrypted channel. |
 | Access Emmy API Endpoints   | The onboarding process will have provided you the endpoint URL. You must have outbound network/firewall access to this host.                                                    |
 | Make HTTP POST (REST) Calls | Your system (or testing tool) must be capable of making HTTP POST calls where you can supply specific headers in the request.                                                   |
 

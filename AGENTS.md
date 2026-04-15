@@ -40,8 +40,8 @@ Observed entry points:
 
 - `main.go`
 - `api.New`
-- `routes.RegisterRoutes`
-- `api-spec/openapi.yaml`
+- `routes.StatusRouter` and `routes.RegisterRoutes`
+- `api-spec/v0/openapi.yaml`
 
 Observed deployment helpers:
 
@@ -56,7 +56,8 @@ Do not modify these without an explicit task and approval:
 - `SECURITY.md`
 - `LICENSE`
 - `public.jwk`
-- `api-spec/dist/*` unless the source spec changed too
+- `api-spec/v0/dist/*` unless the source spec changed too
+- `api-spec/dist/v0/*` unless the source spec changed too
 
 ## 3. Agent Roles
 

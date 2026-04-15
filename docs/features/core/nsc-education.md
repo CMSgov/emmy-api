@@ -60,11 +60,10 @@ if err != nil {
 
 ## Future Improvements
 
-- Accept caller-provided request payload in HTTP handler.
-- Add validation for required request fields before submit.
 - Introduce retry policy with bounded backoff for transient 5xx errors.
 - Add contract tests against NSC sandbox with fixtures.
+- Decide whether the public error contract should move beyond the current plain-text Fiber error responses.
 
 ## Assumptions
 
-- **Medium confidence:** Current handler payload is a scaffold for integration testing, not final business API behavior.
+- **High confidence:** The current handler accepts caller JSON, validates `firstName`, `lastName`, and `dateOfBirth`, and then forwards the request through the NSC service abstraction.

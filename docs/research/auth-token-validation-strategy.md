@@ -2,11 +2,13 @@
 
 ## Problem Statement
 
-The API requires request authentication that can validate Cognito-issued access tokens efficiently and securely.
+This note captures an earlier Cognito/JWKS direction that is not currently
+implemented on this branch. Keep it as historical research rather than current
+runtime documentation.
 
 ## Alternatives Considered
 
-- Offline JWT validation using Cognito JWKS (current).
+- Offline JWT validation using Cognito JWKS (previously explored).
 - Token introspection against upstream auth server.
 - API gateway-only auth with no in-app verification.
 
@@ -24,7 +26,9 @@ The API requires request authentication that can validate Cognito-issued access 
 
 ## Why Current Approach Was Selected (Inferred)
 
-The middleware design and `jwk.Cache` usage imply preference for low-latency local validation with explicit issuer/client claim checks.
+Earlier middleware design appears to have preferred low-latency local
+validation with explicit issuer/client claim checks, but that implementation is
+not present in the current branch.
 
 ## Benchmarks / Status
 
@@ -35,8 +39,10 @@ The middleware design and `jwk.Cache` usage imply preference for low-latency loc
 
 - `api/middleware/middleware.go`
 - `api/app.go`
-- Dependencies: `github.com/lestrrat-go/jwx/v2`
+- Review git history if you need the prior Cognito-specific implementation details.
 
 ## Assumptions
 
-- **Medium confidence:** Upstream architecture expects service-level auth enforcement even when requests may already pass through trusted infrastructure.
+- **Medium confidence:** A production auth layer still exists outside the
+  currently committed skip-auth middleware, but this repository snapshot does
+  not document it in runnable code.

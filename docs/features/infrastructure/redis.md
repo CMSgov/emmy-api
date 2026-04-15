@@ -75,7 +75,7 @@ if err := redisotel.InstrumentMetrics(rdb); err != nil {
 ## Assumptions
 
 - **High confidence:** Redis is an operational dependency for current startup and status-check behavior.
-- **High confidence:** There is an active wiring caveat on `main` where status route setup may receive nil Redis via `api.New` config path until Redis injection is corrected there.
+- **High confidence:** `main.run` now injects the Redis client into `api.New`, and the same dependency is reused by the status route and circuit breaker wiring.
 
 ---
 
@@ -95,4 +95,8 @@ if err := redisotel.InstrumentMetrics(rdb); err != nil {
 
 `redis-server`
 
-- [ ] Replace with docker container option
+Or run the repo's compose stack:
+
+```bash
+docker compose up redis
+```
