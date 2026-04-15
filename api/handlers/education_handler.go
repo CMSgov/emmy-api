@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/cmsgov/emmy-api/pkg/education"
+	"github.com/cmsgov/emmy-api/pkg/reporting"
 	"github.com/cmsgov/emmy-api/pkg/resilience"
 	"github.com/gofiber/fiber/v2"
 	"go.opentelemetry.io/otel"
@@ -19,7 +20,7 @@ import (
 
 var verificationTracer = otel.Tracer("emmy-api/verification")
 
-func EducationHandler(edu education.Service, logger *slog.Logger) fiber.Handler {
+func EducationHandler(edu education.Service, reporter reporting.Reporter, logger *slog.Logger) fiber.Handler {
 	const contextTimeout time.Duration = 30 * time.Second
 
 	if logger == nil {
@@ -28,6 +29,11 @@ func EducationHandler(edu education.Service, logger *slog.Logger) fiber.Handler 
 	logger = logger.With(slog.String("handler", "EducationHandler"))
 
 	return func(c *fiber.Ctx) error {
+		clientID, ok := c.Locals("sub").(string)
+		if !ok {
+			clientID = ""
+		}
+
 		ctx, verificationSpan := verificationTracer.Start(
 			c.UserContext(),
 			"verification.request",
@@ -38,6 +44,7 @@ func EducationHandler(edu education.Service, logger *slog.Logger) fiber.Handler 
 			attribute.String("vendor.name", "nsc"),
 			attribute.String("http.route", c.Path()),
 			attribute.String("http.method", c.Method()),
+			attribute.String("user.id", clientID),
 		)
 
 		var reqBody education.Request
@@ -64,6 +71,13 @@ func EducationHandler(edu education.Service, logger *slog.Logger) fiber.Handler 
 			decisionSpan.SetStatus(codes.Error, "verification failed")
 			decisionSpan.End()
 
+			reporter.Report(c.Context(), reporting.ReportData{
+				Endpoint:   c.Path(),
+				Success:    false,
+				DataSource: "NSC",
+				ClientID:   clientID,
+			})
+
 			logger.ErrorContext(ctx, "education verification failed", slog.Any("error", err))
 
 			verificationSpan.RecordError(err)
@@ -83,6 +97,13 @@ func EducationHandler(edu education.Service, logger *slog.Logger) fiber.Handler 
 
 		decisionSpan.SetStatus(codes.Ok, "decision completed")
 		decisionSpan.End()
+
+		reporter.Report(c.Context(), reporting.ReportData{
+			Endpoint:   c.Path(),
+			Success:    true,
+			DataSource: "NSC",
+			ClientID:   clientID,
+		})
 
 		verificationSpan.SetStatus(codes.Ok, "verification completed")
 		return c.Status(fiber.StatusOK).JSON(result)

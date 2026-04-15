@@ -119,7 +119,7 @@ func New(cfg *Config) (*fiber.App, error) {
 	}))
 
 	app.Use(otelfiber.Middleware())
-
+	app.Use(middleware.SubjectMiddleware(cfg.Logger))
 
 	routes.StatusRouter(app, cfg.Core, cfg.Redis, logger)
 

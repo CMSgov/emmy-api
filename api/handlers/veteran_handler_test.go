@@ -35,8 +35,9 @@ func TestVeteranDisabilityHandler_Success(t *testing.T) {
 	service := &fakeVeteranService{
 		response: veteran.Response{CombinedDisabilityRating: 70},
 	}
+	reporter := &fakeReporter{}
 
-	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, logger))
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, reporter, logger))
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"firstName":"Lynette",
@@ -66,8 +67,9 @@ func TestVeteranDisabilityHandler_AddressOnlySuccess(t *testing.T) {
 	service := &fakeVeteranService{
 		response: veteran.Response{CombinedDisabilityRating: 70},
 	}
+	reporter := &fakeReporter{}
 
-	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, logger))
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, reporter, logger))
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"firstName":"Lynette",
@@ -97,7 +99,7 @@ func TestVeteranDisabilityHandler_InvalidJSONReturnsBadRequest(t *testing.T) {
 	app := fiber.New()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{}, logger))
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{}, &fakeReporter{}, logger))
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{`))
 	req.Header.Set("Content-Type", fiber.MIMEApplicationJSON)
@@ -113,7 +115,7 @@ func TestVeteranDisabilityHandler_MissingRequiredFieldReturnsBadRequest(t *testi
 	app := fiber.New()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{}, logger))
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{}, &fakeReporter{}, logger))
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"lastName":"Oyola",
@@ -134,7 +136,7 @@ func TestVeteranDisabilityHandler_MissingSSNAndAddressReturnsNotFoundWithoutCall
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	service := &fakeVeteranService{}
 
-	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, logger))
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, &fakeReporter{}, logger))
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"firstName":"Lynette",
@@ -156,7 +158,7 @@ func TestVeteranDisabilityHandler_IncompleteAddressWithoutSSNReturnsNotFoundWith
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	service := &fakeVeteranService{}
 
-	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, logger))
+	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(service, &fakeReporter{}, logger))
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"firstName":"Lynette",
@@ -183,7 +185,7 @@ func TestVeteranDisabilityHandler_UpstreamNotFoundReturnsNotFound(t *testing.T) 
 
 	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{
 		err: veteran.ErrNotFound,
-	}, logger))
+	}, &fakeReporter{}, logger))
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"firstName":"Lynette",
@@ -206,7 +208,7 @@ func TestVeteranDisabilityHandler_UpstreamErrorReturnsBadGateway(t *testing.T) {
 
 	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{
 		err: errors.New("provider failed"),
-	}, logger))
+	}, &fakeReporter{}, logger))
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"firstName":"Lynette",
@@ -229,7 +231,7 @@ func TestVeteranDisabilityHandler_CircuitOpenReturnsServiceUnavailable(t *testin
 
 	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(&fakeVeteranService{
 		err: resilience.ErrCircuitOpen,
-	}, logger))
+	}, &fakeReporter{}, logger))
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
 		"firstName":"Lynette",
