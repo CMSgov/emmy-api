@@ -34,7 +34,7 @@ fi
 # --insecure is used to bypass self-signed certificate issues in non-prod environments
 newman run "$COLLECTION_JSON" \
   --env-var "client_id=$CLIENT_ID" \
-  --env-var "client_secret=$SECRET_ID" \
+  --env-var "client_secret=$CLIENT_SECRET" \
   --env-var "auth_base=$AUTH_BASE" \
   --env-var "api_base=$API_BASE" \
   --reporters cli \

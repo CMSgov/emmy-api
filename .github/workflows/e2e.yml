@@ -42,15 +42,15 @@ jobs:
             ${{ github.event.inputs.emmy_env == 'dev' && secrets.CLIENT_ID_DEV ||
                 github.event.inputs.emmy_env == 'uat' && secrets.CLIENT_ID_UAT ||
                 github.event.inputs.emmy_env == 'demo' && secrets.CLIENT_ID_DEMO }}
-          SECRET_ID: >-
-            ${{ github.event.inputs.emmy_env == 'dev' && secrets.SECRET_ID_DEV ||
-                github.event.inputs.emmy_env == 'uat' && secrets.SECRET_ID_UAT ||
-                github.event.inputs.emmy_env == 'demo' && secrets.SECRET_ID_DEMO }}
+          CLIENT_SECRET: >-
+            ${{ github.event.inputs.emmy_env == 'dev' && secrets.CLIENT_SECRET_DEV ||
+                github.event.inputs.emmy_env == 'uat' && secrets.CLIENT_SECRET_UAT ||
+                github.event.inputs.emmy_env == 'demo' && secrets.CLIENT_SECRET_DEMO }}
           API_BASE: ${{ github.event.inputs.emmy_api_url || (github.event.inputs.emmy_env == 'dev' && 'https://api.dev.emmy.cms.gov' || github.event.inputs.emmy_env == 'uat' && 'https://api.uat.emmy.cms.gov' || 'https://api.demo.emmy.cms.gov') }}
           AUTH_BASE: ${{ github.event.inputs.emmy_api_cognito_url || (github.event.inputs.emmy_env == 'dev' && 'https://emmy-dev.auth.us-east-1.amazoncognito.com/oauth2/token' || github.event.inputs.emmy_env == 'uat' && 'https://emmy-uat.auth.us-east-1.amazoncognito.com/oauth2/token' || 'https://emmy-demo.auth.us-east-1.amazoncognito.com/oauth2/token') }}
         run: |
-          if [ -z "$CLIENT_ID" ] || [ -z "$SECRET_ID" ]; then
-            echo "Error: CLIENT_ID or SECRET_ID secrets not set in repository."
+          if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ]; then
+            echo "Error: CLIENT_ID or CLIENT_SECRET secrets not set in repository."
             exit 1
           fi
           chmod +x scripts/postman_e2e.sh
