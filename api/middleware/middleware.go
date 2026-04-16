@@ -2,11 +2,13 @@ package middleware
 
 import (
 	"errors"
+	"log/slog"
 	"strings"
 	"sync"
 
 	"github.com/cmsgov/emmy-api/pkg/circuitbreaker"
 	"github.com/gofiber/fiber/v2"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 const (
@@ -57,6 +59,46 @@ func SkipAuthMiddleware() fiber.Handler {
 		c.Locals("scope", scope)
 		c.Locals("groups", groups)
 
+		return c.Next()
+	}
+}
+
+// SubjectMiddleware extracts the 'sub' claim from the request and injects it into locals.
+// It prioritizes the 'X-Sub' header, then looks for a 'sub' claim in a Bearer JWT,
+// and finally falls back to 'unknown-subject' if none are found.
+func SubjectMiddleware(logger *slog.Logger) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// If SkipAuthMiddleware already set sub, we don't want to overwrite it with "unknown-subject"
+		if existing := c.Locals("sub"); existing != nil {
+			if s, ok := existing.(string); ok && s != "" {
+				return c.Next()
+			}
+		}
+
+		sub := c.Get("X-Sub")
+		if sub == "" {
+			// Try extracting from Authorization header
+			auth := c.Get(fiber.HeaderAuthorization)
+			if strings.HasPrefix(auth, "Bearer ") {
+				tokenString := strings.TrimPrefix(auth, "Bearer ")
+				// In a real scenario, we'd verify the signature with a JWKS.
+				// For now, we parse the token without verification to extract the 'sub' claim.
+				token, err := jwt.ParseString(tokenString, jwt.WithVerify(false), jwt.WithValidate(false))
+				if err != nil {
+					if logger != nil {
+						logger.Error("failed to parse bearer token", "error", err)
+					}
+					return fiber.ErrUnauthorized
+				}
+				sub = token.Subject()
+			}
+		}
+
+		if sub == "" {
+			sub = "unknown-subject"
+		}
+
+		c.Locals("sub", sub)
 		return c.Next()
 	}
 }
