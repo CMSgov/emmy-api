@@ -4,22 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
-	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/cmsgov/emmy-api/pkg/core"
 )
-
-type ReportData struct {
-	Timestamp  time.Time `json:"timestamp"`
-	Endpoint   string    `json:"endpoint"`
-	DataSource string    `json:"data_source"`
-	ClientID   string    `json:"client_id"`
-	Success    bool      `json:"success"`
-	StatusCode int       `json:"status_code"`
-}
 
 type Reporter interface {
 	Report(ctx context.Context, data *ReportData)
