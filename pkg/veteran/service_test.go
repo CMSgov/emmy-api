@@ -113,6 +113,10 @@ func TestLookupDisabilityRating_Success(t *testing.T) {
 	require.Equal(t, 70, out.CombinedDisabilityRating)
 	require.Equal(t, core.DataSourceVA, out.DataSource)
 
+	require.Nil(t, out.LegalEffectiveDate)
+	require.Nil(t, out.CombinedEffectiveDate)
+	require.Nil(t, out.EarliestRatingEndDate)
+
 	rawData, ok := out.RawData.(map[string]any)
 	require.True(t, ok, "RawData should be a map[string]any")
 	data := rawData["data"].(map[string]any)
@@ -201,6 +205,62 @@ func TestLookupDisabilityRating_NotFound(t *testing.T) {
 	})
 
 	require.ErrorIs(t, err, ErrNotFound)
+}
+
+func TestLookupDisabilityRating_RichResponse(t *testing.T) {
+	ft := &fakeTransport{
+		resp: &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     http.Header{"Content-Type": []string{"application/json"}},
+			Body: io.NopCloser(bytes.NewBufferString(`{
+				"data": {
+					"attributes": {
+						"combined_disability_rating": 40,
+						"combined_effective_date": "2012-08-01",
+						"legal_effective_date": "2012-07-01",
+						"individual_ratings": [
+							{
+								"effective_date": "2018-09-21",
+								"rating_end_date": "2122-08-27"
+							},
+							{
+								"effective_date": "2018-02-14",
+								"rating_end_date": "2110-01-01"
+							},
+							{
+								"effective_date": "2020-02-20",
+								"rating_end_date": ""
+							}
+						]
+					}
+				}
+			}`)),
+		},
+	}
+
+	svc := New(&core.VAConfig{
+		BaseURL:        "https://example.test",
+		TokenURL:       "https://example.test/token",
+		ClientID:       "id",
+		TokenAudience:  "https://example.okta.com/oauth2/default/v1/token",
+		PrivateKeyPath: "/tmp/private.pem",
+	}, Options{
+		HTTPClient: ft,
+	})
+
+	out, err := svc.LookupDisabilityRating(context.Background(), Request{
+		FirstName: "Lynette",
+		LastName:  "Oyola",
+	})
+	require.NoError(t, err)
+
+	require.Equal(t, 40, out.CombinedDisabilityRating)
+	require.NotNil(t, out.CombinedEffectiveDate)
+	require.Equal(t, "2012-08-01", *out.CombinedEffectiveDate)
+	require.NotNil(t, out.LegalEffectiveDate)
+	require.Equal(t, "2012-07-01", *out.LegalEffectiveDate)
+	require.NotNil(t, out.EarliestRatingEndDate)
+	require.Equal(t, "2110-01-01", *out.EarliestRatingEndDate)
 }
 
 func TestLookupDisabilityRating_Non2xx(t *testing.T) {

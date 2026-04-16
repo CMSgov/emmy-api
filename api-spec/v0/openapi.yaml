@@ -168,6 +168,24 @@ components:
         combinedDisabilityRating:
           $ref: ../../schema/v0/combined_disability_rating.schema.json
           description: VA combined disability rating for the identified person.
+        legalEffectiveDate:
+          type: string
+          format: date
+          nullable: true
+          description: The date when the disability rating became legally effective.
+          example: "2012-07-01"
+        combinedEffectiveDate:
+          type: string
+          format: date
+          nullable: true
+          description: The date when the combined disability rating became effective.
+          example: "2012-08-01"
+        earliestRatingEndDate:
+          type: string
+          format: date
+          nullable: true
+          description: The earliest end date among all individual disability ratings.
+          example: "2122-08-27"
         rawData:
           type: object
           description: Raw response data from Veterans Affairs.
@@ -347,6 +365,9 @@ components:
     VeteranDisabilityStatusResponseExample:
       value:
         combinedDisabilityRating: 40
+        legalEffectiveDate: "2012-07-01"
+        combinedEffectiveDate: "2012-08-01"
+        earliestRatingEndDate: "2122-08-27"
         rawData:
           data:
             attributes:
