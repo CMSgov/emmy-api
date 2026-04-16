@@ -78,7 +78,7 @@ func TestEducationHandler_Success(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, fiber.StatusOK, resp.StatusCode)
-	require.Contains(t, string(body), `"enrollmentStatus":"ENROLLMENT_STATUS_UNKNOWN"`)
+	require.Contains(t, string(body), `"enrollmentStatus":"ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"`)
 	require.Contains(t, string(body), `"metadata"`)
 	require.Contains(t, string(body), `"apiVersion":"1.3.0"`)
 	require.Contains(t, string(body), `"environment":"test"`)

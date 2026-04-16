@@ -10,7 +10,7 @@ const (
 	EnrollmentStatusFullTime         EnrollmentStatus = "FULL_TIME"
 	EnrollmentStatusPartTime         EnrollmentStatus = "PART_TIME"
 	EnrollmentStatusLessThanPartTime EnrollmentStatus = "LESS_THAN_PART_TIME"
-	EnrollmentStatusUnknown          EnrollmentStatus = "ENROLLMENT_STATUS_UNKNOWN"
+	EnrollmentStatusUnknown          EnrollmentStatus = "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"
 )
 
 type Response struct {

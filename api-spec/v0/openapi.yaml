@@ -246,12 +246,12 @@ components:
         ssn: "123-45-6789"
     EducationEnrollmentResponseExample:
       value:
-        enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN
+        enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
         enrollmentDetails:
           - schoolName: "Trident University International"
             termBeginDate: "2024-05-31"
             termEndDate: "2024-11-19"
-            enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN
+            enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
         rawData:
           clientData:
             zaccountID: ""

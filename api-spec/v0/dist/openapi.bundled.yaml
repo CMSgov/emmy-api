@@ -319,10 +319,10 @@ components:
         - FULL_TIME
         - PART_TIME
         - LESS_THAN_PART_TIME
-        - ENROLLMENT_STATUS_UNKNOWN
+        - ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
       examples:
         - FULL_TIME
-        - ENROLLMENT_STATUS_UNKNOWN
+        - ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
     data_source.schema:
       $id: https://emmy.cms.gov/schemas/v0/data_source.json
       $schema: https://json-schema.org/draft/2020-12/schema
@@ -351,12 +351,12 @@ components:
         ssn: 123-45-6789
     EducationEnrollmentResponseExample:
       value:
-        enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN
+        enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
         enrollmentDetails:
           - schoolName: Trident University International
             termBeginDate: '2024-05-31'
             termEndDate: '2024-11-19'
-            enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN
+            enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
         rawData:
           clientData:
             zaccountID: ''
