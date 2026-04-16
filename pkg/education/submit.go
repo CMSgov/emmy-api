@@ -232,16 +232,41 @@ func isNSCNotCurrentlyEnrolled(resp nscResponse) bool {
 }
 
 func resolveEnrollmentStatus(resp nscResponse) (EnrollmentStatus, bool) {
+	var best EnrollmentStatus
+
+	rank := func(s EnrollmentStatus) int {
+		switch s {
+		case EnrollmentStatusFullTime:
+			return 4
+		case EnrollmentStatusPartTime:
+			return 3
+		case EnrollmentStatusLessThanPartTime:
+			return 2
+		case EnrollmentStatusUnknown:
+			return 1
+		default:
+			return 0
+		}
+	}
+
 	for _, detail := range resp.EnrollmentDetails {
 		for _, item := range detail.EnrollmentData {
 			if status, ok := normalizeEnrollmentStatus(item.EnrollmentStatus); ok {
-				return status, true
+				if rank(status) > rank(best) {
+					best = status
+				}
 			}
 		}
 
 		if status, ok := normalizeCurrentEnrollmentStatus(detail.CurrentEnrollmentStatus); ok {
-			return status, true
+			if rank(status) > rank(best) {
+				best = status
+			}
 		}
+	}
+
+	if best != "" {
+		return best, true
 	}
 
 	if isNSCPositiveHit(resp) {

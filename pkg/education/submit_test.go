@@ -264,3 +264,87 @@ func TestLookupEnrollmentStatus_MapsMultipleEnrollmentDetails(t *testing.T) {
 	require.Equal(t, "2022-12-31", out.EnrollmentDetails[1].TermEndDate)
 	require.Equal(t, EnrollmentStatusPartTime, out.EnrollmentDetails[1].EnrollmentStatus)
 }
+
+func TestResolveEnrollmentStatus_PrioritizesStatus(t *testing.T) {
+	tests := []struct {
+		name     string
+		expected EnrollmentStatus
+		resp     nscResponse
+	}{
+		{
+			name: "FullTime overrides PartTime",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "H"},
+						},
+					},
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "F"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusFullTime,
+		},
+		{
+			name: "PartTime overrides LessThanPartTime",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "L"},
+						},
+					},
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "H"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusPartTime,
+		},
+		{
+			name: "LessThanPartTime overrides Unknown",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "Y"},
+						},
+					},
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "L"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusLessThanPartTime,
+		},
+		{
+			name: "Unknown when only Unknown is present",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "Y"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusUnknown,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			status, ok := resolveEnrollmentStatus(tt.resp)
+			require.True(t, ok)
+			require.Equal(t, tt.expected, status)
+		})
+	}
+}
