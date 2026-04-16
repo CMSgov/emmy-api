@@ -245,7 +245,7 @@ func resolveEnrollmentStatus(resp nscResponse) (EnrollmentStatus, bool) {
 	}
 
 	if isNSCPositiveHit(resp) {
-		return EnrollmentStatusEnrolled, true
+		return EnrollmentStatusUnknown, true
 	}
 
 	return "", false
@@ -287,8 +287,8 @@ func normalizeEnrollmentStatus(value string) (EnrollmentStatus, bool) {
 		return EnrollmentStatusLessThanPartTime, true
 	case "LESS_THAN_HALF_TIME", "L":
 		return EnrollmentStatusLessThanPartTime, true
-	case string(EnrollmentStatusEnrolled), "Y":
-		return EnrollmentStatusEnrolled, true
+	case string(EnrollmentStatusUnknown), "Y":
+		return EnrollmentStatusUnknown, true
 	default:
 		return "", false
 	}
@@ -299,7 +299,7 @@ func normalizeCurrentEnrollmentStatus(value string) (EnrollmentStatus, bool) {
 
 	switch normalized {
 	case "CC":
-		return EnrollmentStatusEnrolled, true
+		return EnrollmentStatusUnknown, true
 	case "CN":
 		return "", false
 	default:

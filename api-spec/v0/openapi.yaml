@@ -67,7 +67,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/EducationEnrollmentResponse"
               examples:
-                enrolled:
+                unknown:
                   $ref: "#/components/examples/EducationEnrollmentResponseExample"
   /api/v0/veteran-disability-ratings:
     post:
@@ -246,12 +246,12 @@ components:
         ssn: "123-45-6789"
     EducationEnrollmentResponseExample:
       value:
-        enrollmentStatus: ENROLLED
+        enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN
         enrollmentDetails:
           - schoolName: "Trident University International"
             termBeginDate: "2024-05-31"
             termEndDate: "2024-11-19"
-            enrollmentStatus: ENROLLED
+            enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN
         rawData:
           clientData:
             zaccountID: ""

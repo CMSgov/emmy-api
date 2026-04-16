@@ -73,7 +73,7 @@
                   "$ref": "#/components/schemas/EducationEnrollmentResponse"
                 },
                 "examples": {
-                  "enrolled": {
+                  "unknown": {
                     "$ref": "#/components/examples/EducationEnrollmentResponseExample"
                   }
                 }
@@ -438,11 +438,11 @@
           "FULL_TIME",
           "PART_TIME",
           "LESS_THAN_PART_TIME",
-          "ENROLLED"
+          "ENROLLMENT_STATUS_UNKNOWN"
         ],
         "examples": [
           "FULL_TIME",
-          "ENROLLED"
+          "ENROLLMENT_STATUS_UNKNOWN"
         ]
       },
       "data_source.schema": {
@@ -480,13 +480,13 @@
       },
       "EducationEnrollmentResponseExample": {
         "value": {
-          "enrollmentStatus": "ENROLLED",
+          "enrollmentStatus": "ENROLLMENT_STATUS_UNKNOWN",
           "enrollmentDetails": [
             {
               "schoolName": "Trident University International",
               "termBeginDate": "2024-05-31",
               "termEndDate": "2024-11-19",
-              "enrollmentStatus": "ENROLLED"
+              "enrollmentStatus": "ENROLLMENT_STATUS_UNKNOWN"
             }
           ],
           "rawData": {

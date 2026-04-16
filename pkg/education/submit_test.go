@@ -56,7 +56,7 @@ func TestLookupEnrollmentStatus_SuccessFallsBackToEnrolledOnPositiveHit(t *testi
 
 	_, err = io.ReadAll(ft.req.Body)
 	require.NoError(t, err)
-	require.Equal(t, EnrollmentStatusEnrolled, out.EnrollmentStatus)
+	require.Equal(t, EnrollmentStatusUnknown, out.EnrollmentStatus)
 	require.Equal(t, core.DataSourceNSC, out.DataSource)
 
 	rawData, ok := out.RawData.(map[string]any)
@@ -213,7 +213,7 @@ func TestLookupEnrollmentStatus_NullEnrollmentDetails(t *testing.T) {
 		DateOfBirth: "1988-10-24",
 	})
 	require.NoError(t, err)
-	require.Equal(t, EnrollmentStatusEnrolled, out.EnrollmentStatus)
+	require.Equal(t, EnrollmentStatusUnknown, out.EnrollmentStatus)
 }
 
 func TestLookupEnrollmentStatus_MapsMultipleEnrollmentDetails(t *testing.T) {
