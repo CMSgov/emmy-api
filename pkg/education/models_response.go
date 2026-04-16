@@ -14,10 +14,18 @@ const (
 )
 
 type Response struct {
+	EnrollmentStatus  EnrollmentStatus   `json:"enrollmentStatus"`
+	EnrollmentDetails []EnrollmentDetail `json:"enrollmentDetails"`
+	RawData           any                `json:"rawData"`
+	DataSource        core.DataSource    `json:"dataSource"`
+	Metadata          Metadata           `json:"metadata"`
+}
+
+type EnrollmentDetail struct {
+	SchoolName       string           `json:"schoolName"`
+	TermBeginDate    string           `json:"termBeginDate"`
+	TermEndDate      string           `json:"termEndDate"`
 	EnrollmentStatus EnrollmentStatus `json:"enrollmentStatus"`
-	RawData          any              `json:"rawData"`
-	DataSource       core.DataSource  `json:"dataSource"`
-	Metadata         Metadata         `json:"metadata"`
 }
 
 type Metadata struct {

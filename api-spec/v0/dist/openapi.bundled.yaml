@@ -110,6 +110,7 @@ components:
       additionalProperties: false
       required:
         - enrollmentStatus
+        - enrollmentDetails
         - rawData
         - dataSource
         - metadata
@@ -117,6 +118,11 @@ components:
         enrollmentStatus:
           $ref: '#/components/schemas/school_enrollment_status.schema'
           description: Current enrollment status for the identified person.
+        enrollmentDetails:
+          type: array
+          description: List of enrollment details filtered from the raw data.
+          items:
+            $ref: '#/components/schemas/EnrollmentDetail'
         rawData:
           type: object
           description: Raw response data from the National Student Clearinghouse.
@@ -147,6 +153,30 @@ components:
           description: The source of the disability rating data.
         metadata:
           $ref: '#/components/schemas/Metadata'
+    EnrollmentDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - schoolName
+        - termBeginDate
+        - termEndDate
+        - enrollmentStatus
+      properties:
+        schoolName:
+          type: string
+          description: Official name of the school.
+          example: Trident University International
+        termBeginDate:
+          type: string
+          description: The date when the enrollment term began.
+          example: '2024-05-31'
+        termEndDate:
+          type: string
+          description: The date when the enrollment term ended.
+          example: '2024-11-19'
+        enrollmentStatus:
+          $ref: '#/components/schemas/school_enrollment_status.schema'
+          description: Enrollment status for this specific term.
     Metadata:
       type: object
       additionalProperties: false
@@ -322,6 +352,11 @@ components:
     EducationEnrollmentResponseExample:
       value:
         enrollmentStatus: ENROLLED
+        enrollmentDetails:
+          - schoolName: Trident University International
+            termBeginDate: '2024-05-31'
+            termEndDate: '2024-11-19'
+            enrollmentStatus: ENROLLED
         rawData:
           clientData:
             zaccountID: ''

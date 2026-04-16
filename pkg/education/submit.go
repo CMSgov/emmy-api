@@ -184,10 +184,27 @@ func translateNSCResponse(resp nscResponse, rawBody any) (Response, error) {
 		return Response{}, errors.New("nsc response missing enrollment status")
 	}
 
+	details := []EnrollmentDetail{}
+	for _, d := range resp.EnrollmentDetails {
+		for _, ed := range d.EnrollmentData {
+			s, ok := normalizeEnrollmentStatus(ed.EnrollmentStatus)
+			if !ok {
+				continue
+			}
+			details = append(details, EnrollmentDetail{
+				SchoolName:       d.OfficialSchoolName,
+				TermBeginDate:    ed.TermBeginDate,
+				TermEndDate:      ed.TermEndDate,
+				EnrollmentStatus: s,
+			})
+		}
+	}
+
 	return Response{
-		EnrollmentStatus: status,
-		RawData:          rawBody,
-		DataSource:       core.DataSourceNSC,
+		EnrollmentStatus:  status,
+		EnrollmentDetails: details,
+		RawData:           rawBody,
+		DataSource:        core.DataSourceNSC,
 	}, nil
 }
 

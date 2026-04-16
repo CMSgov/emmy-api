@@ -91,6 +91,8 @@ func TestLookupEnrollmentStatus_MapsSpecificEnrollmentStatus(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.Equal(t, EnrollmentStatusPartTime, out.EnrollmentStatus)
+	require.Len(t, out.EnrollmentDetails, 1)
+	require.Equal(t, EnrollmentStatusPartTime, out.EnrollmentDetails[0].EnrollmentStatus)
 }
 
 func TestLookupEnrollmentStatus_MapsLessThanHalfTimeToLessThanPartTime(t *testing.T) {
@@ -212,4 +214,53 @@ func TestLookupEnrollmentStatus_NullEnrollmentDetails(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.Equal(t, EnrollmentStatusEnrolled, out.EnrollmentStatus)
+}
+
+func TestLookupEnrollmentStatus_MapsMultipleEnrollmentDetails(t *testing.T) {
+	ft := &fakeTransport{
+		resp: &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     http.Header{"Content-Type": []string{"application/json"}},
+			Body: io.NopCloser(bytes.NewBufferString(`{
+				"transactionDetails":{"nscHit":"Y"},
+				"enrollmentDetails":[
+					{
+						"officialSchoolName":"University A",
+						"enrollmentData":[
+							{"enrollmentStatus":"F","termBeginDate":"2023-01-01","termEndDate":"2023-05-01"}
+						]
+					},
+					{
+						"officialSchoolName":"University B",
+						"enrollmentData":[
+							{"enrollmentStatus":"H","termBeginDate":"2022-09-01","termEndDate":"2022-12-31"}
+						]
+					}
+				]
+			}`)),
+		},
+	}
+
+	svc := New(&core.NSCConfig{SubmitURL: "https://example.test/submit"}, Options{
+		HTTPClient: ft,
+	})
+
+	out, err := svc.LookupEnrollmentStatus(context.Background(), Request{
+		FirstName:   "Lynette",
+		LastName:    "Oyola",
+		DateOfBirth: "1988-10-24",
+	})
+	require.NoError(t, err)
+	require.Equal(t, EnrollmentStatusFullTime, out.EnrollmentStatus)
+	require.Len(t, out.EnrollmentDetails, 2)
+
+	require.Equal(t, "University A", out.EnrollmentDetails[0].SchoolName)
+	require.Equal(t, "2023-01-01", out.EnrollmentDetails[0].TermBeginDate)
+	require.Equal(t, "2023-05-01", out.EnrollmentDetails[0].TermEndDate)
+	require.Equal(t, EnrollmentStatusFullTime, out.EnrollmentDetails[0].EnrollmentStatus)
+
+	require.Equal(t, "University B", out.EnrollmentDetails[1].SchoolName)
+	require.Equal(t, "2022-09-01", out.EnrollmentDetails[1].TermBeginDate)
+	require.Equal(t, "2022-12-31", out.EnrollmentDetails[1].TermEndDate)
+	require.Equal(t, EnrollmentStatusPartTime, out.EnrollmentDetails[1].EnrollmentStatus)
 }
