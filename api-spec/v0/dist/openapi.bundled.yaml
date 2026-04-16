@@ -54,6 +54,8 @@ paths:
               examples:
                 unknown:
                   $ref: '#/components/examples/EducationEnrollmentResponseExample'
+                multiple:
+                  $ref: '#/components/examples/EducationEnrollmentMultipleResponseExample'
   /api/v0/veteran-disability-ratings:
     post:
       tags:
@@ -406,6 +408,27 @@ components:
                 province: ''
                 postalCode: ''
                 country: US
+        dataSource: National Student Clearinghouse
+        metadata:
+          apiVersion: 1.3.0
+          environment: prod
+          requestTimestamp: '2026-04-14T12:00:00.000Z'
+          responseTimestamp: '2026-04-14T12:00:00.217Z'
+          datasourceDurationMillis: 180
+          transaction-id: '123456'
+    EducationEnrollmentMultipleResponseExample:
+      value:
+        enrollmentStatus: FULL_TIME
+        enrollmentDetails:
+          - schoolName: University A
+            termBeginDate: '2023-01-01'
+            termEndDate: '2023-05-01'
+            enrollmentStatus: FULL_TIME
+          - schoolName: University B
+            termBeginDate: '2022-09-01'
+            termEndDate: '2022-12-31'
+            enrollmentStatus: PART_TIME
+        rawData: {}
         dataSource: National Student Clearinghouse
         metadata:
           apiVersion: 1.3.0
