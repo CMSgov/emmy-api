@@ -27,4 +27,3 @@ These collections complement the [Getting Started Guide](../../docs/guides/01-ge
 ## Environment Variables
 
 Populate the variable values in your local Postman environment using the values shared with you during onboarding.
-

@@ -30,6 +30,7 @@ const (
 	keyVAAudience   string = "VA_AUD"
 	keyVAKeyPath    string = "VA_PRIVATE_KEY_PATH"
 	keyVATimeout    string = "VA_TIMEOUT_SECONDS"
+	keySQSQueueURL  string = "SQS_QUEUE_URL"
 )
 
 func DefaultConfig() Config {
@@ -70,6 +71,9 @@ func DefaultConfig() Config {
 			PrivateKeyPath: getEnv(keyVAKeyPath, ""),
 			TimeoutSeconds: defaultVATimeoutSeconds,
 		},
+		Reporting: ReportingConfig{
+			SQSQueueURL: getEnv(keySQSQueueURL, ""),
+		},
 	}
 }
 
@@ -93,6 +97,8 @@ func NewConfig(options ...func(*Config)) Config {
 // - NSC_SUBMIT_URL, NSC_TOKEN_URL, NSC_CLIENT_SECRET, NSC_CLIENT_ID, NSC_ACCOUNT_ID
 //
 // - VA_BASE_URL, VA_TOKEN_URL, VA_CLIENT_ID, VA_AUD, VA_PRIVATE_KEY_PATH, VA_TIMEOUT_SECONDS
+//
+// - SQS_QUEUE_URL
 //
 // Provided options are applied after env loading and override both defaults and env file values.
 func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
@@ -125,6 +131,8 @@ func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
 		setFromEnv(&cfg.VA.TokenAudience, "VA_AUD"),
 		setFromEnv(&cfg.VA.PrivateKeyPath, "VA_PRIVATE_KEY_PATH"),
 		setFromEnv(&cfg.VA.TimeoutSeconds, "VA_TIMEOUT_SECONDS"),
+
+		setFromEnv(&cfg.Reporting.SQSQueueURL, "SQS_QUEUE_URL"),
 	)
 
 	for _, opt := range options {

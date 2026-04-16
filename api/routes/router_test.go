@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/cmsgov/emmy-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/reporting"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
@@ -21,8 +22,9 @@ func TestRegisterRoutes_RegistersOpenAPISpecEndpoint(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr: "localhost:6379",
 	})
+	reporter := reporting.NewMockReporter()
 
-	RegisterRoutes(app, &core.Config{}, rdb, logger)
+	RegisterRoutes(app, &core.Config{}, rdb, reporter, logger)
 
 	req := httptest.NewRequest(http.MethodGet, "/api-spec/v1/verify", http.NoBody)
 	resp, err := app.Test(req)
@@ -46,8 +48,9 @@ func TestRegisterRoutes_RegistersVeteranDisabilityEndpoint(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr: "localhost:6379",
 	})
+	reporter := reporting.NewMockReporter()
 
-	RegisterRoutes(app, &core.Config{}, rdb, logger)
+	RegisterRoutes(app, &core.Config{}, rdb, reporter, logger)
 
 	routes := app.GetRoutes(true)
 	for _, route := range routes {
@@ -65,8 +68,9 @@ func TestRegisterRoutes_RegistersEducationEnrollmentsEndpoint(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr: "localhost:6379",
 	})
+	reporter := reporting.NewMockReporter()
 
-	RegisterRoutes(app, &core.Config{}, rdb, logger)
+	RegisterRoutes(app, &core.Config{}, rdb, reporter, logger)
 
 	routes := app.GetRoutes(true)
 	for _, route := range routes {

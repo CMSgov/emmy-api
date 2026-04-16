@@ -35,6 +35,10 @@ type VAConfig struct {
 	TimeoutSeconds int
 }
 
+type ReportingConfig struct {
+	SQSQueueURL string
+}
+
 type Config struct {
 	Environment string
 	Otel        OtelConfig
@@ -43,6 +47,7 @@ type Config struct {
 	Redis       RedisConfig
 	NSC         NSCConfig
 	VA          VAConfig
+	Reporting   ReportingConfig
 }
 
 type ctxKey int

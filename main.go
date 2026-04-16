@@ -13,6 +13,7 @@ import (
 	"github.com/cmsgov/emmy-api/api/routes"
 	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/cmsgov/emmy-api/pkg/redis"
+	"github.com/cmsgov/emmy-api/pkg/reporting"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -95,6 +96,8 @@ func run() error {
 		}
 	}()
 
+	reporter := reporting.NewReporter(ctx, cfg.Reporting, logger)
+
 	app, err := api.New(&api.Config{
 		Core:   cfg,
 		Logger: logger,
@@ -110,7 +113,7 @@ func run() error {
 		return ErrRunFailed
 	}
 
-	routes.RegisterRoutes(app, &cfg, rdb, logger)
+	routes.RegisterRoutes(app, &cfg, rdb, reporter, logger)
 
 	addr, err := listenAddr(cfg.Port)
 	if err != nil {
