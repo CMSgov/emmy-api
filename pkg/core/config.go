@@ -31,6 +31,7 @@ const (
 	keyVAKeyPath    string = "VA_PRIVATE_KEY_PATH"
 	keyVATimeout    string = "VA_TIMEOUT_SECONDS"
 	keySQSQueueURL  string = "SQS_QUEUE_URL"
+	keyServiceVersion string = "SERVICE_VERSION"
 )
 
 func DefaultConfig() Config {
@@ -74,6 +75,7 @@ func DefaultConfig() Config {
 		Reporting: ReportingConfig{
 			SQSQueueURL: getEnv(keySQSQueueURL, ""),
 		},
+		ServiceVersion: getEnv(keyServiceVersion, "1.3.0"),
 	}
 }
 
@@ -98,7 +100,7 @@ func NewConfig(options ...func(*Config)) Config {
 //
 // - VA_BASE_URL, VA_TOKEN_URL, VA_CLIENT_ID, VA_AUD, VA_PRIVATE_KEY_PATH, VA_TIMEOUT_SECONDS
 //
-// - SQS_QUEUE_URL
+// - SQS_QUEUE_URL, SERVICE_VERSION
 //
 // Provided options are applied after env loading and override both defaults and env file values.
 func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
@@ -133,6 +135,7 @@ func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
 		setFromEnv(&cfg.VA.TimeoutSeconds, "VA_TIMEOUT_SECONDS"),
 
 		setFromEnv(&cfg.Reporting.SQSQueueURL, "SQS_QUEUE_URL"),
+		setFromEnv(&cfg.ServiceVersion, "SERVICE_VERSION"),
 	)
 
 	for _, opt := range options {

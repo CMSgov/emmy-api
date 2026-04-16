@@ -17,6 +17,16 @@ type Response struct {
 	EnrollmentStatus EnrollmentStatus `json:"enrollmentStatus"`
 	RawData          any              `json:"rawData"`
 	DataSource       core.DataSource  `json:"dataSource"`
+	Metadata         Metadata         `json:"metadata"`
+}
+
+type Metadata struct {
+	APIVersion               string `json:"apiVersion"`
+	Environment              string `json:"environment"`
+	RequestTimestamp         string `json:"requestTimestamp"`
+	ResponseTimestamp        string `json:"responseTimestamp"`
+	TransactionID            string `json:"transaction-id"` //nolint:tagliatelle // kebab-case is required for transaction-id for compatibility
+	DatasourceDurationMillis int64  `json:"datasourceDurationMillis"`
 }
 
 type nscResponse struct {
