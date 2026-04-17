@@ -7,7 +7,8 @@ dump.rdb
 .postman
 .envrc
 node_modules
-
+bin
+.idea
 examples/java/target/
 examples/csharp/bin/
 examples/csharp/obj/

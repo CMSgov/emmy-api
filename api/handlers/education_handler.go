@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/cmsgov/emmy-api/pkg/education"
 	"github.com/cmsgov/emmy-api/pkg/reporting"
 	"github.com/cmsgov/emmy-api/pkg/resilience"
@@ -20,7 +21,7 @@ import (
 
 var verificationTracer = otel.Tracer("emmy-api/verification")
 
-func EducationHandler(edu education.Service, reporter reporting.Reporter, logger *slog.Logger) fiber.Handler {
+func EducationHandler(cfg *core.Config, edu education.Service, reporter reporting.Reporter, logger *slog.Logger) fiber.Handler {
 	const contextTimeout time.Duration = 30 * time.Second
 
 	if logger == nil {
@@ -29,6 +30,7 @@ func EducationHandler(edu education.Service, reporter reporting.Reporter, logger
 	logger = logger.With(slog.String("handler", "EducationHandler"))
 
 	return func(c *fiber.Ctx) error {
+		requestStartTime := time.Now()
 		clientID, ok := c.Locals("sub").(string)
 		if !ok {
 			clientID = ""
@@ -65,7 +67,9 @@ func EducationHandler(edu education.Service, reporter reporting.Reporter, logger
 		defer cancel()
 
 		ctx, decisionSpan := verificationTracer.Start(ctx, "decision.engine")
+		datasourceStartTime := time.Now()
 		result, err := edu.LookupEnrollmentStatus(ctx, reqBody)
+		datasourceDuration := time.Since(datasourceStartTime)
 		if err != nil {
 			decisionSpan.RecordError(err)
 			decisionSpan.SetStatus(codes.Error, "verification failed")
@@ -105,6 +109,20 @@ func EducationHandler(edu education.Service, reporter reporting.Reporter, logger
 
 		decisionSpan.SetStatus(codes.Ok, "decision completed")
 		decisionSpan.End()
+
+		responseTimestamp := time.Now()
+		rid, ok := ctx.Value(core.RequestContextKey).(string)
+		if !ok || rid == "" {
+			rid = "unknown"
+		}
+		result.Metadata = education.Metadata{
+			APIVersion:               cfg.ServiceVersion,
+			Environment:              cfg.Environment,
+			RequestTimestamp:         requestStartTime.UTC().Format("2006-01-02T15:04:05.000Z"),
+			ResponseTimestamp:        responseTimestamp.UTC().Format("2006-01-02T15:04:05.000Z"),
+			DatasourceDurationMillis: datasourceDuration.Milliseconds(),
+			TransactionID:            rid,
+		}
 
 		reporter.Report(c.Context(), &reporting.ReportData{
 			Endpoint:   c.Path(),

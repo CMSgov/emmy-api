@@ -194,7 +194,7 @@ linters:
     tagliatelle:
       case:
         rules:
-          json: snake
+          json: camel
     testifylint:
       enable-all: true
     testpackage:

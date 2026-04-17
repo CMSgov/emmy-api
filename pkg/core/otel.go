@@ -32,7 +32,6 @@ import (
 //	export SERVICE_VERSION=$(git rev-parse --short HEAD)
 //	go build -o out \
 //	  -X github.com/cmsgov/emmy-api/pkg/core.ServiceVersion=${SERVICE_VERSION}
-var ServiceVersion = "UNSET"
 
 // OtelService provides methods for handling OpenTelemetry operations.
 type OtelService interface {
@@ -102,7 +101,7 @@ func newOtelServiceNoop() OtelService {
 }
 
 func newOtelServiceGRPC(ctx context.Context, cfg *Config) (OtelService, error) {
-	res, err := newResource(ctx)
+	res, err := newResource(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +151,7 @@ func newConn(cfg *Config) (*grpc.ClientConn, error) {
 	return conn, nil
 }
 
-func newResource(ctx context.Context) (*resource.Resource, error) {
+func newResource(ctx context.Context, cfg *Config) (*resource.Resource, error) {
 	res, e := resource.New(
 		ctx,
 		resource.WithFromEnv(),
@@ -162,7 +161,7 @@ func newResource(ctx context.Context) (*resource.Resource, error) {
 		resource.WithContainer(),
 		resource.WithHost(),
 		resource.WithAttributes(
-			semconv.ServiceVersion(ServiceVersion),
+			semconv.ServiceVersion(cfg.ServiceVersion),
 		),
 	)
 

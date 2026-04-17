@@ -48,6 +48,7 @@ type Config struct {
 	NSC         NSCConfig
 	VA          VAConfig
 	Reporting   ReportingConfig
+	ServiceVersion string
 }
 
 type ctxKey int

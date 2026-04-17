@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/cmsgov/emmy-api/pkg/education"
 	"github.com/cmsgov/emmy-api/pkg/reporting"
 	"github.com/cmsgov/emmy-api/pkg/resilience"
@@ -44,13 +45,20 @@ func (s *fakeEducationService) LookupEnrollmentStatus(_ context.Context, req edu
 
 func TestEducationHandler_Success(t *testing.T) {
 	app := fiber.New()
+	app.Use(func(c *fiber.Ctx) error {
+		rid := c.Get(fiber.HeaderXRequestID)
+		ctx := context.WithValue(c.UserContext(), core.RequestContextKey, rid)
+		c.SetUserContext(ctx)
+		return c.Next()
+	})
+	cfg := &core.Config{Environment: "test", ServiceVersion: "1.3.0"}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	service := &fakeEducationService{
 		response: education.Response{EnrollmentStatus: education.EnrollmentStatusEnrolled},
 	}
 	reporter := &fakeReporter{}
 
-	app.Post("/api/v0/education-enrollments", EducationHandler(service, reporter, logger))
+	app.Post("/api/v0/education-enrollments", EducationHandler(cfg, service, reporter, logger))
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v0/education-enrollments", strings.NewReader(`{
 		"firstName":"Lynette",
@@ -60,6 +68,7 @@ func TestEducationHandler_Success(t *testing.T) {
 		"ssn":"123-45-6789"
 	}`))
 	req.Header.Set("Content-Type", fiber.MIMEApplicationJSON)
+	req.Header.Set(fiber.HeaderXRequestID, "test-request-id")
 
 	resp, err := app.Test(req)
 	require.NoError(t, err)
@@ -69,7 +78,11 @@ func TestEducationHandler_Success(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, fiber.StatusOK, resp.StatusCode)
-	require.JSONEq(t, `{"enrollmentStatus":"ENROLLED", "dataSource":"", "rawData":null}`, string(body))
+	require.Contains(t, string(body), `"enrollmentStatus":"ENROLLED"`)
+	require.Contains(t, string(body), `"metadata"`)
+	require.Contains(t, string(body), `"apiVersion":"1.3.0"`)
+	require.Contains(t, string(body), `"environment":"test"`)
+	require.Contains(t, string(body), `"transaction-id":"test-request-id"`)
 	require.Equal(t, 1, service.calls)
 	require.Equal(t, "Lynette", service.lastReq.FirstName)
 	require.Equal(t, "Marie", service.lastReq.MiddleName)
@@ -84,10 +97,11 @@ func TestEducationHandler_Success(t *testing.T) {
 
 func TestEducationHandler_InvalidJSONReturnsBadRequest(t *testing.T) {
 	app := fiber.New()
+	cfg := &core.Config{}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	reporter := &fakeReporter{}
 
-	app.Post("/api/v0/education-enrollments", EducationHandler(&fakeEducationService{}, reporter, logger))
+	app.Post("/api/v0/education-enrollments", EducationHandler(cfg, &fakeEducationService{}, reporter, logger))
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v0/education-enrollments", strings.NewReader(`{`))
 	req.Header.Set("Content-Type", fiber.MIMEApplicationJSON)
@@ -101,10 +115,11 @@ func TestEducationHandler_InvalidJSONReturnsBadRequest(t *testing.T) {
 
 func TestEducationHandler_MissingRequiredFieldReturnsBadRequest(t *testing.T) {
 	app := fiber.New()
+	cfg := &core.Config{}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	reporter := &fakeReporter{}
 
-	app.Post("/api/v0/education-enrollments", EducationHandler(&fakeEducationService{}, reporter, logger))
+	app.Post("/api/v0/education-enrollments", EducationHandler(cfg, &fakeEducationService{}, reporter, logger))
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v0/education-enrollments", strings.NewReader(`{
 		"lastName":"Oyola",
@@ -122,10 +137,11 @@ func TestEducationHandler_MissingRequiredFieldReturnsBadRequest(t *testing.T) {
 
 func TestEducationHandler_NotFoundReturnsNotFound(t *testing.T) {
 	app := fiber.New()
+	cfg := &core.Config{}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	reporter := &fakeReporter{}
 
-	app.Post("/api/v0/education-enrollments", EducationHandler(&fakeEducationService{
+	app.Post("/api/v0/education-enrollments", EducationHandler(cfg, &fakeEducationService{
 		err: education.ErrNotFound,
 	}, reporter, logger))
 
@@ -149,9 +165,10 @@ func TestEducationHandler_NotFoundReturnsNotFound(t *testing.T) {
 
 func TestEducationHandler_CircuitOpenReturnsServiceUnavailable(t *testing.T) {
 	app := fiber.New()
+	cfg := &core.Config{}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	app.Post("/api/v0/education-enrollments", EducationHandler(&fakeEducationService{
+	app.Post("/api/v0/education-enrollments", EducationHandler(cfg, &fakeEducationService{
 		err: resilience.ErrCircuitOpen,
 	}, &fakeReporter{}, logger))
 
@@ -172,9 +189,10 @@ func TestEducationHandler_CircuitOpenReturnsServiceUnavailable(t *testing.T) {
 
 func TestEducationHandler_VendorErrorReturnsBadGateway(t *testing.T) {
 	app := fiber.New()
+	cfg := &core.Config{}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	app.Post("/api/v0/education-enrollments", EducationHandler(&fakeEducationService{
+	app.Post("/api/v0/education-enrollments", EducationHandler(cfg, &fakeEducationService{
 		err: errors.New("vendor request failed"),
 	}, &fakeReporter{}, logger))
 
@@ -204,9 +222,10 @@ func TestEducationHandler_EmitsVerificationSpans(t *testing.T) {
 	})
 
 	app := fiber.New()
+	cfg := &core.Config{}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	app.Post("/api/v0/education-enrollments", EducationHandler(&fakeEducationService{
+	app.Post("/api/v0/education-enrollments", EducationHandler(cfg, &fakeEducationService{
 		response: education.Response{EnrollmentStatus: education.EnrollmentStatusFullTime},
 	}, &fakeReporter{}, logger))
 

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/cmsgov/emmy-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/education"
 )
 
 const disabilityRatingPath = "/restricted/disability_rating"
@@ -53,9 +54,10 @@ type Address struct {
 }
 
 type Response struct {
-	CombinedDisabilityRating int             `json:"combinedDisabilityRating"`
-	RawData                  any             `json:"rawData"`
-	DataSource               core.DataSource `json:"dataSource"`
+	CombinedDisabilityRating int                `json:"combinedDisabilityRating"`
+	RawData                  any                `json:"rawData"`
+	DataSource               core.DataSource    `json:"dataSource"`
+	Metadata                 education.Metadata `json:"metadata"`
 }
 
 type service struct {
