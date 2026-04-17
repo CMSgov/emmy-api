@@ -25,6 +25,8 @@ Example success response:
 }
 ```
 
+View [education response detail](./04-education-responses-detail.md) for more examples and further nuance of the APi explained.
+
 ## Veteran Disability Verification
 
 ```bash
