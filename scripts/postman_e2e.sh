@@ -3,7 +3,7 @@
 # Emmy API End-to-End Test (Newman-based script)
 #
 # This script performs the "Obtain Token" and "Get Enrollment Data" flow
-# by using Newman to run the bundled Postman collection (emmy.yaml).
+# by using Newman to run the bundled Postman collection (emmy.json).
 
 set -e
 
@@ -13,7 +13,6 @@ AUTH_BASE="${AUTH_BASE:-https://emmy-uat.auth.us-east-1.amazoncognito.com/oauth2
 API_BASE="${API_BASE:-https://api.uat.emmy.cms.gov}"
 
 # Paths to collection
-COLLECTION_YAML="examples/postman/emmy.yaml"
 COLLECTION_JSON="examples/postman/emmy.json"
 echo "Starting E2E Test Flow (Using Newman and emmy.yaml)..."
 echo "----------------------------------------------------"
@@ -22,11 +21,6 @@ echo "----------------------------------------------------"
 if ! command -v newman &> /dev/null; then
   echo "Error: Newman is not installed or not in PATH. Please install it with 'npm install -g newman'."
   exit 1
-fi
-
-# Sync YAML to JSON (Newman requires JSON for many features/versions)
-if [ -f "$COLLECTION_YAML" ]; then
-  node -e "const yaml = require('js-yaml'); const fs = require('fs'); const doc = yaml.load(fs.readFileSync('$COLLECTION_YAML', 'utf8')); console.log(JSON.stringify(doc, null, 2));" > "$COLLECTION_JSON"
 fi
 
 # Execute Newman run
