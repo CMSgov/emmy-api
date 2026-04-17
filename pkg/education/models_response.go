@@ -10,14 +10,22 @@ const (
 	EnrollmentStatusFullTime         EnrollmentStatus = "FULL_TIME"
 	EnrollmentStatusPartTime         EnrollmentStatus = "PART_TIME"
 	EnrollmentStatusLessThanPartTime EnrollmentStatus = "LESS_THAN_PART_TIME"
-	EnrollmentStatusEnrolled         EnrollmentStatus = "ENROLLED"
+	EnrollmentStatusUnknown          EnrollmentStatus = "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"
 )
 
 type Response struct {
+	EnrollmentStatus  EnrollmentStatus   `json:"enrollmentStatus"`
+	EnrollmentDetails []EnrollmentDetail `json:"enrollmentDetails"`
+	RawData           any                `json:"rawData"`
+	DataSource        core.DataSource    `json:"dataSource"`
+	Metadata          Metadata           `json:"metadata"`
+}
+
+type EnrollmentDetail struct {
+	SchoolName       string           `json:"schoolName"`
+	TermBeginDate    string           `json:"termBeginDate"`
+	TermEndDate      string           `json:"termEndDate"`
 	EnrollmentStatus EnrollmentStatus `json:"enrollmentStatus"`
-	RawData          any              `json:"rawData"`
-	DataSource       core.DataSource  `json:"dataSource"`
-	Metadata         Metadata         `json:"metadata"`
 }
 
 type Metadata struct {

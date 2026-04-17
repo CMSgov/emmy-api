@@ -67,8 +67,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/EducationEnrollmentResponse"
               examples:
-                enrolled:
+                unknown:
                   $ref: "#/components/examples/EducationEnrollmentResponseExample"
+                multiple:
+                  $ref: "#/components/examples/EducationEnrollmentMultipleResponseExample"
   /api/v0/veteran-disability-ratings:
     post:
       tags:
@@ -131,6 +133,7 @@ components:
       additionalProperties: false
       required:
         - enrollmentStatus
+        - enrollmentDetails
         - rawData
         - dataSource
         - metadata
@@ -138,6 +141,11 @@ components:
         enrollmentStatus:
           $ref: ../../schema/v0/school_enrollment_status.schema.json
           description: Current enrollment status for the identified person.
+        enrollmentDetails:
+          type: array
+          description: List of enrollment details filtered from the raw data.
+          items:
+            $ref: "#/components/schemas/EnrollmentDetail"
         rawData:
           type: object
           description: Raw response data from the National Student Clearinghouse.
@@ -160,6 +168,24 @@ components:
         combinedDisabilityRating:
           $ref: ../../schema/v0/combined_disability_rating.schema.json
           description: VA combined disability rating for the identified person.
+        legalEffectiveDate:
+          type: string
+          format: date
+          nullable: true
+          description: The date when the disability rating became legally effective.
+          example: "2012-07-01"
+        combinedEffectiveDate:
+          type: string
+          format: date
+          nullable: true
+          description: The date when the combined disability rating became effective.
+          example: "2012-08-01"
+        earliestRatingEndDate:
+          type: string
+          format: date
+          nullable: true
+          description: The earliest end date among all individual disability ratings.
+          example: "2122-08-27"
         rawData:
           type: object
           description: Raw response data from Veterans Affairs.
@@ -168,6 +194,30 @@ components:
           description: The source of the disability rating data.
         metadata:
           $ref: "#/components/schemas/Metadata"
+    EnrollmentDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - schoolName
+        - termBeginDate
+        - termEndDate
+        - enrollmentStatus
+      properties:
+        schoolName:
+          type: string
+          description: Official name of the school.
+          example: "Trident University International"
+        termBeginDate:
+          type: string
+          description: The date when the enrollment term began.
+          example: "2024-05-31"
+        termEndDate:
+          type: string
+          description: The date when the enrollment term ended.
+          example: "2024-11-19"
+        enrollmentStatus:
+          $ref: ../../schema/v0/school_enrollment_status.schema.json
+          description: Enrollment status for this specific term.
     Metadata:
       type: object
       additionalProperties: false
@@ -216,7 +266,12 @@ components:
         ssn: "123-45-6789"
     EducationEnrollmentResponseExample:
       value:
-        enrollmentStatus: ENROLLED
+        enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
+        enrollmentDetails:
+          - schoolName: "Trident University International"
+            termBeginDate: "2024-05-31"
+            termEndDate: "2024-11-19"
+            enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
         rawData:
           clientData:
             zaccountID: ""
@@ -274,6 +329,27 @@ components:
           responseTimestamp: "2026-04-14T12:00:00.217Z"
           datasourceDurationMillis: 180
           transaction-id: "123456"
+    EducationEnrollmentMultipleResponseExample:
+      value:
+        enrollmentStatus: FULL_TIME
+        enrollmentDetails:
+          - schoolName: "University A"
+            termBeginDate: "2023-01-01"
+            termEndDate: "2023-05-01"
+            enrollmentStatus: FULL_TIME
+          - schoolName: "University B"
+            termBeginDate: "2022-09-01"
+            termEndDate: "2022-12-31"
+            enrollmentStatus: PART_TIME
+        rawData: {}
+        dataSource: National Student Clearinghouse
+        metadata:
+          apiVersion: 1.3.0
+          environment: prod
+          requestTimestamp: "2026-04-14T12:00:00.000Z"
+          responseTimestamp: "2026-04-14T12:00:00.217Z"
+          datasourceDurationMillis: 180
+          transaction-id: "123456"
     GetVeteranDisabilityStatusRequestExample:
       value:
         firstName: Lynette
@@ -289,6 +365,9 @@ components:
     VeteranDisabilityStatusResponseExample:
       value:
         combinedDisabilityRating: 40
+        legalEffectiveDate: "2012-07-01"
+        combinedEffectiveDate: "2012-08-01"
+        earliestRatingEndDate: "2122-08-27"
         rawData:
           data:
             attributes:

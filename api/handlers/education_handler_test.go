@@ -54,7 +54,7 @@ func TestEducationHandler_Success(t *testing.T) {
 	cfg := &core.Config{Environment: "test", ServiceVersion: "1.3.0"}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	service := &fakeEducationService{
-		response: education.Response{EnrollmentStatus: education.EnrollmentStatusEnrolled},
+		response: education.Response{EnrollmentStatus: education.EnrollmentStatusUnknown},
 	}
 	reporter := &fakeReporter{}
 
@@ -78,7 +78,7 @@ func TestEducationHandler_Success(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, fiber.StatusOK, resp.StatusCode)
-	require.Contains(t, string(body), `"enrollmentStatus":"ENROLLED"`)
+	require.Contains(t, string(body), `"enrollmentStatus":"ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"`)
 	require.Contains(t, string(body), `"metadata"`)
 	require.Contains(t, string(body), `"apiVersion":"1.3.0"`)
 	require.Contains(t, string(body), `"environment":"test"`)

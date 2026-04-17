@@ -184,10 +184,27 @@ func translateNSCResponse(resp nscResponse, rawBody any) (Response, error) {
 		return Response{}, errors.New("nsc response missing enrollment status")
 	}
 
+	details := []EnrollmentDetail{}
+	for _, d := range resp.EnrollmentDetails {
+		for _, ed := range d.EnrollmentData {
+			s, ok := normalizeEnrollmentStatus(ed.EnrollmentStatus)
+			if !ok {
+				continue
+			}
+			details = append(details, EnrollmentDetail{
+				SchoolName:       d.OfficialSchoolName,
+				TermBeginDate:    ed.TermBeginDate,
+				TermEndDate:      ed.TermEndDate,
+				EnrollmentStatus: s,
+			})
+		}
+	}
+
 	return Response{
-		EnrollmentStatus: status,
-		RawData:          rawBody,
-		DataSource:       core.DataSourceNSC,
+		EnrollmentStatus:  status,
+		EnrollmentDetails: details,
+		RawData:           rawBody,
+		DataSource:        core.DataSourceNSC,
 	}, nil
 }
 
@@ -215,20 +232,45 @@ func isNSCNotCurrentlyEnrolled(resp nscResponse) bool {
 }
 
 func resolveEnrollmentStatus(resp nscResponse) (EnrollmentStatus, bool) {
+	var best EnrollmentStatus
+
+	rank := func(s EnrollmentStatus) int {
+		switch s {
+		case EnrollmentStatusFullTime:
+			return 4
+		case EnrollmentStatusPartTime:
+			return 3
+		case EnrollmentStatusLessThanPartTime:
+			return 2
+		case EnrollmentStatusUnknown:
+			return 1
+		default:
+			return 0
+		}
+	}
+
 	for _, detail := range resp.EnrollmentDetails {
 		for _, item := range detail.EnrollmentData {
 			if status, ok := normalizeEnrollmentStatus(item.EnrollmentStatus); ok {
-				return status, true
+				if rank(status) > rank(best) {
+					best = status
+				}
 			}
 		}
 
 		if status, ok := normalizeCurrentEnrollmentStatus(detail.CurrentEnrollmentStatus); ok {
-			return status, true
+			if rank(status) > rank(best) {
+				best = status
+			}
 		}
 	}
 
+	if best != "" {
+		return best, true
+	}
+
 	if isNSCPositiveHit(resp) {
-		return EnrollmentStatusEnrolled, true
+		return EnrollmentStatusUnknown, true
 	}
 
 	return "", false
@@ -270,8 +312,8 @@ func normalizeEnrollmentStatus(value string) (EnrollmentStatus, bool) {
 		return EnrollmentStatusLessThanPartTime, true
 	case "LESS_THAN_HALF_TIME", "L":
 		return EnrollmentStatusLessThanPartTime, true
-	case string(EnrollmentStatusEnrolled), "Y":
-		return EnrollmentStatusEnrolled, true
+	case string(EnrollmentStatusUnknown), "Y":
+		return EnrollmentStatusUnknown, true
 	default:
 		return "", false
 	}
@@ -282,7 +324,7 @@ func normalizeCurrentEnrollmentStatus(value string) (EnrollmentStatus, bool) {
 
 	switch normalized {
 	case "CC":
-		return EnrollmentStatusEnrolled, true
+		return EnrollmentStatusUnknown, true
 	case "CN":
 		return "", false
 	default:

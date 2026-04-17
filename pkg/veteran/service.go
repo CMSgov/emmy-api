@@ -55,6 +55,9 @@ type Address struct {
 
 type Response struct {
 	CombinedDisabilityRating int                `json:"combinedDisabilityRating"`
+	LegalEffectiveDate       *string            `json:"legalEffectiveDate"`
+	CombinedEffectiveDate    *string            `json:"combinedEffectiveDate"`
+	EarliestRatingEndDate    *string            `json:"earliestRatingEndDate"`
 	RawData                  any                `json:"rawData"`
 	DataSource               core.DataSource    `json:"dataSource"`
 	Metadata                 education.Metadata `json:"metadata"`
@@ -85,9 +88,23 @@ type disabilityRatingRequest struct {
 type disabilityRatingResponse struct {
 	Data struct {
 		Attributes struct {
-			CombinedDisabilityRating int `json:"combined_disability_rating"`
+			CombinedDisabilityRating int                `json:"combined_disability_rating"` //nolint:tagliatelle // VA API uses snake_case
+			CombinedEffectiveDate    *string            `json:"combined_effective_date"`    //nolint:tagliatelle // VA API uses snake_case
+			LegalEffectiveDate       *string            `json:"legal_effective_date"`       //nolint:tagliatelle // VA API uses snake_case
+			IndividualRatings        []individualRating `json:"individual_ratings"`         //nolint:tagliatelle // VA API uses snake_case
 		} `json:"attributes"`
 	} `json:"data"`
+}
+
+type individualRating struct {
+	EffectiveDate      *string `json:"effective_date"`  //nolint:tagliatelle // VA API uses snake_case
+	RatingEndDate      *string `json:"rating_end_date"` //nolint:tagliatelle // VA API uses snake_case
+	Decision           string  `json:"decision"`
+	DiagnosticText     string  `json:"diagnostic_text"`      //nolint:tagliatelle // VA API uses snake_case
+	DiagnosticTypeCode string  `json:"diagnostic_type_code"` //nolint:tagliatelle // VA API uses snake_case
+	DiagnosticTypeName string  `json:"diagnostic_type_name"` //nolint:tagliatelle // VA API uses snake_case
+	DisabilityRatingID string  `json:"disability_rating_id"` //nolint:tagliatelle // VA API uses snake_case
+	RatingPercentage   int     `json:"rating_percentage"`    //nolint:tagliatelle // VA API uses snake_case
 }
 
 func New(cfg *core.VAConfig, opts Options) Service {
@@ -183,6 +200,15 @@ func (s *service) LookupDisabilityRating(ctx context.Context, reqBody Request) (
 		return Response{}, fmt.Errorf("decode disability rating response: %w", err)
 	}
 
+	var earliestEndDate *string
+	for _, r := range out.Data.Attributes.IndividualRatings {
+		if r.RatingEndDate != nil && *r.RatingEndDate != "" {
+			if earliestEndDate == nil || *r.RatingEndDate < *earliestEndDate {
+				earliestEndDate = r.RatingEndDate
+			}
+		}
+	}
+
 	var rawBody any
 	if err := json.Unmarshal(respBytes, &rawBody); err != nil {
 		return Response{}, fmt.Errorf("decode raw disability rating body: %w", err)
@@ -190,6 +216,9 @@ func (s *service) LookupDisabilityRating(ctx context.Context, reqBody Request) (
 
 	return Response{
 		CombinedDisabilityRating: out.Data.Attributes.CombinedDisabilityRating,
+		CombinedEffectiveDate:    out.Data.Attributes.CombinedEffectiveDate,
+		LegalEffectiveDate:       out.Data.Attributes.LegalEffectiveDate,
+		EarliestRatingEndDate:    earliestEndDate,
 		RawData:                  rawBody,
 		DataSource:               core.DataSourceVA,
 	}, nil

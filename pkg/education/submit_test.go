@@ -56,7 +56,7 @@ func TestLookupEnrollmentStatus_SuccessFallsBackToEnrolledOnPositiveHit(t *testi
 
 	_, err = io.ReadAll(ft.req.Body)
 	require.NoError(t, err)
-	require.Equal(t, EnrollmentStatusEnrolled, out.EnrollmentStatus)
+	require.Equal(t, EnrollmentStatusUnknown, out.EnrollmentStatus)
 	require.Equal(t, core.DataSourceNSC, out.DataSource)
 
 	rawData, ok := out.RawData.(map[string]any)
@@ -91,6 +91,8 @@ func TestLookupEnrollmentStatus_MapsSpecificEnrollmentStatus(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.Equal(t, EnrollmentStatusPartTime, out.EnrollmentStatus)
+	require.Len(t, out.EnrollmentDetails, 1)
+	require.Equal(t, EnrollmentStatusPartTime, out.EnrollmentDetails[0].EnrollmentStatus)
 }
 
 func TestLookupEnrollmentStatus_MapsLessThanHalfTimeToLessThanPartTime(t *testing.T) {
@@ -211,5 +213,138 @@ func TestLookupEnrollmentStatus_NullEnrollmentDetails(t *testing.T) {
 		DateOfBirth: "1988-10-24",
 	})
 	require.NoError(t, err)
-	require.Equal(t, EnrollmentStatusEnrolled, out.EnrollmentStatus)
+	require.Equal(t, EnrollmentStatusUnknown, out.EnrollmentStatus)
+}
+
+func TestLookupEnrollmentStatus_MapsMultipleEnrollmentDetails(t *testing.T) {
+	ft := &fakeTransport{
+		resp: &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     http.Header{"Content-Type": []string{"application/json"}},
+			Body: io.NopCloser(bytes.NewBufferString(`{
+				"transactionDetails":{"nscHit":"Y"},
+				"enrollmentDetails":[
+					{
+						"officialSchoolName":"University A",
+						"enrollmentData":[
+							{"enrollmentStatus":"F","termBeginDate":"2023-01-01","termEndDate":"2023-05-01"}
+						]
+					},
+					{
+						"officialSchoolName":"University B",
+						"enrollmentData":[
+							{"enrollmentStatus":"H","termBeginDate":"2022-09-01","termEndDate":"2022-12-31"}
+						]
+					}
+				]
+			}`)),
+		},
+	}
+
+	svc := New(&core.NSCConfig{SubmitURL: "https://example.test/submit"}, Options{
+		HTTPClient: ft,
+	})
+
+	out, err := svc.LookupEnrollmentStatus(context.Background(), Request{
+		FirstName:   "Lynette",
+		LastName:    "Oyola",
+		DateOfBirth: "1988-10-24",
+	})
+	require.NoError(t, err)
+	require.Equal(t, EnrollmentStatusFullTime, out.EnrollmentStatus)
+	require.Len(t, out.EnrollmentDetails, 2)
+
+	require.Equal(t, "University A", out.EnrollmentDetails[0].SchoolName)
+	require.Equal(t, "2023-01-01", out.EnrollmentDetails[0].TermBeginDate)
+	require.Equal(t, "2023-05-01", out.EnrollmentDetails[0].TermEndDate)
+	require.Equal(t, EnrollmentStatusFullTime, out.EnrollmentDetails[0].EnrollmentStatus)
+
+	require.Equal(t, "University B", out.EnrollmentDetails[1].SchoolName)
+	require.Equal(t, "2022-09-01", out.EnrollmentDetails[1].TermBeginDate)
+	require.Equal(t, "2022-12-31", out.EnrollmentDetails[1].TermEndDate)
+	require.Equal(t, EnrollmentStatusPartTime, out.EnrollmentDetails[1].EnrollmentStatus)
+}
+
+func TestResolveEnrollmentStatus_PrioritizesStatus(t *testing.T) {
+	tests := []struct {
+		name     string
+		expected EnrollmentStatus
+		resp     nscResponse
+	}{
+		{
+			name: "FullTime overrides PartTime",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "H"},
+						},
+					},
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "F"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusFullTime,
+		},
+		{
+			name: "PartTime overrides LessThanPartTime",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "L"},
+						},
+					},
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "H"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusPartTime,
+		},
+		{
+			name: "LessThanPartTime overrides Unknown",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "Y"},
+						},
+					},
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "L"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusLessThanPartTime,
+		},
+		{
+			name: "Unknown when only Unknown is present",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "Y"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusUnknown,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			status, ok := resolveEnrollmentStatus(tt.resp)
+			require.True(t, ok)
+			require.Equal(t, tt.expected, status)
+		})
+	}
 }
