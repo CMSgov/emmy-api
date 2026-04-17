@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/cmsgov/emmy-api/pkg/circuitbreaker"
+	"github.com/cmsgov/emmy-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/education"
 	"github.com/cmsgov/emmy-api/pkg/reporting"
 	"github.com/cmsgov/emmy-api/pkg/resilience"
 	"github.com/cmsgov/emmy-api/pkg/veteran"
@@ -18,7 +20,7 @@ import (
 	"go.opentelemetry.io/otel/codes"
 )
 
-func VeteranDisabilityHandler(service veteran.Service, reporter reporting.Reporter, logger *slog.Logger) fiber.Handler {
+func VeteranDisabilityHandler(cfg *core.Config, service veteran.Service, reporter reporting.Reporter, logger *slog.Logger) fiber.Handler {
 	const contextTimeout = 5 * time.Second
 
 	if logger == nil {
@@ -28,6 +30,7 @@ func VeteranDisabilityHandler(service veteran.Service, reporter reporting.Report
 	logger = logger.With(slog.String("handler", "VeteranDisabilityHandler"))
 
 	return func(c *fiber.Ctx) error {
+		requestStartTime := time.Now()
 		clientID, ok := c.Locals("sub").(string)
 		if !ok {
 			clientID = ""
@@ -70,7 +73,9 @@ func VeteranDisabilityHandler(service veteran.Service, reporter reporting.Report
 
 		ctx, decisionSpan := verificationTracer.Start(ctx, "decision.engine")
 
+		datasourceStartTime := time.Now()
 		result, err := service.LookupDisabilityRating(ctx, req)
+		datasourceDuration := time.Since(datasourceStartTime)
 		if err != nil {
 			decisionSpan.RecordError(err)
 			decisionSpan.SetStatus(codes.Error, "verification failed")
@@ -112,6 +117,20 @@ func VeteranDisabilityHandler(service veteran.Service, reporter reporting.Report
 
 		decisionSpan.SetStatus(codes.Ok, "decision completed")
 		decisionSpan.End()
+
+		responseTimestamp := time.Now()
+		rid, ok := ctx.Value(core.RequestContextKey).(string)
+		if !ok || rid == "" {
+			rid = "unknown"
+		}
+		result.Metadata = education.Metadata{
+			APIVersion:               cfg.ServiceVersion,
+			Environment:              cfg.Environment,
+			RequestTimestamp:         requestStartTime.UTC().Format("2006-01-02T15:04:05.000Z"),
+			ResponseTimestamp:        responseTimestamp.UTC().Format("2006-01-02T15:04:05.000Z"),
+			DatasourceDurationMillis: datasourceDuration.Milliseconds(),
+			TransactionID:            rid,
+		}
 
 		reporter.Report(c.Context(), &reporting.ReportData{
 			Endpoint:   c.Path(),

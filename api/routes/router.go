@@ -43,6 +43,6 @@ func RegisterRoutes(app fiber.Router, cfg *core.Config, rdb *redis.Client, repor
 		)
 	})
 
-	api.Post("/v0/education-enrollments", withCB(handlers.EducationHandler(edu, reporter, logger)))
-	api.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(veteranService, reporter, logger)))
+	api.Post("/v0/education-enrollments", withCB(handlers.EducationHandler(cfg, edu, reporter, logger)))
+	api.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(cfg, veteranService, reporter, logger)))
 }
