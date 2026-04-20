@@ -49,3 +49,5 @@ Example success response:
     "combinedDisabilityRating": 70
 }
 ```
+
+View [veteran disability response detail](./05-veteran-responses-detail.md) for more examples and further nuance of the APi explained.
