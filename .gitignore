@@ -1,4 +1,5 @@
 .env
+secrets
 .env.local
 tmp/
 vendor/
