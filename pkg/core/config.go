@@ -28,6 +28,11 @@ const (
 	keyVAKeyPath      string = "VA_PRIVATE_KEY_PATH"
 	keyVATimeout      string = "VA_TIMEOUT_SECONDS"
 	keySQSQueueURL    string = "SQS_QUEUE_URL"
+	keyDBHost       string = "DB_HOST"
+	keyDBPort       string = "DB_PORT"
+	keyDBName       string = "DB_NAME"
+	keyDBUser       string = "DB_USER"
+	keyDBPassword   string
 	keyServiceVersion string = "SERVICE_VERSION"
 )
 
@@ -60,6 +65,13 @@ func DefaultConfig() Config {
 			TokenAudience:  getEnv(keyVAAudience, ""),
 			PrivateKeyPath: getEnv(keyVAKeyPath, ""),
 			TimeoutSeconds: defaultVATimeoutSeconds,
+		},
+		Database: DatabaseConfig{
+			Host:     getEnv(keyDBHost, "localhost"),
+			Port:     getEnv(keyDBPort, "5432"),
+			Name:     getEnv(keyDBName, "emmy"),
+			User:     getEnv(keyDBUser, "postgres"),
+			Password: getEnv(keyDBPassword, ""),
 		},
 		Reporting: ReportingConfig{
 			SQSQueueURL: getEnv(keySQSQueueURL, ""),
@@ -116,6 +128,12 @@ func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
 		setFromEnv(&cfg.VA.TokenAudience, "VA_AUD"),
 		setFromEnv(&cfg.VA.PrivateKeyPath, "VA_PRIVATE_KEY_PATH"),
 		setFromEnv(&cfg.VA.TimeoutSeconds, "VA_TIMEOUT_SECONDS"),
+
+		setFromEnv(&cfg.Database.Host, "DB_HOST"),
+		setFromEnv(&cfg.Database.Port, "DB_PORT"),
+		setFromEnv(&cfg.Database.Name, "DB_NAME"),
+		setFromEnv(&cfg.Database.User, "DB_USER"),
+		setFromEnv(&cfg.Database.Password, "DB_PASSWORD"),
 
 		setFromEnv(&cfg.Reporting.SQSQueueURL, "SQS_QUEUE_URL"),
 		setFromEnv(&cfg.ServiceVersion, "SERVICE_VERSION"),
