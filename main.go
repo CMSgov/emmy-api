@@ -62,19 +62,6 @@ func run() error {
 
 	initLogger := core.NewLogger(&cfg)
 
-	otel, err := core.NewOtelService(ctx, &cfg)
-	if err != nil {
-		initLogger.ErrorContext(
-			ctx,
-			"Otel error",
-			"err", err,
-		)
-		return ErrRunFailed
-	}
-	defer otel.Shutdown(ctx, initLogger)
-
-	logger = core.NewLoggerWithOtel(&cfg, otel)
-
 	rdb := redis.NewClient(redis.Config{
 		Addr:               cfg.Redis.Addr,
 		Password:           cfg.Redis.Password,
@@ -100,8 +87,7 @@ func run() error {
 
 	app, err := api.New(&api.Config{
 		Core:   cfg,
-		Logger: logger,
-		Otel:   otel,
+		Logger: initLogger,
 		Redis:  rdb,
 	})
 	if err != nil {

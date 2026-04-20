@@ -1,15 +1,5 @@
 package core
 
-type OtlpConfig struct {
-	Endpoint string
-	Insecure bool
-}
-
-type OtelConfig struct {
-	OtlpExporter OtlpConfig
-	Disable      bool
-}
-
 type RedisConfig struct {
 	Addr               string
 	Password           string
@@ -41,7 +31,6 @@ type ReportingConfig struct {
 
 type Config struct {
 	Environment string
-	Otel        OtelConfig
 	Port        int
 	SkipAuth    bool
 	Redis       RedisConfig

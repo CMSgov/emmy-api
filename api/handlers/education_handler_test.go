@@ -17,9 +17,6 @@ import (
 	"github.com/cmsgov/emmy-api/pkg/resilience"
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 )
 
 type fakeReporter struct {
@@ -211,44 +208,3 @@ func TestEducationHandler_VendorErrorReturnsBadGateway(t *testing.T) {
 	require.Equal(t, fiber.StatusBadGateway, resp.StatusCode)
 }
 
-func TestEducationHandler_EmitsVerificationSpans(t *testing.T) {
-	recorder := tracetest.NewSpanRecorder()
-	tp := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(recorder))
-	previous := otel.GetTracerProvider()
-	otel.SetTracerProvider(tp)
-	t.Cleanup(func() {
-		otel.SetTracerProvider(previous)
-		_ = tp.Shutdown(context.Background())
-	})
-
-	app := fiber.New()
-	cfg := &core.Config{}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-
-	app.Post("/api/v0/education-enrollments", EducationHandler(cfg, &fakeEducationService{
-		response: education.Response{EnrollmentStatus: education.EnrollmentStatusFullTime},
-	}, &fakeReporter{}, logger))
-
-	req := httptest.NewRequest(http.MethodPost, "/api/v0/education-enrollments", strings.NewReader(`{
-		"firstName":"Lynette",
-		"lastName":"Oyola",
-		"dateOfBirth":"1988-10-24",
-		"ssn":"123-45-6789"
-	}`))
-	req.Header.Set("Content-Type", fiber.MIMEApplicationJSON)
-
-	resp, err := app.Test(req)
-	require.NoError(t, err)
-	defer resp.Body.Close()
-
-	require.Equal(t, fiber.StatusOK, resp.StatusCode)
-
-	spans := recorder.Ended()
-	names := make([]string, 0, len(spans))
-	for _, sp := range spans {
-		names = append(names, sp.Name())
-	}
-
-	require.Contains(t, names, "verification.request")
-	require.Contains(t, names, "decision.engine")
-}

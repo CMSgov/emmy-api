@@ -16,8 +16,6 @@ import (
 	"github.com/cmsgov/emmy-api/pkg/resilience"
 	"github.com/cmsgov/emmy-api/pkg/veteran"
 	"github.com/gofiber/fiber/v2"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
 )
 
 func VeteranDisabilityHandler(cfg *core.Config, service veteran.Service, reporter reporting.Reporter, logger *slog.Logger) fiber.Handler {
@@ -36,66 +34,41 @@ func VeteranDisabilityHandler(cfg *core.Config, service veteran.Service, reporte
 			clientID = ""
 		}
 
-		ctx, verificationSpan := verificationTracer.Start(
-			c.UserContext(),
-			"verification.request",
-		)
-		defer verificationSpan.End()
-
-		verificationSpan.SetAttributes(
-			attribute.String("vendor.name", "va"),
-			attribute.String("http.route", c.Path()),
-			attribute.String("http.method", c.Method()),
-			attribute.String("user.id", clientID),
-		)
+		ctx := c.UserContext()
 
 		var req veteran.Request
 		if err := c.BodyParser(&req); err != nil {
-			verificationSpan.RecordError(err)
-			verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadRequest))
 			return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
 		}
 
 		if missing := missingVeteranIdentityField(req); missing != "" {
 			err := fmt.Errorf("missing required field %s", missing)
-			verificationSpan.RecordError(err)
-			verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadRequest))
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		if !hasVeteranLookupInput(req) {
-			verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusNotFound))
 			return c.SendStatus(fiber.StatusNotFound)
 		}
 
 		ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 		defer cancel()
 
-		ctx, decisionSpan := verificationTracer.Start(ctx, "decision.engine")
-
 		datasourceStartTime := time.Now()
 		result, err := service.LookupDisabilityRating(ctx, req)
 		datasourceDuration := time.Since(datasourceStartTime)
 		if err != nil {
-			decisionSpan.RecordError(err)
-			decisionSpan.SetStatus(codes.Error, "verification failed")
-			decisionSpan.End()
-
 			var statusCode int
 			switch {
 			case errors.Is(err, veteran.ErrNotFound):
 				statusCode = fiber.StatusNotFound
-				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusNotFound))
 			case errors.Is(err, resilience.ErrCircuitOpen), errors.Is(err, circuitbreaker.ErrCircuitOpen):
 				statusCode = fiber.StatusServiceUnavailable
-				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusServiceUnavailable))
 			default:
 				statusCode = fiber.StatusBadGateway
 				logger.ErrorContext(ctx, "veteran disability lookup failed",
 					slog.Any("error", err),
 					slog.String("sub", clientID),
 				)
-				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadGateway))
 			}
 
 			reporter.Report(c.Context(), &reporting.ReportData{
@@ -107,16 +80,11 @@ func VeteranDisabilityHandler(cfg *core.Config, service veteran.Service, reporte
 				StatusCode: statusCode,
 			})
 
-			verificationSpan.RecordError(err)
-
 			if statusCode == fiber.StatusNotFound {
 				return c.SendStatus(fiber.StatusNotFound)
 			}
 			return fiber.NewError(statusCode, http.StatusText(statusCode))
 		}
-
-		decisionSpan.SetStatus(codes.Ok, "decision completed")
-		decisionSpan.End()
 
 		responseTimestamp := time.Now()
 		rid, ok := ctx.Value(core.RequestContextKey).(string)
@@ -141,7 +109,6 @@ func VeteranDisabilityHandler(cfg *core.Config, service veteran.Service, reporte
 			StatusCode: fiber.StatusOK,
 		})
 
-		verificationSpan.SetStatus(codes.Ok, "verification completed")
 		return c.Status(fiber.StatusOK).JSON(result)
 	}
 }

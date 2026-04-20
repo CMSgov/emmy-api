@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -62,15 +61,6 @@ func NewClient(c Config, logger *slog.Logger) *redis.Client {
 
 	rdb := redis.NewClient(opts)
 
-	err := redisotel.InstrumentTracing(rdb)
-	if err != nil {
-		logger.Warn("Otel Tracing Instrumentation Failed", "err", err)
-	}
-
-	err = redisotel.InstrumentMetrics(rdb)
-	if err != nil {
-		logger.Warn("Otel Metrics instrumentation Failed", "err", err)
-	}
 	return rdb
 }
 

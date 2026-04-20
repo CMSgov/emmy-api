@@ -9,15 +9,12 @@ const (
 	defaultConfigEnvironment    string = "development"
 	defaultConfigPort           int    = 3000
 	defaultSkipAuth             bool   = false
-	defaultOtelDisable          bool   = true
-	defaultOTLPExporterEndpoint string = "localhost:4317"
-	defaultOTLPInsecure         bool   = false
+	defaultVATimeoutSeconds     int    = 5
 	defaultRedisAddr            string = "localhost:6379"
 	defaultRedisPassword        string = ""
 	defaultRedisDB              int    = 0
 	defaultRedisUseTLS          bool   = true
 	defaultRedisInsecureSkip    bool   = false
-	defaultVATimeoutSeconds     int    = 5
 
 	keyNSCSubmitURL string = "NSC_SUBMIT_URL"
 	keyTokenURL     string = "NSC_TOKEN_URL"
@@ -39,14 +36,6 @@ func DefaultConfig() Config {
 		Environment: defaultConfigEnvironment,
 		Port:        defaultConfigPort,
 		SkipAuth:    defaultSkipAuth,
-
-		Otel: OtelConfig{
-			Disable: defaultOtelDisable,
-			OtlpExporter: OtlpConfig{
-				Endpoint: defaultOTLPExporterEndpoint,
-				Insecure: defaultOTLPInsecure,
-			},
-		},
 
 		Redis: RedisConfig{
 			Addr:               defaultRedisAddr,
@@ -92,8 +81,6 @@ func NewConfig(options ...func(*Config)) Config {
 //
 // - ENVIRONMENT, PORT, SKIP_AUTH
 //
-// - OTEL_DISABLE, OTEL_OTLP_EXPORTER_ENDPOINT, OTEL_OTLP_EXPORTER_INSECURE
-//
 // - REDIS_ADDR, REDIS_PASSWORD, REDIS_DB
 //
 // - NSC_SUBMIT_URL, NSC_TOKEN_URL, NSC_CLIENT_SECRET, NSC_CLIENT_ID, NSC_ACCOUNT_ID
@@ -110,10 +97,6 @@ func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
 		setFromEnv(&cfg.Environment, "ENVIRONMENT"),
 		setFromEnv(&cfg.Port, "PORT"),
 		setFromEnv(&cfg.SkipAuth, "SKIP_AUTH"),
-
-		setFromEnv(&cfg.Otel.Disable, "OTEL_DISABLE"),
-		setFromEnv(&cfg.Otel.OtlpExporter.Endpoint, "OTEL_OTLP_EXPORTER_ENDPOINT"),
-		setFromEnv(&cfg.Otel.OtlpExporter.Insecure, "OTEL_OTLP_EXPORTER_INSECURE"),
 
 		setFromEnv(&cfg.Redis.Addr, "REDIS_ADDR"),
 		setFromEnv(&cfg.Redis.Password, "REDIS_PASSWORD"),

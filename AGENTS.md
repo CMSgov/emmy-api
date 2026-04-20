@@ -10,7 +10,7 @@ This repo currently contains:
 - Go application code for a Fiber HTTP service
 - Redis-backed status and circuit-breaker behavior
 - NSC education integration code
-- OpenTelemetry, Prometheus, and Jaeger local observability config
+- Datadog/Orchestrion local observability config
 - ECS deployment and image-publish helper scripts
 - OpenAPI contract files and repository documentation
 
@@ -23,12 +23,12 @@ Core structure:
 
 - `main.go`: process bootstrap, config load, Redis init, app startup
 - `api/`: HTTP app construction, routes, handlers, middleware
-- `pkg/`: core config/logging/otel plus integration packages
+- `pkg/`: core config/logging plus integration packages
 - `api-spec/`: OpenAPI source files and bundled artifacts
 - `docs/`: setup, architecture, API, feature, research, and audit docs
 - `.github/workflows/`: CI checks for tests, linting, markdown, spelling, and secrets
 - `scripts/`: helper scripts for image build/push and ECS deployment
-- `Dockerfile`, `docker-compose.yml`, `otel-collector-config.yml`, `prometheus.yml`: local container and observability setup
+- `Dockerfile`, `docker-compose.yml`: local container and observability setup
 
 API boundaries:
 

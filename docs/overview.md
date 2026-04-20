@@ -22,16 +22,16 @@ Runtime dependencies in current implementation:
 - Redis (`github.com/redis/go-redis/v9`) for health checks and distributed circuit-breaker state.
 - NSC endpoints (`NSC_TOKEN_URL`, `NSC_SUBMIT_URL`) for education verification.
 - AWS Cognito JWKS/JWT validation for request authentication (when `SKIP_AUTH=false`).
-- OpenTelemetry OTLP exporter for tracing/metrics/log fanout.
+- Datadog Orchestrion for build-time automatic instrumentation.
 
 ## Key Packages
 
-- `main`: process bootstrap, env/config load, OTel startup, Redis client init, route registration, graceful shutdown.
+- `main`: process bootstrap, env/config load, Redis client init, route registration, graceful shutdown.
 - `api`: Fiber app construction and shared middleware setup.
 - `api/routes`: endpoint registration (`/`, `/health`, `/api/edu`, `/api/v0/veteran-disability-ratings`).
 - `api/handlers`: HTTP handlers for Redis health, education scaffolding, and veteran verification.
 - `api/middleware`: Cognito auth and circuit-breaker middleware.
-- `pkg/core`: configuration, logger, OTel service abstractions/utilities.
+- `pkg/core`: configuration, logger.
 - `pkg/education`: NSC service abstraction and HTTP/OAuth submit flow.
 - `pkg/veteran`: VA service abstraction and JWT client-assertion flow.
 - `pkg/circuitbreaker`: Redis-backed circuit-breaker implementation.
@@ -40,8 +40,8 @@ Runtime dependencies in current implementation:
 ## Design Principles (Observed)
 
 - Explicit startup configuration from environment via `core.NewConfigFromEnv()`.
-- Interface-driven boundaries for integration points (`EducationService`, `HTTPTransport`, `OtelService`, `Breaker`).
-- Middleware-first cross-cutting concerns (recovery, CORS, tracing, request logging, auth, circuit breaking).
+- Interface-driven boundaries for integration points (`EducationService`, `HTTPTransport`, `Breaker`).
+- Middleware-first cross-cutting concerns (recovery, CORS, request logging, auth, circuit breaking).
 - Operational defaults favoring availability in unknown breaker state (`FailOpen=true` by default).
 
 ## High-Level Request Flow
@@ -49,7 +49,7 @@ Runtime dependencies in current implementation:
 ```mermaid
 flowchart TD
     A[Client] --> B[Fiber App]
-    B --> C[Recover + CORS + OTel + Slog middleware]
+    B --> C[Recover + CORS + Slog middleware]
     C --> D{SKIP_AUTH == false?}
     D -->|Yes| E[Cognito JWT Verifier]
     D -->|No| F[Route Handler]
@@ -71,7 +71,7 @@ flowchart TD
     W --> X[VA disability endpoint]
     X --> Y[JSON response]
 
-    B -.-> O[OpenTelemetry exporter]
+    B -.-> O[Datadog Agent]
     I -.-> O
     K -.-> O
     V -.-> O

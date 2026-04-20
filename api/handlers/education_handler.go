@@ -14,12 +14,7 @@ import (
 	"github.com/cmsgov/emmy-api/pkg/reporting"
 	"github.com/cmsgov/emmy-api/pkg/resilience"
 	"github.com/gofiber/fiber/v2"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
 )
-
-var verificationTracer = otel.Tracer("emmy-api/verification")
 
 func EducationHandler(cfg *core.Config, edu education.Service, reporter reporting.Reporter, logger *slog.Logger) fiber.Handler {
 	const contextTimeout time.Duration = 30 * time.Second
@@ -36,56 +31,33 @@ func EducationHandler(cfg *core.Config, edu education.Service, reporter reportin
 			clientID = ""
 		}
 
-		ctx, verificationSpan := verificationTracer.Start(
-			c.UserContext(),
-			"verification.request",
-		)
-		defer verificationSpan.End()
-
-		verificationSpan.SetAttributes(
-			attribute.String("vendor.name", "nsc"),
-			attribute.String("http.route", c.Path()),
-			attribute.String("http.method", c.Method()),
-			attribute.String("user.id", clientID),
-		)
+		ctx := c.UserContext()
 
 		var reqBody education.Request
 		if err := c.BodyParser(&reqBody); err != nil {
-			verificationSpan.RecordError(err)
-			verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadRequest))
 			return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
 		}
 
 		if missing := missingEducationIdentityField(reqBody); missing != "" {
 			err := fmt.Errorf("missing required field %s", missing)
-			verificationSpan.RecordError(err)
-			verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadRequest))
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 		defer cancel()
 
-		ctx, decisionSpan := verificationTracer.Start(ctx, "decision.engine")
 		datasourceStartTime := time.Now()
 		result, err := edu.LookupEnrollmentStatus(ctx, reqBody)
 		datasourceDuration := time.Since(datasourceStartTime)
 		if err != nil {
-			decisionSpan.RecordError(err)
-			decisionSpan.SetStatus(codes.Error, "verification failed")
-			decisionSpan.End()
-
 			var statusCode int
 			switch {
 			case errors.Is(err, education.ErrNotFound):
 				statusCode = fiber.StatusNotFound
-				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusNotFound))
 			case errors.Is(err, resilience.ErrCircuitOpen):
 				statusCode = fiber.StatusServiceUnavailable
-				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusServiceUnavailable))
 			default:
 				statusCode = fiber.StatusBadGateway
-				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadGateway))
 			}
 
 			reporter.Report(c.Context(), &reporting.ReportData{
@@ -99,16 +71,11 @@ func EducationHandler(cfg *core.Config, edu education.Service, reporter reportin
 
 			logger.ErrorContext(ctx, "education verification failed", slog.Any("error", err))
 
-			verificationSpan.RecordError(err)
-
 			if statusCode == fiber.StatusNotFound {
 				return c.SendStatus(fiber.StatusNotFound)
 			}
 			return fiber.NewError(statusCode, http.StatusText(statusCode))
 		}
-
-		decisionSpan.SetStatus(codes.Ok, "decision completed")
-		decisionSpan.End()
 
 		responseTimestamp := time.Now()
 		rid, ok := ctx.Value(core.RequestContextKey).(string)
@@ -133,7 +100,6 @@ func EducationHandler(cfg *core.Config, edu education.Service, reporter reportin
 			StatusCode: fiber.StatusOK,
 		})
 
-		verificationSpan.SetStatus(codes.Ok, "verification completed")
 		return c.Status(fiber.StatusOK).JSON(result)
 	}
 }

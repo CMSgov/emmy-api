@@ -32,7 +32,7 @@ func TestLambdaHandler_HandleRequest(t *testing.T) {
 		},
 	}
 
-	handler := NewLambdaHandler(nil)
+	handler := NewLambdaHandler(nil, nil)
 	err = handler.HandleRequest(context.Background(), sqsEvent)
 
 	require.NoError(t, err)
@@ -48,7 +48,7 @@ func TestLambdaHandler_HandleRequest_InvalidJSON(t *testing.T) {
 		},
 	}
 
-	handler := NewLambdaHandler(nil)
+	handler := NewLambdaHandler(nil, nil)
 	err := handler.HandleRequest(context.Background(), sqsEvent)
 
 	require.NoError(t, err) // Should log error and continue, not return error
