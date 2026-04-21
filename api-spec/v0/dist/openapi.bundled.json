@@ -460,6 +460,8 @@
         "type": "string",
         "enum": [
           "FULL_TIME",
+          "THREE_QUARTERS_TIME",
+          "HALF_TIME",
           "PART_TIME",
           "LESS_THAN_PART_TIME",
           "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"
