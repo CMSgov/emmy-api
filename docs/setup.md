@@ -14,7 +14,7 @@
 | Category | Variables | Defaults |
 |---|---|---|
 | Service | `ENVIRONMENT`, `PORT`, `SKIP_AUTH` | `development`, `3000`, `false` |
-| OTel | `OTEL_DISABLE`, `OTEL_OTLP_EXPORTER_ENDPOINT`, `OTEL_OTLP_EXPORTER_INSECURE` | `true`, `localhost:4317`, `false` |
+| Orchestrion | `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT` | `localhost`, `8126` |
 | Cognito | `COGNITO_REGION`, `COGNITO_USER_POOL_ID`, `COGNITO_APP_CLIENT_ID` | `us-east-1`, `UNSET`, `UNSET` |
 | Redis | `REDIS_ADDR`, `REDIS_PASSWORD`, `REDIS_DB`, `REDIS_USE_TLS`, `REDIS_INSECURE_SKIP_VERIFY` | `localhost:6379`, empty, `0`, `true`, `false` |
 | NSC | `NSC_SUBMIT_URL`, `NSC_TOKEN_URL`, `NSC_CLIENT_SECRET`, `NSC_CLIENT_ID`, `NSC_ACCOUNT_ID` | empty |
@@ -84,9 +84,7 @@ Services:
 
 - API (`:8000` from the compose/example env)
 - Redis (`:6379`)
-- OTel Collector (`:4317`, `:4318`, metrics endpoints)
-- Jaeger UI (`:16686`)
-- Prometheus (`:9090`)
+- Datadog Agent (`:8126`)
 
 The API container is configured with `REDIS_ADDR=redis:6379`, so the compose
 stack now includes the Redis dependency needed for local startup and
@@ -128,10 +126,9 @@ go test ./...
 
 ## Telemetry Notes
 
-- OTel service is enabled unless `OTEL_DISABLE=true`.
-- OTel collector config: `otel-collector-config.yml`.
-- Prometheus scrape config: `prometheus.yml`.
-- Logger fanout can include OTEL log bridge via `core.NewLoggerWithOtel`.
+- Telemetry is handled by Datadog Orchestrion.
+- Building with the Dockerfile automatically applies instrumentation.
+- For local builds, you may need to install and use the `orchestrion` tool.
 
 ## Assumptions
 

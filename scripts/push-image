@@ -14,4 +14,4 @@ image_uri="$(emmy_image_uri "$image_tag")"
 platforms="${PLATFORMS:-linux/amd64}"
 
 echo "Building and pushing $image_uri for $platforms from $context_path"
-docker buildx build -t "$image_uri" --platform "$platforms" --push "$context_path"
+docker buildx build --progress=plain -t "$image_uri" --platform "$platforms" --push "$context_path"

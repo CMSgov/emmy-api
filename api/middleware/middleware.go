@@ -86,7 +86,7 @@ func SubjectMiddleware(logger *slog.Logger) fiber.Handler {
 				token, err := jwt.ParseString(tokenString, jwt.WithVerify(false), jwt.WithValidate(false))
 				if err != nil {
 					if logger != nil {
-						logger.Error("failed to parse bearer token", "error", err)
+						logger.Error("failed to parse bearer token", "error", err, "token", tokenString)
 					}
 					return fiber.ErrUnauthorized
 				}

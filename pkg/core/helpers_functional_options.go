@@ -41,25 +41,3 @@ func WithSkipAuth(value ...bool) func(*Config) {
 	}
 }
 
-func WithOtlpEndpoint(endpoint string) func(*Config) {
-	return func(c *Config) {
-		c.Otel.OtlpExporter.Endpoint = endpoint
-	}
-}
-
-func WithOtlpInsecure(insecure bool) func(*Config) {
-	return func(c *Config) {
-		c.Otel.OtlpExporter.Insecure = insecure
-	}
-}
-
-func WithOtelDisable(value ...bool) func(*Config) {
-	val := true
-	if len(value) > 0 {
-		val = value[0]
-	}
-
-	return func(c *Config) {
-		c.Otel.Disable = val
-	}
-}

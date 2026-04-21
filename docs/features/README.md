@@ -16,9 +16,7 @@ controls, and resilience patterns without scanning a single flat list.
 | Component | Purpose | Functionality |
 |---|---|---|
 | [Redis](infrastructure/redis.md) | Document Redis runtime dependency and client behavior. | Covers config defaults, connection/pool settings, instrumentation hooks, ping usage, and operational failure modes. |
-| [OpenTelemetry](infrastructure/opentelemetry.md) | Document app and collector telemetry integration. | Covers OTel initialization, middleware tracing, logger fanout, and collector integration caveats. |
-| [Prometheus](infrastructure/prometheus.md) | Document metrics scraping and exposure path. | Covers collector metrics export, scrape configuration, and operational metrics caveats. |
-| [Jaeger](infrastructure/jaeger.md) | Document trace sink and local trace UI integration. | Covers trace pipeline export, Jaeger service wiring, and local operational caveats. |
+| [Orchestrion](infrastructure/orchestrion.md) | Document Datadog Orchestrion integration. | Covers build-time instrumentation, environment configuration, and agent connectivity. |
 
 ## Security
 

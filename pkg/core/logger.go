@@ -4,9 +4,6 @@ import (
 	"context"
 	"log/slog"
 	"os"
-
-	slogmulti "github.com/samber/slog-multi"
-	"go.opentelemetry.io/contrib/bridges/otelslog"
 )
 
 type contextHandler struct {
@@ -41,19 +38,4 @@ func newStdoutHandler(cfg *Config) slog.Handler {
 func NewLogger(cfg *Config) *slog.Logger {
 	stdoutHandler := newStdoutHandler(cfg)
 	return slog.New(stdoutHandler)
-}
-
-func NewLoggerWithOtel(cfg *Config, otel OtelService) *slog.Logger {
-	stdoutHandler := newStdoutHandler(cfg)
-	otelHandler := otelslog.NewHandler(
-		"emmy-api",
-		otelslog.WithLoggerProvider(otel.LoggerProvider()),
-	)
-
-	return slog.New(
-		slogmulti.Fanout(
-			stdoutHandler,
-			otelHandler,
-		),
-	)
 }
