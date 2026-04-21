@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+SWAGGER_UI_DIR="${REPO_ROOT}/swagger-ui"
+SWAGGER_SITE_DIR="${REPO_ROOT}/swagger-site"
+OPENAPI_SOURCE="${REPO_ROOT}/api-spec/v0/dist/openapi.bundled.json"
+
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "error: pnpm is required to bundle the OpenAPI spec." >&2
+  exit 1
+fi
+
+for required in \
+  "${SWAGGER_SITE_DIR}/index.html" \
+  "${SWAGGER_SITE_DIR}/swagger-initializer.js" \
+  "${SWAGGER_UI_DIR}/swagger-ui.css" \
+  "${SWAGGER_UI_DIR}/swagger-ui-bundle.js" \
+  "${SWAGGER_UI_DIR}/swagger-ui-standalone-preset.js" \
+  "${SWAGGER_UI_DIR}/oauth2-redirect.html" \
+  "${SWAGGER_UI_DIR}/oauth2-redirect.js"
+do
+  if [[ ! -f "${required}" ]]; then
+    echo "error: required file missing: ${required}" >&2
+    exit 1
+  fi
+done
+
+pushd "${REPO_ROOT}" >/dev/null
+pnpm run bundle:api-spec
+popd >/dev/null
+
+if [[ ! -f "${OPENAPI_SOURCE}" ]]; then
+  echo "error: bundled OpenAPI file not found: ${OPENAPI_SOURCE}" >&2
+  exit 1
+fi
+
+mkdir -p "${SWAGGER_SITE_DIR}"
+
+cp "${SWAGGER_UI_DIR}/swagger-ui.css" "${SWAGGER_SITE_DIR}/swagger-ui.css"
+cp "${SWAGGER_UI_DIR}/swagger-ui-bundle.js" "${SWAGGER_SITE_DIR}/swagger-ui-bundle.js"
+cp "${SWAGGER_UI_DIR}/swagger-ui-standalone-preset.js" "${SWAGGER_SITE_DIR}/swagger-ui-standalone-preset.js"
+cp "${SWAGGER_UI_DIR}/favicon-16x16.png" "${SWAGGER_SITE_DIR}/favicon-16x16.png"
+cp "${SWAGGER_UI_DIR}/favicon-32x32.png" "${SWAGGER_SITE_DIR}/favicon-32x32.png"
+cp "${SWAGGER_UI_DIR}/oauth2-redirect.html" "${SWAGGER_SITE_DIR}/oauth2-redirect.html"
+cp "${SWAGGER_UI_DIR}/oauth2-redirect.js" "${SWAGGER_SITE_DIR}/oauth2-redirect.js"
+cp "${OPENAPI_SOURCE}" "${SWAGGER_SITE_DIR}/openapi.json"
+
+echo "Built static Swagger site at ${SWAGGER_SITE_DIR}"

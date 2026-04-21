@@ -1,0 +1,67 @@
+name: Publish Swagger Site
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || secrets.AWS_REGION || 'us-east-1' }}
+  SWAGGER_S3_BUCKET: ${{ vars.SWAGGER_S3_BUCKET || secrets.SWAGGER_S3_BUCKET }}
+
+jobs:
+  publish:
+    name: publish swagger docs
+    runs-on: self-hosted
+    steps:
+      - name: Validate required configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${SWAGGER_S3_BUCKET}" ]]; then
+            echo "SWAGGER_S3_BUCKET must be set as a repository variable or secret." >&2
+            exit 1
+          fi
+
+      - name: Fetch Repository
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.25.x"
+          cache: false
+
+      - name: Download Go modules
+        run: go mod download
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Install Node dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Swagger site payload
+        run: ./scripts/build-swagger-site
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME || format('arn:aws:iam::{0}:role/{1}', vars.AWS_ACCOUNT_ID, vars.AWS_ROLE_NAME) }}
+
+      - name: Upload Swagger site to S3
+        run: aws s3 sync swagger-site "s3://${SWAGGER_S3_BUCKET}" --delete

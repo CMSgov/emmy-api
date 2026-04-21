@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+SWAGGER_SITE_DIR="${REPO_ROOT}/swagger-site"
+SWAGGER_S3_BUCKET="${SWAGGER_S3_BUCKET:-}"
+AWS_REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-}}"
+
+if [[ -z "${SWAGGER_S3_BUCKET}" ]]; then
+  echo "error: SWAGGER_S3_BUCKET is required." >&2
+  exit 1
+fi
+
+if [[ -z "${AWS_REGION}" ]]; then
+  echo "error: AWS_REGION (or AWS_DEFAULT_REGION) is required." >&2
+  exit 1
+fi
+
+if ! command -v aws >/dev/null 2>&1; then
+  echo "error: aws CLI is required to publish the Swagger site." >&2
+  exit 1
+fi
+
+"${SCRIPT_DIR}/build-swagger-site"
+
+aws s3 sync "${SWAGGER_SITE_DIR}" "s3://${SWAGGER_S3_BUCKET}" \
+  --region "${AWS_REGION}" \
+  --delete
+
+echo "Published Swagger site to s3://${SWAGGER_S3_BUCKET}"
