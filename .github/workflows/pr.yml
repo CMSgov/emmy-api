@@ -16,27 +16,36 @@ jobs:
   unit:
     name: test
     runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
-    services:
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     steps:
       - name: Fetch Repository
         uses: actions/checkout@v6
 
-      - uses: actions/setup-go@v6
-        with:
-          go-version: "1.25.x"
-          cache: false
+      - name: Start Redis
+        run: |
+          docker network create emmy-net
+          docker run -d --name redis --network emmy-net redis:7-alpine
+
+          # Wait for redis to be ready
+          for i in {1..10}; do
+            if docker exec redis redis-cli ping | grep -q PONG; then
+              echo "Redis is ready"
+              exit 0
+            fi
+            echo "Waiting for Redis..."
+            sleep 2
+          done
+          echo "Redis failed to start"
+          exit 1
+
+      - name: Build Test Image
+        run: docker build -t emmy-test -f Dockerfile.test .
 
       - name: Test
-        run: go run gotest.tools/gotestsum@latest
+        run: |
+          docker run --rm \
+            --network emmy-net \
+            -e REDIS_ADDR=redis:6379 \
+            emmy-test
 
   golangci:
     name: lint

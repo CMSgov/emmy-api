@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/cmsgov/emmy-api/pkg/core"
@@ -19,8 +20,13 @@ func TestStatusEndpoint(t *testing.T) {
 
 	cfg := core.Config{}
 
+	addr := os.Getenv("REDIS_ADDR")
+	if addr == "" {
+		addr = "localhost:6379"
+	}
+
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: addr,
 	})
 
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))

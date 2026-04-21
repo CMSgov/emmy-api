@@ -16,11 +16,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func getRedisAddr() string {
+	addr := os.Getenv("REDIS_ADDR")
+	if addr == "" {
+		return "localhost:6379"
+	}
+	return addr
+}
+
 func TestRegisterRoutes_RegistersOpenAPISpecEndpoint(t *testing.T) {
 	app := fiber.New()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: getRedisAddr(),
 	})
 	reporter := reporting.NewMockReporter()
 
@@ -46,7 +54,7 @@ func TestRegisterRoutes_RegistersVeteranDisabilityEndpoint(t *testing.T) {
 	app := fiber.New()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: getRedisAddr(),
 	})
 	reporter := reporting.NewMockReporter()
 
@@ -66,7 +74,7 @@ func TestRegisterRoutes_RegistersEducationEnrollmentsEndpoint(t *testing.T) {
 	app := fiber.New()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: getRedisAddr(),
 	})
 	reporter := reporting.NewMockReporter()
 
