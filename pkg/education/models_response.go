@@ -7,10 +7,12 @@ import (
 type EnrollmentStatus string
 
 const (
-	EnrollmentStatusFullTime         EnrollmentStatus = "FULL_TIME"
-	EnrollmentStatusPartTime         EnrollmentStatus = "PART_TIME"
-	EnrollmentStatusLessThanPartTime EnrollmentStatus = "LESS_THAN_PART_TIME"
-	EnrollmentStatusUnknown          EnrollmentStatus = "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"
+	EnrollmentStatusFullTime          EnrollmentStatus = "FULL_TIME"
+	EnrollmentStatusThreeQuartersTime EnrollmentStatus = "THREE_QUARTERS_TIME"
+	EnrollmentStatusHalfTime          EnrollmentStatus = "HALF_TIME"
+	EnrollmentStatusPartTime          EnrollmentStatus = "PART_TIME"
+	EnrollmentStatusLessThanPartTime  EnrollmentStatus = "LESS_THAN_PART_TIME"
+	EnrollmentStatusUnknown           EnrollmentStatus = "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"
 )
 
 type Response struct {

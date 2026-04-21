@@ -90,9 +90,9 @@ func TestLookupEnrollmentStatus_MapsSpecificEnrollmentStatus(t *testing.T) {
 		DateOfBirth: "1988-10-24",
 	})
 	require.NoError(t, err)
-	require.Equal(t, EnrollmentStatusPartTime, out.EnrollmentStatus)
+	require.Equal(t, EnrollmentStatusHalfTime, out.EnrollmentStatus)
 	require.Len(t, out.EnrollmentDetails, 1)
-	require.Equal(t, EnrollmentStatusPartTime, out.EnrollmentDetails[0].EnrollmentStatus)
+	require.Equal(t, EnrollmentStatusHalfTime, out.EnrollmentDetails[0].EnrollmentStatus)
 }
 
 func TestLookupEnrollmentStatus_MapsLessThanHalfTimeToLessThanPartTime(t *testing.T) {
@@ -262,7 +262,7 @@ func TestLookupEnrollmentStatus_MapsMultipleEnrollmentDetails(t *testing.T) {
 	require.Equal(t, "University B", out.EnrollmentDetails[1].SchoolName)
 	require.Equal(t, "2022-09-01", out.EnrollmentDetails[1].TermBeginDate)
 	require.Equal(t, "2022-12-31", out.EnrollmentDetails[1].TermEndDate)
-	require.Equal(t, EnrollmentStatusPartTime, out.EnrollmentDetails[1].EnrollmentStatus)
+	require.Equal(t, EnrollmentStatusHalfTime, out.EnrollmentDetails[1].EnrollmentStatus)
 }
 
 func TestResolveEnrollmentStatus_PrioritizesStatus(t *testing.T) {
@@ -272,12 +272,12 @@ func TestResolveEnrollmentStatus_PrioritizesStatus(t *testing.T) {
 		resp     nscResponse
 	}{
 		{
-			name: "FullTime overrides PartTime",
+			name: "FullTime overrides ThreeQuartersTime",
 			resp: nscResponse{
 				EnrollmentDetails: []nscEnrollmentDetails{
 					{
 						EnrollmentData: []nscEnrollmentData{
-							{EnrollmentStatus: "H"},
+							{EnrollmentStatus: "Q"},
 						},
 					},
 					{
@@ -290,6 +290,42 @@ func TestResolveEnrollmentStatus_PrioritizesStatus(t *testing.T) {
 			expected: EnrollmentStatusFullTime,
 		},
 		{
+			name: "ThreeQuartersTime overrides HalfTime",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "H"},
+						},
+					},
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "Q"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusThreeQuartersTime,
+		},
+		{
+			name: "HalfTime overrides PartTime",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "PART_TIME"},
+						},
+					},
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "H"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusHalfTime,
+		},
+		{
 			name: "PartTime overrides LessThanPartTime",
 			resp: nscResponse{
 				EnrollmentDetails: []nscEnrollmentDetails{
@@ -300,7 +336,7 @@ func TestResolveEnrollmentStatus_PrioritizesStatus(t *testing.T) {
 					},
 					{
 						EnrollmentData: []nscEnrollmentData{
-							{EnrollmentStatus: "H"},
+							{EnrollmentStatus: "PART_TIME"},
 						},
 					},
 				},
