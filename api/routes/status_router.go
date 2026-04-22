@@ -17,7 +17,7 @@ func StatusRouter(app fiber.Router, cfg core.Config, rdb *redis.Client, logger *
 		logger = slog.Default()
 	}
 
-	withBreaker := middleware.WithCircuitBreaker(func(name string) *circuitbreaker.RedisBreaker {
+	withBreaker := middleware.WithCircuitBreaker(func(name string) circuitbreaker.Breaker {
 		return circuitbreaker.NewRedisBreaker(rdb, name, circuitbreaker.DefaultOptions(), logger)
 	})
 
