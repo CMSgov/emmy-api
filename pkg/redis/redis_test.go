@@ -14,6 +14,9 @@ import (
 
 func TestNewClient_Ping_Set_Get(t *testing.T) {
 	addr := os.Getenv("REDIS_ADDR")
+	if addr == "" {
+		addr = "localhost:6379"
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -21,8 +24,12 @@ func TestNewClient_Ping_Set_Get(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 	rdb := NewClient(Config{Addr: addr}, logger)
+	t.Cleanup(func() { _ = rdb.Close() })
 
 	err := Ping(ctx, rdb)
+	if err != nil {
+		t.Skipf("skipping redis-dependent test; redis unavailable at %s: %v", addr, err)
+	}
 
 	require.NoErrorf(t, err, "Ping(ctx, rdb) returned an error: %v", err)
 

@@ -34,7 +34,7 @@ func RegisterRoutes(app fiber.Router, cfg *core.Config, rdb *redis.Client, repor
 	})
 
 	// One breaker per endpoint
-	withCB := middleware.WithCircuitBreaker(func(name string) *circuitbreaker.RedisBreaker {
+	withCB := middleware.WithCircuitBreaker(func(name string) circuitbreaker.Breaker {
 		return circuitbreaker.NewRedisBreaker(
 			rdb,
 			name,

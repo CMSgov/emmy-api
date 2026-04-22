@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"log/slog"
@@ -9,6 +10,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/cmsgov/emmy-api/pkg/circuitbreaker"
 	"github.com/gofiber/fiber/v2"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -189,4 +191,132 @@ func TestSubjectMiddleware_Logging(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 	assert.Contains(t, buf.String(), "failed to parse bearer token")
 	assert.Contains(t, buf.String(), "invalid-token-for-logging-test")
+}
+
+type fakeBreaker struct {
+	allowErr       error
+	allowCalls     int
+	onSuccessCalls int
+	onFailureCalls int
+}
+
+func (b *fakeBreaker) Allow(_ context.Context) error {
+	b.allowCalls++
+	return b.allowErr
+}
+
+func (b *fakeBreaker) OnSuccess(context.Context) {
+	b.onSuccessCalls++
+}
+
+func (b *fakeBreaker) OnFailure(context.Context) {
+	b.onFailureCalls++
+}
+
+func TestWithCircuitBreaker_DeniedByOpenCircuit(t *testing.T) {
+	app := fiber.New()
+	breaker := &fakeBreaker{allowErr: circuitbreaker.ErrCircuitOpen}
+
+	calledNext := false
+	app.Get("/test", WithCircuitBreaker(func(_ string) circuitbreaker.Breaker {
+		return breaker
+	})(func(c *fiber.Ctx) error {
+		calledNext = true
+		return c.SendStatus(fiber.StatusOK)
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/test", http.NoBody)
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, fiber.StatusServiceUnavailable, resp.StatusCode)
+	assert.False(t, calledNext)
+	assert.Equal(t, 1, breaker.allowCalls)
+	assert.Equal(t, 0, breaker.onSuccessCalls)
+	assert.Equal(t, 0, breaker.onFailureCalls)
+}
+
+func TestWithCircuitBreaker_CallsOnSuccessFor2xx(t *testing.T) {
+	app := fiber.New()
+	breaker := &fakeBreaker{}
+
+	app.Get("/test", WithCircuitBreaker(func(_ string) circuitbreaker.Breaker {
+		return breaker
+	})(func(c *fiber.Ctx) error {
+		return c.SendStatus(fiber.StatusOK)
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/test", http.NoBody)
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, fiber.StatusOK, resp.StatusCode)
+	assert.Equal(t, 1, breaker.allowCalls)
+	assert.Equal(t, 1, breaker.onSuccessCalls)
+	assert.Equal(t, 0, breaker.onFailureCalls)
+}
+
+func TestWithCircuitBreaker_CallsOnFailureForHandlerError(t *testing.T) {
+	app := fiber.New()
+	breaker := &fakeBreaker{}
+
+	app.Get("/test", WithCircuitBreaker(func(_ string) circuitbreaker.Breaker {
+		return breaker
+	})(func(_ *fiber.Ctx) error {
+		return fiber.NewError(fiber.StatusBadGateway, "upstream failed")
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/test", http.NoBody)
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, fiber.StatusBadGateway, resp.StatusCode)
+	assert.Equal(t, 1, breaker.allowCalls)
+	assert.Equal(t, 0, breaker.onSuccessCalls)
+	assert.Equal(t, 1, breaker.onFailureCalls)
+}
+
+func TestWithCircuitBreaker_CallsOnFailureFor5xxResponseStatus(t *testing.T) {
+	app := fiber.New()
+	breaker := &fakeBreaker{}
+
+	app.Get("/test", WithCircuitBreaker(func(_ string) circuitbreaker.Breaker {
+		return breaker
+	})(func(c *fiber.Ctx) error {
+		return c.SendStatus(fiber.StatusServiceUnavailable)
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/test", http.NoBody)
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, fiber.StatusServiceUnavailable, resp.StatusCode)
+	assert.Equal(t, 1, breaker.allowCalls)
+	assert.Equal(t, 0, breaker.onSuccessCalls)
+	assert.Equal(t, 1, breaker.onFailureCalls)
+}
+
+func TestWithCircuitBreaker_DoesNotCount4xxAsBreakerFailure(t *testing.T) {
+	app := fiber.New()
+	breaker := &fakeBreaker{}
+
+	app.Get("/test", WithCircuitBreaker(func(_ string) circuitbreaker.Breaker {
+		return breaker
+	})(func(_ *fiber.Ctx) error {
+		return fiber.NewError(fiber.StatusBadRequest, "bad request")
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/test", http.NoBody)
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+	assert.Equal(t, 1, breaker.allowCalls)
+	assert.Equal(t, 1, breaker.onSuccessCalls)
+	assert.Equal(t, 0, breaker.onFailureCalls)
 }

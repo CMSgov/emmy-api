@@ -122,14 +122,14 @@ func parseGroups(value string) []string {
 // It can block the entire request
 // figures out what breaker to use since we're intentionally reusing one breaker per endpoint
 // calls breaker.Allow() to either block the request of let it continue
-func WithCircuitBreaker(newBreaker func(name string) *circuitbreaker.RedisBreaker) func(fiber.Handler) fiber.Handler {
+func WithCircuitBreaker(newBreaker func(name string) circuitbreaker.Breaker) func(fiber.Handler) fiber.Handler {
 	var mu sync.RWMutex
 
 	// the lookup table is usable by multiple requests
 	// We want multiple requests to be able to hit this middleware without failing or creating inconsistent state such as multiple requests creating multiple breakers for the same endpoint
-	breakers := make(map[string]*circuitbreaker.RedisBreaker)
+	breakers := make(map[string]circuitbreaker.Breaker)
 
-	getBreaker := func(name string) *circuitbreaker.RedisBreaker {
+	getBreaker := func(name string) circuitbreaker.Breaker {
 		// allows concurrent read requests but not write requests
 		mu.RLock()
 		// read breaker in map and assign to variable
@@ -175,9 +175,28 @@ func WithCircuitBreaker(newBreaker func(name string) *circuitbreaker.RedisBreake
 				return c.SendStatus(fiber.StatusServiceUnavailable)
 			}
 
-			return next(c)
+			err = next(c)
+			if breakerShouldCountFailure(c, err) {
+				breaker.OnFailure(c.Context())
+			} else {
+				breaker.OnSuccess(c.Context())
+			}
+
+			return err
 		}
 	}
+}
+
+func breakerShouldCountFailure(c *fiber.Ctx, err error) bool {
+	if err != nil {
+		var fiberErr *fiber.Error
+		if errors.As(err, &fiberErr) {
+			return fiberErr.Code >= fiber.StatusInternalServerError
+		}
+		return true
+	}
+
+	return c.Response().StatusCode() >= fiber.StatusInternalServerError
 }
 
 func breakerName(c *fiber.Ctx) string {
