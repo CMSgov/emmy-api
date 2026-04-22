@@ -1,13 +1,11 @@
 package routes
 
 import (
-	"context"
 	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/gofiber/fiber/v2"
@@ -24,13 +22,6 @@ func TestStatusEndpoint(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr: "localhost:6379",
 	})
-	t.Cleanup(func() { _ = rdb.Close() })
-
-	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
-	defer cancel()
-	if err := rdb.Ping(ctx).Err(); err != nil {
-		t.Skipf("skipping test; redis unavailable at localhost:6379: %v", err)
-	}
 
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 

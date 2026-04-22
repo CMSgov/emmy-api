@@ -46,14 +46,11 @@ func newTestRedisClient(t *testing.T) *redis.Client {
 		PoolSize:     redisPoolSize,
 		MinIdleConns: redisMinIdleConns,
 	})
-	t.Cleanup(func() { _ = rdb.Close() })
 
-	// Skip integration tests when Redis isn't running locally.
+	// Fail fast with a clear error if Redis isn't running
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
-	if err := rdb.Ping(ctx).Err(); err != nil {
-		t.Skipf("skipping redis-dependent test; redis unavailable at %s: %v", redisClientAddr, err)
-	}
+	require.NoError(t, rdb.Ping(ctx).Err(), "Redis must be running at %s for these tests", redisClientAddr)
 
 	return rdb
 }
