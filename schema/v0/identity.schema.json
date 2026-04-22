@@ -5,6 +5,14 @@
   "type": "object",
   "additionalProperties": true,
   "required": ["firstName", "lastName", "dateOfBirth"],
+  "oneOf": [
+    {
+      "required": ["ssn"]
+    },
+    {
+      "required": ["address"]
+    }
+  ],
   "properties": {
     "firstName": {
       "type": "string",

@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -41,13 +40,8 @@ func VeteranDisabilityHandler(cfg *core.Config, service veteran.Service, reporte
 			return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
 		}
 
-		if missing := missingVeteranIdentityField(req); missing != "" {
-			err := fmt.Errorf("missing required field %s", missing)
-			return fiber.NewError(fiber.StatusBadRequest, err.Error())
-		}
-
-		if !hasVeteranLookupInput(req) {
-			return c.SendStatus(fiber.StatusNotFound)
+		if !isValidVeteranRequest(&req) {
+			return fiber.NewError(fiber.StatusBadRequest, "request must include first name, last name, date of birth, and either SSN or a complete address")
 		}
 
 		ctx, cancel := context.WithTimeout(ctx, contextTimeout)
@@ -113,20 +107,13 @@ func VeteranDisabilityHandler(cfg *core.Config, service veteran.Service, reporte
 	}
 }
 
-func missingVeteranIdentityField(req veteran.Request) string {
-	switch {
-	case strings.TrimSpace(req.FirstName) == "":
-		return "firstName"
-	case strings.TrimSpace(req.LastName) == "":
-		return "lastName"
-	case strings.TrimSpace(req.DateOfBirth) == "":
-		return "dateOfBirth"
-	default:
-		return ""
+func isValidVeteranRequest(req *veteran.Request) bool {
+	if strings.TrimSpace(req.FirstName) == "" ||
+		strings.TrimSpace(req.LastName) == "" ||
+		strings.TrimSpace(req.DateOfBirth) == "" {
+		return false
 	}
-}
 
-func hasVeteranLookupInput(req veteran.Request) bool {
 	if strings.TrimSpace(req.SSN) != "" {
 		return true
 	}

@@ -4,6 +4,7 @@
   "description": "Postal address used when a lookup requires demographic matching instead of SSN matching.",
   "type": "object",
   "additionalProperties": false,
+  "required": ["street1", "city", "state", "postalCode", "country"],
   "properties": {
     "street1": {
       "type": "string",
