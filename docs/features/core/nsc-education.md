@@ -2,11 +2,13 @@
 
 ## Feature Overview
 
-Provides education verification through NSC by submitting a structured JSON request with OAuth2 client-credentials authentication.
+Provides education verification through NSC by accepting a caller JSON payload
+and submitting a structured upstream request with OAuth2 client-credentials
+authentication.
 
 ## Business Logic
 
-- Build `education.Request` payload.
+- Parse the request body into `education.Request`.
 - Serialize request body to JSON.
 - Create HTTP POST to `NSC_SUBMIT_URL`.
 - Use OAuth2-enabled HTTP client sourced from NSC token endpoint.
@@ -60,11 +62,12 @@ if err != nil {
 
 ## Future Improvements
 
-- Accept caller-provided request payload in HTTP handler.
-- Add validation for required request fields before submit.
+- Add richer request validation beyond the current required
+  `firstName`/`lastName`/`dateOfBirth` checks.
 - Introduce retry policy with bounded backoff for transient 5xx errors.
 - Add contract tests against NSC sandbox with fixtures.
 
 ## Assumptions
 
-- **Medium confidence:** Current handler payload is a scaffold for integration testing, not final business API behavior.
+- **High confidence:** The HTTP handler now accepts caller-provided payloads and
+  is no longer the earlier hardcoded-request scaffold.

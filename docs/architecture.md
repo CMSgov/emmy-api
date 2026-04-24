@@ -48,7 +48,10 @@ flowchart LR
 ## Interfaces and Abstractions
 
 - `pkg/education/service.go`
-  - `type EducationService interface { Submit(ctx context.Context, req Request) (Response, error) }`
+  - `type Service interface { LookupEnrollmentStatus(ctx context.Context, req Request) (Response, error) }`
+  - `type HTTPTransport interface { Do(req *http.Request) (*http.Response, error) }`
+- `pkg/veteran/service.go`
+  - `type Service interface { LookupDisabilityRating(ctx context.Context, req Request) (Response, error) }`
   - `type HTTPTransport interface { Do(req *http.Request) (*http.Response, error) }`
 - `pkg/circuitbreaker/circuitbreaker.go`
   - `type Breaker interface { Allow; OnSuccess; OnFailure }`
@@ -62,7 +65,7 @@ without route-layer rewrites.
   - `runServer` starts `app.Listen` in a goroutine and selects on server error or signal context cancellation.
   - graceful shutdown uses `app.ShutdownWithTimeout(5 * time.Second)`.
 - Request lifecycle:
-  - handlers create per-request contexts with timeout (`/health`: 2s, `/api/edu`: 5s, `/api/v0/veteran-disability-ratings`: 5s).
+  - handlers create per-request contexts with timeout (`/health`: 2s, `POST /api/v0/education-enrollments`: 30s, `POST /api/v0/veteran-disability-ratings`: 5s).
 - Circuit-breaker middleware:
   - breaker registry map guarded with `sync.RWMutex`.
   - lazy breaker initialization via double-check lock pattern.
@@ -80,10 +83,12 @@ without route-layer rewrites.
 
 Ordered middleware in `api.New`:
 
-1. Recover
-2. CORS (`*` origin/headers/methods)
-3. Structured request logging (trace/span/request IDs)
-4. Conditional Cognito auth middleware
+1. Request ID context propagation
+2. Structured request logging (trace/span/request IDs)
+3. Recover
+4. CORS (`*` origin/headers/methods)
+5. Subject extraction middleware
+6. Conditional local skip-auth identity injection
 
 ## Dependency Injection Pattern
 
@@ -99,10 +104,14 @@ injects it.
 
 ## Technical Caveats (Current State)
 
-- `/api/edu` handler builds a hardcoded request payload instead of binding user input.
-- `/health` is registered before the auth middleware, so it remains a runtime-only unauthenticated health route.
-- Current runtime routes are a mix of scaffold and contract-aligned paths: `GET /`, `GET /health`, `GET /api/edu`, and `POST /api/v0/veteran-disability-ratings`.
-- `GET /api/edu` remains runtime scaffolding, while `POST /api/v0/veteran-disability-ratings` matches the checked-in v0 contract in `api-spec/v0/openapi.yaml`.
+- `api.New` does not currently install a Cognito-verifying middleware. The
+  request subject comes from `X-Sub`, an unverified bearer token `sub` claim,
+  or skip-auth locals when `SKIP_AUTH=true`.
+- `GET /health` and the two `POST /api/v0/*` verification routes are
+  circuit-breaker wrapped, but `GET /` and `GET /api-spec/v1/verify` are not.
+- The public contract documents OAuth 2.0 client-credentials auth, while the
+  runtime currently focuses on subject propagation plus downstream provider
+  calls.
 - Some tests require local Redis and fail when unavailable.
 
 ## Assumptions

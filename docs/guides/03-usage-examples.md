@@ -25,7 +25,7 @@ Example success response:
 }
 ```
 
-View [education response detail](./04-education-responses-detail.md) for more examples and further nuance of the APi explained.
+View [education response detail](./04-education-responses-detail.md) for more examples and further nuance of the API explained.
 
 ## Veteran Disability Verification
 
@@ -50,4 +50,4 @@ Example success response:
 }
 ```
 
-View [veteran disability response detail](./05-veteran-responses-detail.md) for more examples and further nuance of the APi explained.
+View [veteran disability response detail](./05-veteran-responses-detail.md) for more examples and further nuance of the API explained.

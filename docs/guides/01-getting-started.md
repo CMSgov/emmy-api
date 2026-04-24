@@ -42,7 +42,7 @@ To begin using the Emmy API, we will start with manual steps which ensure your c
 
 To **authenticate** with the Emmy API, you will use your `<client_id>` and `<client_secret>` to obtain a token for all Emmy API operations. Once you obtain a token, you will use it to make all subsequent Emmy API requests. Tokens are short-lived and expire, typically after 60 minutes. You can use this token as many times as you'd like until expiration, or you can generate a new token each time.
 
-Obtaining a token requires that you use a **Basic Authentication** HTTP header. This means that you will join your `<client_id>` and `<client_secreet>` with a colon `:` and then Base64 encode the entire string. Follow the [Authentication Base64 Encoding](02-authentication.md#credential-format) instructions to build your credential string. We'll refer to the credential string that you generate as `<base64_credentials>`.
+Obtaining a token requires that you use a **Basic Authentication** HTTP header. This means that you will join your `<client_id>` and `<client_secret>` with a colon `:` and then Base64 encode the entire string. Follow the [Authentication Guide](02-authentication.md) for token-request details. We'll refer to the credential string that you generate as `<base64_credentials>`.
 
 For simplicity, we'll use `curl` to showcase getting an access token. From a terminal or command prompt, run this `curl` command ([how do I install `curl`?](../examples/v0/curl.md#installing-curl)) by substituting the appropriate variables (shown ```<IN_BRACKETS>``` below) with their actual values:
 
@@ -71,9 +71,9 @@ _(Review the [Authentication Guide](02-authentication.md) for more details on au
 
 ### Step 2: Prepare your Request Payload
 
-Requests to the Emmy API use JSON content payloads in the request body. First, review the [Emmy API specification](https://cmsgov.github.io/emmy-api/swagger-ui) for the operation you would like to perform. In this example, we will make request a member's educational enrollment information from the Emmy API's `/v0/education-enrollments` endpoint.
+Requests to the Emmy API use JSON content payloads in the request body. First, review the [Emmy API specification](https://cmsgov.github.io/emmy-api/swagger-ui) for the operation you would like to perform. In this example, we will request a member's educational enrollment information from the Emmy API's `/api/v0/education-enrollments` endpoint.
 
-In the [API specs for `/v0/education-enrollments`](https://cmsgov.github.io/emmy-api/swagger-ui/#/Education%20Verification/getEducationEnrollmentStatus), you can see the structure of the request body. Build a JSON body using your member's information, like so:
+In the [API specs for `/api/v0/education-enrollments`](https://cmsgov.github.io/emmy-api/swagger-ui/#/Education%20Verification/getEducationEnrollmentStatus), you can see the structure of the request body. Build a JSON body using your member's information, like so:
 
 ```json
 {
@@ -90,12 +90,12 @@ With your JSON payload prepared, you can now [make a request to the Emmy API](01
 
 ### Step 3: Invoke an Emmy API Request
 
-In this step, we will again use the `curl` tool to make a request to the Emmy API. We will continue the example from step 2 and request member information from the [Education `/v0/education-enrollments`](https://cmsgov.github.io/emmy-api/swagger-ui/#/Education%20Verification/getEducationEnrollmentStatus) endpoint.
+In this step, we will again use the `curl` tool to make a request to the Emmy API. We will continue the example from step 2 and request member information from the [Education `/api/v0/education-enrollments`](https://cmsgov.github.io/emmy-api/swagger-ui/#/Education%20Verification/getEducationEnrollmentStatus) endpoint.
 
 This request is slightly more complex since it now has HTTP authorization, a content body, and a different endpoint. Use this example by substituting the values for your environment:
 
 ```bash
-curl --location --request POST '<API_BASE>/v0/education-enrollments' \
+curl --location --request POST '<API_BASE>/api/v0/education-enrollments' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data '{
@@ -113,4 +113,4 @@ After a moment, the Emmy API will provide a verification response for the applic
 
 Now that you have completed an end-to-end test of using the Emmy API, you can use these lessons learned to connect to and use the API in your own application.
 
-- [Visit the Emmy API examples](../../examples/README.md)
+- [Visit the Emmy API examples](03-usage-examples.md)

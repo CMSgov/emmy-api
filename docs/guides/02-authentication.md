@@ -6,6 +6,11 @@ The v0 contract uses the `OAuth2ClientCredentials` security scheme. Clients
 obtain an access token from the configured token endpoint and then present that
 token as a bearer token on API requests.
 
+The current Go runtime docs in [`docs/api.md`](../api.md) should be read
+alongside this guide: the checked-in v0 contract documents OAuth, while the
+runtime currently extracts request identity from headers and bearer tokens
+without enforcing the full contract server-side.
+
 For the checked-in v0 spec, the security scheme is defined in
 `api-spec/v0/openapi.yaml` with this token URL:
 
