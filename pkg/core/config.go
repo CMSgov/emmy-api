@@ -33,6 +33,8 @@ const (
 	keyDBName       string = "DB_NAME"
 	keyDBUser       string = "DB_USER"
 	keyDBPassword   string
+	keyDBSSLMode    string = "DB_SSLMODE"
+	keyDBIAMAuth    string = "DB_IAM_AUTH"
 	keyServiceVersion string = "SERVICE_VERSION"
 )
 
@@ -72,6 +74,8 @@ func DefaultConfig() Config {
 			Name:     getEnv(keyDBName, "emmy"),
 			User:     getEnv(keyDBUser, "postgres"),
 			Password: getEnv(keyDBPassword, ""),
+			SSLMode:  getEnv(keyDBSSLMode, "allow"),
+			IAMAuth:  getEnv(keyDBIAMAuth, "false") == "true",
 		},
 		Reporting: ReportingConfig{
 			SQSQueueURL: getEnv(keySQSQueueURL, ""),
@@ -134,6 +138,8 @@ func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
 		setFromEnv(&cfg.Database.Name, "DB_NAME"),
 		setFromEnv(&cfg.Database.User, "DB_USER"),
 		setFromEnv(&cfg.Database.Password, "DB_PASSWORD"),
+		setFromEnv(&cfg.Database.SSLMode, "DB_SSLMODE"),
+		setFromEnv(&cfg.Database.IAMAuth, "DB_IAM_AUTH"),
 
 		setFromEnv(&cfg.Reporting.SQSQueueURL, "SQS_QUEUE_URL"),
 		setFromEnv(&cfg.ServiceVersion, "SERVICE_VERSION"),

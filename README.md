@@ -75,6 +75,36 @@ You can also run each step individually with `mise run bundle-api-spec`,
 `mise run lint-yaml-files`, `mise run check-format-contract-files`,
 `mise run check-json-schemas`, and `mise run check-openapi-breaking`.
 
+### Database Migrations
+
+This project uses [`golang-migrate`](https://github.com/golang-migrate/migrate) to manage database schema changes.
+
+Migration files are located in the `migrations/` directory.
+
+To manage migrations, you can use the following `make` commands:
+
+```sh
+# Apply all pending migrations
+make migrate-up
+
+# Revert the last applied migration
+make migrate-down
+
+# Check the current migration version
+make migrate-version
+```
+
+Migrations are also supported in environments requiring IAM authentication (e.g., AWS RDS), using the same configuration as the main application.
+
+To run migrations in AWS (e.g., in the `dev` environment):
+
+```sh
+# This runs a one-off ECS task with the migration command
+make migrate-remote ENV=dev
+```
+
+See [docs/architecture/04-database-migrations.md](docs/architecture/04-database-migrations.md) for more details on AWS deployment and Terraform configuration.
+
 ## Policies
 
 ### Open Source Policy

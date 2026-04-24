@@ -35,6 +35,8 @@ type DatabaseConfig struct {
 	Name     string
 	User     string
 	Password string
+	SSLMode  string
+	IAMAuth  bool
 }
 
 type Config struct {
