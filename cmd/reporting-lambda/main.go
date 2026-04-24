@@ -29,12 +29,6 @@ func main() {
 	if cfg.Database.Host != "" {
 		password := cfg.Database.Password
 		iamAuthEnabled := cfg.Database.IAMAuth
-		logger.Info("database connection info",
-			"host", cfg.Database.Host,
-			"port", cfg.Database.Port,
-			"user", cfg.Database.User,
-			"iam_auth_enabled", iamAuthEnabled,
-			"has_password", password != "")
 
 		if iamAuthEnabled {
 			ctx := context.Background()
@@ -49,10 +43,6 @@ func main() {
 					logger.Error("failed to build auth token", "error", tokenErr)
 				} else {
 					password = token
-					logger.Info("generated IAM auth token",
-						"user", cfg.Database.User,
-						"endpoint", endpoint,
-						"region", awsConfig.Region)
 				}
 			}
 		}
@@ -60,7 +50,6 @@ func main() {
 		dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 			cfg.Database.Host, cfg.Database.Port, cfg.Database.User, password, cfg.Database.Name, cfg.Database.SSLMode)
 		db, err = sql.Open("postgres", dsn)
-		logger.Info("connecting to database", "host", cfg.Database.Host, "dbname", cfg.Database.Name)
 		if err != nil {
 			logger.Error("failed to open database connection", "error", err)
 		} else {
@@ -70,7 +59,6 @@ func main() {
 				db.Close()
 				db = nil
 			} else {
-				logger.Info("connected to database", "host", cfg.Database.Host, "dbname", cfg.Database.Name)
 				defer db.Close()
 			}
 		}

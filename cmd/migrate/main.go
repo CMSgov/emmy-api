@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"flag"
 	"fmt"
@@ -55,7 +54,6 @@ func main() {
 				logger.Error("failed to build auth token", "error", tokenErr)
 			} else {
 				password = url.QueryEscape(token)
-				logger.Info("generated IAM auth token", "user", cfg.Database.User, "endpoint", endpoint)
 			}
 		}
 	}
@@ -64,53 +62,12 @@ func main() {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
 		cfg.Database.User, password, dbHostPort, cfg.Database.Name, cfg.Database.SSLMode)
 
-	// Debug migration permissions
-	db, err := sql.Open("postgres", dsn)
-	if err != nil {
-		logger.Warn("failed to open debug connection", "error", err)
-	} else {
-		logger.Info("running debug queries to investigate migration permission issues")
-
-		var currentUser, sessionUser, currentDatabase, currentSchema string
-		err = db.QueryRow("SELECT current_user, session_user, current_database(), current_schema();").Scan(&currentUser, &sessionUser, &currentDatabase, &currentSchema)
-		if err != nil {
-			logger.Warn("failed to query session info", "error", err)
-		} else {
-			logger.Info("session info", "current_user", currentUser, "session_user", sessionUser, "database", currentDatabase, "schema", currentSchema)
-		}
-
-		var searchPath string
-		err = db.QueryRow("SHOW search_path;").Scan(&searchPath)
-		if err != nil {
-			logger.Warn("failed to query search_path", "error", err)
-		} else {
-			logger.Info("search_path", "path", searchPath)
-		}
-
-		var nspname, nspowner string
-		err = db.QueryRow("SELECT nspname, nspowner::regrole::text FROM pg_namespace WHERE nspname = 'public';").Scan(&nspname, &nspowner)
-		if err != nil {
-			logger.Warn("failed to query public namespace info", "error", err)
-		} else {
-			logger.Info("public namespace info", "name", nspname, "owner", nspowner)
-		}
-
-		var canUse, canCreate bool
-		err = db.QueryRow("SELECT has_schema_privilege(current_user, 'public', 'USAGE'), has_schema_privilege(current_user, 'public', 'CREATE');").Scan(&canUse, &canCreate)
-		if err != nil {
-			logger.Warn("failed to query schema privileges", "error", err)
-		} else {
-			logger.Info("schema privileges (public)", "can_use", canUse, "can_create", canCreate)
-		}
-		db.Close() //nolint:errcheck // Closing debug connection
-	}
 
 	m, err := migrate.New(
 		"file://"+migrationPath,
 		dsn,
 	)
 	if err != nil {
-		logger.Error("press F to place migration respects", "host", cfg.Database.Host, "port", cfg.Database.Port, "pass", password)
 		logger.Error("failed to initialize migration", "error", err, "dsn", dsn)
 		os.Exit(1)
 	}
