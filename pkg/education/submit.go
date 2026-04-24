@@ -237,12 +237,10 @@ func resolveEnrollmentStatus(resp nscResponse) (EnrollmentStatus, bool) {
 	rank := func(s EnrollmentStatus) int {
 		switch s {
 		case EnrollmentStatusFullTime:
-			return 6
-		case EnrollmentStatusThreeQuartersTime:
 			return 5
-		case EnrollmentStatusHalfTime:
+		case EnrollmentStatusThreeQuartersTime:
 			return 4
-		case EnrollmentStatusPartTime:
+		case EnrollmentStatusHalfTime:
 			return 3
 		case EnrollmentStatusLessThanPartTime:
 			return 2
@@ -306,10 +304,6 @@ func normalizeEnrollmentStatus(value string) (EnrollmentStatus, bool) {
 		return EnrollmentStatusFullTime, true
 	case "F":
 		return EnrollmentStatusFullTime, true
-	case string(EnrollmentStatusPartTime):
-		return EnrollmentStatusPartTime, true
-	case "PARTTIME":
-		return EnrollmentStatusPartTime, true
 	case string(EnrollmentStatusThreeQuartersTime):
 		return EnrollmentStatusThreeQuartersTime, true
 	case "Q", "THREE_QUARTER_TIME":

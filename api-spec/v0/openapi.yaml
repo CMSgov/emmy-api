@@ -193,6 +193,7 @@ components:
         enrollmentStatus:
           $ref: ../../schema/v0/school_enrollment_status.schema.json
           description: Current enrollment status for the identified person.
+          example: FULL_TIME
         enrollmentDetails:
           type: array
           description: List of enrollment details filtered from the raw data.
@@ -393,16 +394,16 @@ components:
           transaction-id: "123456"
     EducationEnrollmentMultipleResponseExample:
       value:
-        enrollmentStatus: FULL_TIME
+        enrollmentStatus: HALF_TIME
         enrollmentDetails:
           - schoolName: "University A"
             termBeginDate: "2023-01-01"
             termEndDate: "2023-05-01"
-            enrollmentStatus: FULL_TIME
+            enrollmentStatus: HALF_TIME
           - schoolName: "University B"
             termBeginDate: "2022-09-01"
             termEndDate: "2022-12-31"
-            enrollmentStatus: PART_TIME
+            enrollmentStatus: HALF_TIME
         rawData: {}
         dataSource: National Student Clearinghouse
         metadata:

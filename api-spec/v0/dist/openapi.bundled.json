@@ -263,7 +263,8 @@
         "properties": {
           "enrollmentStatus": {
             "$ref": "#/components/schemas/school_enrollment_status.schema",
-            "description": "Current enrollment status for the identified person."
+            "description": "Current enrollment status for the identified person.",
+            "example": "FULL_TIME"
           },
           "enrollmentDetails": {
             "type": "array",
@@ -583,7 +584,6 @@
           "FULL_TIME",
           "THREE_QUARTERS_TIME",
           "HALF_TIME",
-          "PART_TIME",
           "LESS_THAN_PART_TIME",
           "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"
         ],
@@ -710,19 +710,19 @@
       },
       "EducationEnrollmentMultipleResponseExample": {
         "value": {
-          "enrollmentStatus": "FULL_TIME",
+          "enrollmentStatus": "HALF_TIME",
           "enrollmentDetails": [
             {
               "schoolName": "University A",
               "termBeginDate": "2023-01-01",
               "termEndDate": "2023-05-01",
-              "enrollmentStatus": "FULL_TIME"
+              "enrollmentStatus": "HALF_TIME"
             },
             {
               "schoolName": "University B",
               "termBeginDate": "2022-09-01",
               "termEndDate": "2022-12-31",
-              "enrollmentStatus": "PART_TIME"
+              "enrollmentStatus": "HALF_TIME"
             }
           ],
           "rawData": {},
