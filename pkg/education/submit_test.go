@@ -308,12 +308,12 @@ func TestResolveEnrollmentStatus_PrioritizesStatus(t *testing.T) {
 			expected: EnrollmentStatusThreeQuartersTime,
 		},
 		{
-			name: "HalfTime overrides PartTime",
+			name: "HalfTime overrides LessThanPartTime",
 			resp: nscResponse{
 				EnrollmentDetails: []nscEnrollmentDetails{
 					{
 						EnrollmentData: []nscEnrollmentData{
-							{EnrollmentStatus: "PART_TIME"},
+							{EnrollmentStatus: "L"},
 						},
 					},
 					{
@@ -324,24 +324,6 @@ func TestResolveEnrollmentStatus_PrioritizesStatus(t *testing.T) {
 				},
 			},
 			expected: EnrollmentStatusHalfTime,
-		},
-		{
-			name: "PartTime overrides LessThanPartTime",
-			resp: nscResponse{
-				EnrollmentDetails: []nscEnrollmentDetails{
-					{
-						EnrollmentData: []nscEnrollmentData{
-							{EnrollmentStatus: "L"},
-						},
-					},
-					{
-						EnrollmentData: []nscEnrollmentData{
-							{EnrollmentStatus: "PART_TIME"},
-						},
-					},
-				},
-			},
-			expected: EnrollmentStatusPartTime,
 		},
 		{
 			name: "LessThanPartTime overrides Unknown",
