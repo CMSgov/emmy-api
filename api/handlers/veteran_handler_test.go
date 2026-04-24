@@ -152,7 +152,7 @@ func TestVeteranDisabilityHandler_MissingRequiredFieldReturnsBadRequest(t *testi
 	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 }
 
-func TestVeteranDisabilityHandler_MissingSSNAndAddressReturnsNotFoundWithoutCallingProvider(t *testing.T) {
+func TestVeteranDisabilityHandler_MissingSSNAndAddressReturnsBadRequestWithoutCallingProvider(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
@@ -171,11 +171,11 @@ func TestVeteranDisabilityHandler_MissingSSNAndAddressReturnsNotFoundWithoutCall
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
-	require.Equal(t, fiber.StatusNotFound, resp.StatusCode)
+	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	require.Equal(t, 0, service.calls)
 }
 
-func TestVeteranDisabilityHandler_IncompleteAddressWithoutSSNReturnsNotFoundWithoutCallingProvider(t *testing.T) {
+func TestVeteranDisabilityHandler_IncompleteAddressWithoutSSNReturnsBadRequestWithoutCallingProvider(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
@@ -198,7 +198,7 @@ func TestVeteranDisabilityHandler_IncompleteAddressWithoutSSNReturnsNotFoundWith
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
-	require.Equal(t, fiber.StatusNotFound, resp.StatusCode)
+	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 	require.Equal(t, 0, service.calls)
 }
 

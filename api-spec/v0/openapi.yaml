@@ -71,6 +71,32 @@ paths:
                   $ref: "#/components/examples/EducationEnrollmentResponseExample"
                 multiple:
                   $ref: "#/components/examples/EducationEnrollmentMultipleResponseExample"
+        "400":
+          description: Invalid request. Missing required fields or malformed JSON.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                missingFields:
+                  value:
+                    error: "missing required field firstName"
+        "404":
+          description: Person not found.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                notFound:
+                  value:
+                    error: "Not Found"
   /api/v0/veteran-disability-ratings:
     post:
       tags:
@@ -104,6 +130,32 @@ paths:
               examples:
                 rated:
                   $ref: "#/components/examples/VeteranDisabilityStatusResponseExample"
+        "400":
+          description: Invalid request. Missing required fields or malformed JSON.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                missingFields:
+                  value:
+                    error: "request must include first name, last name, date of birth, and either SSN or a complete address"
+        "404":
+          description: Person not found.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                notFound:
+                  value:
+                    error: "Not Found"
 components:
   securitySchemes:
     OAuth2ClientCredentials:
@@ -256,6 +308,16 @@ components:
           format: int64
           description: How long the back-end spent in milliseconds.
           example: 180
+    Error:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: A descriptive error message.
+          example: "Not Found"
   examples:
     GetEducationEnrollmentRequestExample:
       value:
