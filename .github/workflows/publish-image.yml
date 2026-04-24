@@ -109,18 +109,22 @@ jobs:
             echo "password=$password"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Log in to Artifactory
-        uses: docker/login-action@v3
-        with:
-          registry: artifactory.cloud.cms.gov
-          username: ${{ steps.artifactory-credentials.outputs.username }}
-          password: ${{ steps.artifactory-credentials.outputs.password }}
+      # - name: Log in to Artifactory
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: artifactory.cloud.cms.gov
+      #     username: ${{ steps.artifactory-credentials.outputs.username }}
+      #     password: ${{ steps.artifactory-credentials.outputs.password }}
 
       - name: Push Docker image
         env:
           IMAGE_URI: ${{ steps.image-metadata.outputs.image_uri }}
           LATEST_IMAGE_URI: ${{ steps.image-metadata.outputs.latest_image_uri }}
-        run: docker buildx build -t "$IMAGE_URI" -t "$LATEST_IMAGE_URI" --platform "$PLATFORMS" --push .
+        run: |
+          docker login --username ${{ steps.artifactory-credentials.outputs.username }} \
+            --password ${{ steps.artifactory-credentials.outputs.password }} \
+            artifactory.cloud.cms.gov
+          docker buildx build -t "$IMAGE_URI" -t "$LATEST_IMAGE_URI" --platform "$PLATFORMS" --push .
 
   deploy:
     name: deploy ${{ matrix.env_name }}
