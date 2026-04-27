@@ -68,7 +68,7 @@ func main() {
 		dsn,
 	)
 	if err != nil {
-		logger.Error("failed to initialize migration", "error", err, "dsn", dsn)
+		logger.Error("failed to initialize migration", "error", err)
 		os.Exit(1)
 	}
 

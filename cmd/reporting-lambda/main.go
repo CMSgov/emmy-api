@@ -10,9 +10,9 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
-	_ "github.com/lib/pq"
 	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/cmsgov/emmy-api/pkg/reporting"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -56,10 +56,15 @@ func main() {
 			err = db.Ping()
 			if err != nil {
 				logger.Error("failed to ping database", "error", err)
-				db.Close()
+				err = db.Close()
+				if err != nil {
+					logger.Error("failed to close database", "error", err)
+				}
 				db = nil
 			} else {
-				defer db.Close()
+				if err := db.Close(); err != nil {
+					logger.Error("failed to close db", "error", err)
+				}
 			}
 		}
 	}
