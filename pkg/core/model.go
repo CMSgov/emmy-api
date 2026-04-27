@@ -40,15 +40,15 @@ type DatabaseConfig struct {
 }
 
 type Config struct {
-	Environment string
-	Port        int
-	SkipAuth    bool
+	Environment    string
+	Port           int
+	SkipAuth       bool
 	ServiceVersion string
-	Redis       RedisConfig
-	Database    DatabaseConfig
-	NSC         NSCConfig
-	VA          VAConfig
-	Reporting   ReportingConfig
+	Redis          RedisConfig
+	Database       DatabaseConfig
+	NSC            NSCConfig
+	VA             VAConfig
+	Reporting      ReportingConfig
 }
 
 type ctxKey int
