@@ -2,7 +2,6 @@ package redis
 
 import (
 	"context"
-	"io"
 	"log/slog"
 	"os"
 	"testing"
@@ -18,7 +17,7 @@ func TestNewClient_Ping_Set_Get(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	rdb := NewClient(Config{Addr: addr}, logger)
 
@@ -34,22 +33,23 @@ func TestNewClient_Ping_Set_Get(t *testing.T) {
 	require.NoErrorf(t, err, `rdb.Set(ctx, key, "bar", 5*time.Second).Err() return an error: %v`, err)
 
 	val, err := rdb.Get(ctx, key).Result()
+	require.NoErrorf(t, err, "rdb.Get(ctx, key).Result() returned an error: %v", err)
 	result := val
 
 	expected := "bar"
 
 	assert.Equalf(t, expected, result, "Expected: %q; Got: %q", expected, result)
 
-	_ = rdb.Del(ctx, key).Err
+	err = rdb.Del(ctx, key).Err()
+	require.NoErrorf(t, err, "rdb.Del(ctx, key).Err() returned an error: %v", err)
 }
 
-func NewClient_Works(t *testing.T) {
-
+func TestNewClientWorks(t *testing.T) {
 	t.Setenv("REDIS_ADDR", "localhost:6379")
 
 	addr := os.Getenv("REDIS_ADDR")
 
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	rdb := NewClient(Config{Addr: addr}, logger)
 

@@ -35,15 +35,12 @@ func DefaultCircuitBreakerOptions() CircuitBreakerOptions {
 }
 
 type CircuitBreaker struct {
-	mu sync.Mutex
-
-	state State
-
+	openedAt            time.Time
+	state               State
+	opts                CircuitBreakerOptions
 	consecutiveFailures int
 	halfOpenInFlight    int
-	openedAt            time.Time
-
-	opts CircuitBreakerOptions
+	mu                  sync.Mutex
 }
 
 func NewCircuitBreaker(opts CircuitBreakerOptions) *CircuitBreaker {
@@ -81,9 +78,9 @@ func (cb *CircuitBreaker) Allow() error {
 
 		cb.halfOpenInFlight++
 		return nil
-	default:
-		return ErrCircuitOpen
 	}
+
+	return ErrCircuitOpen
 }
 
 func (cb *CircuitBreaker) OnSuccess() {
@@ -102,6 +99,8 @@ func (cb *CircuitBreaker) OnSuccess() {
 			cb.consecutiveFailures = 0
 			cb.openedAt = time.Time{}
 		}
+	default:
+		// No state transition needed.
 	}
 }
 
@@ -125,6 +124,8 @@ func (cb *CircuitBreaker) OnFailure() {
 	case StateOpen:
 		// Extend the cooldown window on repeated failures while open.
 		cb.openedAt = now
+	default:
+		// No state transition needed.
 	}
 }
 

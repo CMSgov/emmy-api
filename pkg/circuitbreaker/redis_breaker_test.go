@@ -2,7 +2,6 @@ package circuitbreaker
 
 import (
 	"context"
-	"io"
 	"log/slog"
 	"os"
 	"strconv"
@@ -84,7 +83,7 @@ func TestNewRedisBreaker(t *testing.T) {
 
 	name := "redisBreaker:" + t.Name()
 
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	result := NewRedisBreaker(rdb, name, testBreakerOpts, logger)
 
@@ -100,7 +99,7 @@ func TestNewRedisBreaker_keys(t *testing.T) {
 
 	name := "redisBreaker:" + t.Name()
 
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	breaker := NewRedisBreaker(rdb, name, testBreakerOpts, logger)
 
@@ -119,7 +118,7 @@ func TestNewRedisBreaker_Allow(t *testing.T) {
 
 	name := "redisBreaker:" + t.Name()
 
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	breaker := NewRedisBreaker(rdb, name, testBreakerOpts, logger)
 
@@ -143,7 +142,7 @@ func TestRedisBreaker_OnFailure_TransitionsToOpen(t *testing.T) {
 
 	name := "redisBreaker:" + t.Name()
 
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	breaker := NewRedisBreaker(rdb, name, opts, logger)
 

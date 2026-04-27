@@ -3,7 +3,6 @@ package education
 import (
 	"context"
 	"encoding/json"
-	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -19,7 +18,6 @@ func TestNSCHTTPClient_PreservesAuthOnRedirect(t *testing.T) {
 	// Test NSC server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-
 		// OAuth token endpoint
 		case "/token":
 			w.Header().Set("Content-Type", "application/json")
@@ -51,14 +49,18 @@ func TestNSCHTTPClient_PreservesAuthOnRedirect(t *testing.T) {
 		TokenURL:     ts.URL + "/token",
 	}
 
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	client := nscHTTPClient(context.Background(), cfg, logger)
 
-	req, err := http.NewRequest("GET", ts.URL+"/submit", nil)
+	req, err := http.NewRequest(http.MethodGet, ts.URL+"/submit", http.NoBody)
 	require.NoError(t, err)
 
 	resp, err := client.Do(req)
 	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, resp.Body.Close())
+	}()
+
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 
 	require.Equal(t, "Bearer test-token", seenAuth)

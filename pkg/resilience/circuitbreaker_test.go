@@ -1,7 +1,6 @@
 package resilience
 
 import (
-	"errors"
 	"testing"
 	"time"
 
@@ -69,13 +68,13 @@ func TestCircuitBreaker_HalfOpenFailureReopens(t *testing.T) {
 	breaker.OnFailure()
 
 	require.Equal(t, StateOpen, breaker.State())
-	require.True(t, errors.Is(breaker.Allow(), ErrCircuitOpen))
+	require.ErrorIs(t, breaker.Allow(), ErrCircuitOpen)
 }
 
 func TestDefaultCircuitBreakerOptions_AreUsable(t *testing.T) {
 	opts := DefaultCircuitBreakerOptions()
 
-	assert.Greater(t, opts.FailureThreshold, 0)
+	assert.Positive(t, opts.FailureThreshold)
 	assert.Greater(t, opts.OpenTimeout, time.Duration(0))
-	assert.Greater(t, opts.HalfOpenMaxProbes, 0)
+	assert.Positive(t, opts.HalfOpenMaxProbes)
 }

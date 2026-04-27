@@ -18,7 +18,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-var ErrRunFailed = errors.New("application failed to run")
+var (
+	ErrRunFailed      = errors.New("application failed to run")
+	ErrPortOutOfRange = errors.New("port out of range")
+)
 
 func main() {
 	err := run()
@@ -73,13 +76,15 @@ func run() error {
 	err = redis.Ping(ctx, rdb)
 	if err != nil {
 		logger.ErrorContext(ctx, "redis ping failed", "err", err)
-		_ = rdb.Close()
+		if closeErr := rdb.Close(); closeErr != nil {
+			logger.Warn("redis close failed after ping error", "err", closeErr)
+		}
 		return ErrRunFailed
 	}
 
 	defer func() {
-		if err := rdb.Close(); err != nil {
-			logger.Warn("redis close failed", "err", err)
+		if closeErr := rdb.Close(); closeErr != nil {
+			logger.Warn("redis close failed", "err", closeErr)
 		}
 	}()
 
@@ -127,7 +132,7 @@ func run() error {
 
 func listenAddr(port int) (string, error) {
 	if port < 1 || port > 65535 {
-		return "", fmt.Errorf("port out of range: %d", port)
+		return "", fmt.Errorf("%w: %d", ErrPortOutOfRange, port)
 	}
 
 	return fmt.Sprintf(":%d", port), nil

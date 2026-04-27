@@ -28,12 +28,15 @@ func (r *fakeReporter) Report(_ context.Context, data *reporting.ReportData) {
 }
 
 type fakeEducationService struct {
-	response education.Response
-	err      error
-	calls    int
 	lastReq  education.Request
+	err      error
+	response education.Response
+	calls    int
 }
 
+var errVendorRequestFailed = errors.New("vendor request failed")
+
+//nolint:gocritic // Interface requires value parameter.
 func (s *fakeEducationService) LookupEnrollmentStatus(_ context.Context, req education.Request) (education.Response, error) {
 	s.calls++
 	s.lastReq = req
@@ -49,7 +52,7 @@ func TestEducationHandler_Success(t *testing.T) {
 		return c.Next()
 	})
 	cfg := &core.Config{Environment: "test", ServiceVersion: "1.3.0"}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	service := &fakeEducationService{
 		response: education.Response{EnrollmentStatus: education.EnrollmentStatusUnknown},
 	}
@@ -95,7 +98,7 @@ func TestEducationHandler_Success(t *testing.T) {
 func TestEducationHandler_InvalidJSONReturnsBadRequest(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	reporter := &fakeReporter{}
 
 	app.Post("/api/v0/education-enrollments", EducationHandler(cfg, &fakeEducationService{}, reporter, logger))
@@ -113,7 +116,7 @@ func TestEducationHandler_InvalidJSONReturnsBadRequest(t *testing.T) {
 func TestEducationHandler_MissingRequiredFieldReturnsBadRequest(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	reporter := &fakeReporter{}
 
 	app.Post("/api/v0/education-enrollments", EducationHandler(cfg, &fakeEducationService{}, reporter, logger))
@@ -135,7 +138,7 @@ func TestEducationHandler_MissingRequiredFieldReturnsBadRequest(t *testing.T) {
 func TestEducationHandler_NotFoundReturnsNotFound(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	reporter := &fakeReporter{}
 
 	app.Post("/api/v0/education-enrollments", EducationHandler(cfg, &fakeEducationService{
@@ -163,7 +166,7 @@ func TestEducationHandler_NotFoundReturnsNotFound(t *testing.T) {
 func TestEducationHandler_CircuitOpenReturnsServiceUnavailable(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	app.Post("/api/v0/education-enrollments", EducationHandler(cfg, &fakeEducationService{
 		err: resilience.ErrCircuitOpen,
@@ -187,10 +190,10 @@ func TestEducationHandler_CircuitOpenReturnsServiceUnavailable(t *testing.T) {
 func TestEducationHandler_VendorErrorReturnsBadGateway(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	app.Post("/api/v0/education-enrollments", EducationHandler(cfg, &fakeEducationService{
-		err: errors.New("vendor request failed"),
+		err: errVendorRequestFailed,
 	}, &fakeReporter{}, logger))
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v0/education-enrollments", strings.NewReader(`{
@@ -207,4 +210,3 @@ func TestEducationHandler_VendorErrorReturnsBadGateway(t *testing.T) {
 
 	require.Equal(t, fiber.StatusBadGateway, resp.StatusCode)
 }
-

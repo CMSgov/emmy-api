@@ -70,9 +70,8 @@ func stackTraceHandler(logger *slog.Logger) func(*fiber.Ctx, any) {
 
 type Config struct {
 	Logger *slog.Logger
+	Redis  *redis.Client
 	Core   core.Config
-
-	Redis *redis.Client
 }
 
 func New(cfg *Config) (*fiber.App, error) {
@@ -112,7 +111,7 @@ func New(cfg *Config) (*fiber.App, error) {
 
 	app.Use(middleware.SubjectMiddleware(cfg.Logger))
 
-	routes.StatusRouter(app, cfg.Core, cfg.Redis, logger)
+	routes.StatusRouter(app, cfg.Redis, logger)
 
 	if cfg.Core.SkipAuth {
 		app.Use(middleware.SkipAuthMiddleware())

@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -21,6 +22,8 @@ import (
 )
 
 type roundTripFunc func(*http.Request) (*http.Response, error)
+
+var errUnexpectedRequestURL = errors.New("unexpected request url")
 
 func (fn roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 	return fn(req)
@@ -63,7 +66,7 @@ func TestVAHTTPClient_AddsBearerTokenFromClientAssertionFlow(t *testing.T) {
 				return jsonResponse(http.StatusOK, `{"data":{"attributes":{"combined_disability_rating":70}}}`), nil
 			default:
 				t.Fatalf("unexpected request to %s", req.URL.String())
-				return nil, nil
+				return nil, errUnexpectedRequestURL
 			}
 		}),
 	}
@@ -76,7 +79,7 @@ func TestVAHTTPClient_AddsBearerTokenFromClientAssertionFlow(t *testing.T) {
 		PrivateKeyPath: keyPath,
 	}, base)
 
-	req, err := http.NewRequest(http.MethodPost, "https://example.test/restricted/disability_rating", nil)
+	req, err := http.NewRequest(http.MethodPost, "https://example.test/restricted/disability_rating", http.NoBody)
 	require.NoError(t, err)
 
 	resp, err := client.Do(req)
