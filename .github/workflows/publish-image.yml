@@ -105,8 +105,8 @@ jobs:
           printf '::add-mask::%s\n' "$password"
 
           {
-            echo "username=$username"
-            echo "password=$password"
+            printf 'username<<EOF\n%s\nEOF\n' "$username"
+            printf 'password<<EOF\n%s\nEOF\n' "$password"
           } >> "$GITHUB_OUTPUT"
 
       - name: Log in to Artifactory
