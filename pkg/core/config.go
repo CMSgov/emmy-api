@@ -32,7 +32,7 @@ const (
 	keyDBPort       string = "DB_PORT"
 	keyDBName       string = "DB_NAME"
 	keyDBUser       string = "DB_USER"
-	keyDBPassword   string
+	keyDBPassword   string = ""
 	keyDBSSLMode    string = "DB_SSLMODE"
 	keyDBIAMAuth    string = "DB_IAM_AUTH"
 	keyServiceVersion string = "SERVICE_VERSION"
