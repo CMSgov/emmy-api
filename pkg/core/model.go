@@ -30,13 +30,13 @@ type ReportingConfig struct {
 }
 
 type Config struct {
-	Environment string
-	Port        int
-	SkipAuth    bool
-	Redis       RedisConfig
-	NSC         NSCConfig
-	VA          VAConfig
-	Reporting   ReportingConfig
+	Environment    string
+	Port           int
+	SkipAuth       bool
+	Redis          RedisConfig
+	NSC            NSCConfig
+	VA             VAConfig
+	Reporting      ReportingConfig
 	ServiceVersion string
 }
 

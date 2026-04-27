@@ -209,5 +209,4 @@ func breakerName(c *fiber.Ctx) string {
 	}
 
 	return c.Method() + " " + path
-
 }

@@ -6,28 +6,28 @@ import (
 )
 
 const (
-	defaultConfigEnvironment    string = "development"
-	defaultConfigPort           int    = 3000
-	defaultSkipAuth             bool   = false
-	defaultVATimeoutSeconds     int    = 5
-	defaultRedisAddr            string = "localhost:6379"
-	defaultRedisPassword        string = ""
-	defaultRedisDB              int    = 0
-	defaultRedisUseTLS          bool   = true
-	defaultRedisInsecureSkip    bool   = false
+	defaultConfigEnvironment string = "development"
+	defaultConfigPort        int    = 3000
+	defaultSkipAuth          bool   = false
+	defaultVATimeoutSeconds  int    = 5
+	defaultRedisAddr         string = "localhost:6379"
+	defaultRedisPassword     string = ""
+	defaultRedisDB           int    = 0
+	defaultRedisUseTLS       bool   = true
+	defaultRedisInsecureSkip bool   = false
 
-	keyNSCSubmitURL string = "NSC_SUBMIT_URL"
-	keyTokenURL     string = "NSC_TOKEN_URL"
-	keyClientSecret string = "NSC_CLIENT_SECRET"
-	keyClientID     string = "NSC_CLIENT_ID"
-	keyAccountID    string = "NSC_ACCOUNT_ID"
-	keyVABaseURL    string = "VA_BASE_URL"
-	keyVATokenURL   string = "VA_TOKEN_URL"
-	keyVAClientID   string = "VA_CLIENT_ID"
-	keyVAAudience   string = "VA_AUD"
-	keyVAKeyPath    string = "VA_PRIVATE_KEY_PATH"
-	keyVATimeout    string = "VA_TIMEOUT_SECONDS"
-	keySQSQueueURL  string = "SQS_QUEUE_URL"
+	keyNSCSubmitURL   string = "NSC_SUBMIT_URL"
+	keyTokenURL       string = "NSC_TOKEN_URL"
+	keyClientSecret   string = "NSC_CLIENT_SECRET"
+	keyClientID       string = "NSC_CLIENT_ID"
+	keyAccountID      string = "NSC_ACCOUNT_ID"
+	keyVABaseURL      string = "VA_BASE_URL"
+	keyVATokenURL     string = "VA_TOKEN_URL"
+	keyVAClientID     string = "VA_CLIENT_ID"
+	keyVAAudience     string = "VA_AUD"
+	keyVAKeyPath      string = "VA_PRIVATE_KEY_PATH"
+	keyVATimeout      string = "VA_TIMEOUT_SECONDS"
+	keySQSQueueURL    string = "SQS_QUEUE_URL"
 	keyServiceVersion string = "SERVICE_VERSION"
 )
 
