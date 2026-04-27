@@ -99,7 +99,14 @@ func run() error {
 		return ErrRunFailed
 	}
 
-	routes.RegisterRoutes(app, &cfg, rdb, reporter, logger)
+	params := &routes.RouterParams{
+		CFG: &cfg,
+		RDB: rdb,
+		Reporter: reporter,
+		Logger: logger,
+	}
+
+	routes.RegisterRoutes(app, params)
 
 	addr, err := listenAddr(cfg.Port)
 	if err != nil {

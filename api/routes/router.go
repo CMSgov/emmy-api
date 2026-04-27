@@ -14,9 +14,16 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func RegisterRoutes(app fiber.Router, cfg *core.Config, rdb *redis.Client, reporter reporting.Reporter, logger *slog.Logger) {
-	if logger == nil {
-		logger = slog.Default()
+type RouterParams struct {
+	CFG      *core.Config
+	RDB      *redis.Client
+	Reporter reporting.Reporter
+	Logger   *slog.Logger
+}
+
+func RegisterRoutes(app fiber.Router, params RouterParams) {
+	if params.Logger == nil {
+		params.Logger = slog.Default()
 	}
 
 	app.Get("/", func(c *fiber.Ctx) error {
@@ -26,23 +33,23 @@ func RegisterRoutes(app fiber.Router, cfg *core.Config, rdb *redis.Client, repor
 
 	api := app.Group("/api")
 
-	edu := education.New(&cfg.NSC, education.Options{
-		Logger: logger,
+	edu := education.New(&params.CFG.NSC, education.Options{
+		Logger: params.Logger,
 	})
-	veteranService := veteran.New(&cfg.VA, veteran.Options{
-		Logger: logger,
+	veteranService := veteran.New(&params.CFG.VA, veteran.Options{
+		Logger: params.Logger,
 	})
 
 	// One breaker per endpoint
 	withCB := middleware.WithCircuitBreaker(func(name string) circuitbreaker.Breaker {
 		return circuitbreaker.NewRedisBreaker(
-			rdb,
+			params.RDB,
 			name,
 			circuitbreaker.DefaultOptions(),
-			logger,
+			params.Logger,
 		)
 	})
 
-	api.Post("/v0/education-enrollments", withCB(handlers.EducationHandler(cfg, edu, reporter, logger)))
-	api.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(cfg, veteranService, reporter, logger)))
+	api.Post("/v0/education-enrollments", withCB(handlers.EducationHandler(params.CFG, edu, params.Reporter, params.Logger)))
+	api.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(params.CFG, veteranService, params.Reporter, params.Logger)))
 }
