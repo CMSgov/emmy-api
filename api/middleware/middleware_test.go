@@ -29,11 +29,28 @@ func setupSkipAuthApp() *fiber.App {
 	app := fiber.New()
 	app.Use(SkipAuthMiddleware())
 	app.Get("/whoami", func(c *fiber.Ctx) error {
+		sub, ok := c.Locals("sub").(string)
+		if !ok {
+			return fiber.ErrInternalServerError
+		}
+		username, ok := c.Locals("username").(string)
+		if !ok {
+			return fiber.ErrInternalServerError
+		}
+		scope, ok := c.Locals("scope").(string)
+		if !ok {
+			return fiber.ErrInternalServerError
+		}
+		groups, ok := c.Locals("groups").([]string)
+		if !ok {
+			return fiber.ErrInternalServerError
+		}
+
 		return c.JSON(skipAuthPayload{
-			Sub:      c.Locals("sub").(string),
-			Username: c.Locals("username").(string),
-			Scope:    c.Locals("scope").(string),
-			Groups:   c.Locals("groups").([]string),
+			Sub:      sub,
+			Username: username,
+			Scope:    scope,
+			Groups:   groups,
 		})
 	})
 

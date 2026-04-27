@@ -20,6 +20,17 @@ const disabilityRatingPath = "/restricted/disability_rating"
 
 var ErrNotFound = errors.New("veteran not found")
 
+var (
+	errVADisabilityRatingFailed = errors.New("va disability rating failed")
+	errVAServiceConfigRequired  = errors.New("va config is required")
+	errVABaseURLRequired        = errors.New("va base url is required")
+	errVATokenURLRequired       = errors.New("va token url is required")
+	errVAClientIDRequired       = errors.New("va client id is required")
+	errVATokenAudienceRequired  = errors.New("va token audience is required")
+	errVAPrivateKeyRequired     = errors.New("va private key path is required")
+	errVAHTTPClientRequired     = errors.New("va http client is required")
+)
+
 type Service interface {
 	LookupDisabilityRating(ctx context.Context, req Request) (Response, error)
 }
@@ -35,12 +46,12 @@ type Options struct {
 }
 
 type Request struct {
+	Address     *Address `json:"address,omitempty"`
 	FirstName   string   `json:"firstName"`
 	MiddleName  string   `json:"middleName,omitempty"`
 	LastName    string   `json:"lastName"`
 	DateOfBirth string   `json:"dateOfBirth"`
 	SSN         string   `json:"ssn,omitempty"`
-	Address     *Address `json:"address,omitempty"`
 }
 
 type Address struct {
@@ -54,13 +65,13 @@ type Address struct {
 }
 
 type Response struct {
-	CombinedDisabilityRating int                `json:"combinedDisabilityRating"`
+	RawData                  any                `json:"rawData"`
 	LegalEffectiveDate       *string            `json:"legalEffectiveDate"`
 	CombinedEffectiveDate    *string            `json:"combinedEffectiveDate"`
 	EarliestRatingEndDate    *string            `json:"earliestRatingEndDate"`
-	RawData                  any                `json:"rawData"`
 	DataSource               core.DataSource    `json:"dataSource"`
 	Metadata                 education.Metadata `json:"metadata"`
+	CombinedDisabilityRating int                `json:"combinedDisabilityRating"`
 }
 
 type service struct {
@@ -72,13 +83,13 @@ type service struct {
 
 type disabilityRatingRequest struct {
 	SSN                string `json:"ssn,omitempty"`
-	FirstName          string `json:"first_name"`
-	MiddleName         string `json:"middle_name,omitempty"`
-	LastName           string `json:"last_name"`
-	BirthDate          string `json:"birth_date"`
-	StreetAddressLine1 string `json:"street_address_line1,omitempty"`
-	StreetAddressLine2 string `json:"street_address_line2,omitempty"`
-	StreetAddressLine3 string `json:"street_address_line3,omitempty"`
+	FirstName          string `json:"first_name"`                     //nolint:tagliatelle // VA API request uses snake_case.
+	MiddleName         string `json:"middle_name,omitempty"`          //nolint:tagliatelle // VA API request uses snake_case.
+	LastName           string `json:"last_name"`                      //nolint:tagliatelle // VA API request uses snake_case.
+	BirthDate          string `json:"birth_date"`                     //nolint:tagliatelle // VA API request uses snake_case.
+	StreetAddressLine1 string `json:"street_address_line1,omitempty"` //nolint:tagliatelle // VA API request uses snake_case.
+	StreetAddressLine2 string `json:"street_address_line2,omitempty"` //nolint:tagliatelle // VA API request uses snake_case.
+	StreetAddressLine3 string `json:"street_address_line3,omitempty"` //nolint:tagliatelle // VA API request uses snake_case.
 	City               string `json:"city,omitempty"`
 	State              string `json:"state,omitempty"`
 	Zipcode            string `json:"zipcode,omitempty"`
@@ -88,10 +99,10 @@ type disabilityRatingRequest struct {
 type disabilityRatingResponse struct {
 	Data struct {
 		Attributes struct {
-			CombinedDisabilityRating int                `json:"combined_disability_rating"` //nolint:tagliatelle // VA API uses snake_case
-			CombinedEffectiveDate    *string            `json:"combined_effective_date"`    //nolint:tagliatelle // VA API uses snake_case
-			LegalEffectiveDate       *string            `json:"legal_effective_date"`       //nolint:tagliatelle // VA API uses snake_case
-			IndividualRatings        []individualRating `json:"individual_ratings"`         //nolint:tagliatelle // VA API uses snake_case
+			CombinedEffectiveDate    *string            `json:"combined_effective_date"`    //nolint:tagliatelle // VA API response uses snake_case.
+			LegalEffectiveDate       *string            `json:"legal_effective_date"`       //nolint:tagliatelle // VA API response uses snake_case.
+			IndividualRatings        []individualRating `json:"individual_ratings"`         //nolint:tagliatelle // VA API response uses snake_case.
+			CombinedDisabilityRating int                `json:"combined_disability_rating"` //nolint:tagliatelle // VA API response uses snake_case.
 		} `json:"attributes"`
 	} `json:"data"`
 }
@@ -135,6 +146,7 @@ func New(cfg *core.VAConfig, opts Options) Service {
 	}
 }
 
+//nolint:gocritic // Request is treated as an immutable API payload value.
 func (s *service) LookupDisabilityRating(ctx context.Context, reqBody Request) (Response, error) {
 	if err := s.validateConfig(); err != nil {
 		return Response{}, err
@@ -173,9 +185,14 @@ func (s *service) LookupDisabilityRating(ctx context.Context, reqBody Request) (
 		)
 		return Response{}, fmt.Errorf("do disability rating request: %w", err)
 	}
-	defer resp.Body.Close()
 
-	respBytes, _ := io.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
+	if closeErr := resp.Body.Close(); closeErr != nil {
+		return Response{}, fmt.Errorf("close disability rating response body: %w", closeErr)
+	}
+	if err != nil {
+		return Response{}, fmt.Errorf("read disability rating response body: %w", err)
+	}
 
 	if resp.StatusCode == http.StatusNotFound {
 		return Response{}, ErrNotFound
@@ -192,7 +209,7 @@ func (s *service) LookupDisabilityRating(ctx context.Context, reqBody Request) (
 			slog.String("body_snippet", snippet),
 			slog.Duration("latency", latency),
 		)
-		return Response{}, fmt.Errorf("va disability rating failed: status=%d", resp.StatusCode)
+		return Response{}, fmt.Errorf("%w: status=%d", errVADisabilityRatingFailed, resp.StatusCode)
 	}
 
 	var out disabilityRatingResponse
@@ -224,6 +241,7 @@ func (s *service) LookupDisabilityRating(ctx context.Context, reqBody Request) (
 	}, nil
 }
 
+//nolint:gocritic // Request is treated as an immutable API payload value.
 func toDisabilityRatingRequest(reqBody Request) disabilityRatingRequest {
 	out := disabilityRatingRequest{
 		SSN:        reqBody.SSN,
@@ -248,22 +266,22 @@ func toDisabilityRatingRequest(reqBody Request) disabilityRatingRequest {
 
 func (s *service) validateConfig() error {
 	if s.cfg == nil {
-		return errors.New("va config is required")
+		return errVAServiceConfigRequired
 	}
 
 	switch {
 	case s.cfg.BaseURL == "":
-		return errors.New("va base url is required")
+		return errVABaseURLRequired
 	case s.cfg.TokenURL == "":
-		return errors.New("va token url is required")
+		return errVATokenURLRequired
 	case s.cfg.ClientID == "":
-		return errors.New("va client id is required")
+		return errVAClientIDRequired
 	case s.cfg.TokenAudience == "":
-		return errors.New("va token audience is required")
+		return errVATokenAudienceRequired
 	case s.cfg.PrivateKeyPath == "":
-		return errors.New("va private key path is required")
+		return errVAPrivateKeyRequired
 	case s.client == nil:
-		return errors.New("va http client is required")
+		return errVAHTTPClientRequired
 	}
 
 	return nil

@@ -48,7 +48,7 @@ type nscResponse struct {
 }
 
 type nscClientData struct {
-	AccountID        string `json:"zaccountID"`
+	AccountID        string `json:"zaccountID"` //nolint:tagliatelle // NSC payload uses this exact casing.
 	CaseReferenceID  string `json:"caseReferenceId"`
 	ContactEmail     string `json:"contactEmail"`
 	OrganizationName string `json:"organizationName"`
@@ -88,11 +88,11 @@ type nscTransactionDetails struct {
 }
 
 type nscEnrollmentDetails struct {
+	StudentAddress          *nscStudentAddress  `json:"studentAddress"`
 	OfficialSchoolName      string              `json:"officialSchoolName"`
 	EnrollmentSinceDate     string              `json:"enrollmentSinceDate"`
 	CurrentEnrollmentStatus string              `json:"currentEnrollmentStatus"`
 	EnrollmentData          []nscEnrollmentData `json:"enrollmentData"`
-	StudentAddress          *nscStudentAddress  `json:"studentAddress"`
 }
 
 type nscEnrollmentData struct {

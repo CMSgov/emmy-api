@@ -3,7 +3,6 @@ package education
 import (
 	"bytes"
 	"context"
-	"errors"
 	"io"
 	"net/http"
 	"testing"
@@ -61,10 +60,14 @@ func TestLookupEnrollmentStatus_SuccessFallsBackToEnrolledOnPositiveHit(t *testi
 
 	rawData, ok := out.RawData.(map[string]any)
 	require.True(t, ok, "RawData should be a map[string]any")
-	transactionDetails := rawData["transactionDetails"].(map[string]any)
+	transactionDetails, ok := rawData["transactionDetails"].(map[string]any)
+	require.True(t, ok, "transactionDetails should be a map[string]any")
 	require.Equal(t, "Y", transactionDetails["nscHit"])
-	enrollmentDetails := rawData["enrollmentDetails"].([]any)
-	firstDetail := enrollmentDetails[0].(map[string]any)
+	enrollmentDetails, ok := rawData["enrollmentDetails"].([]any)
+	require.True(t, ok, "enrollmentDetails should be a []any")
+	require.NotEmpty(t, enrollmentDetails)
+	firstDetail, ok := enrollmentDetails[0].(map[string]any)
+	require.True(t, ok, "first enrollment detail should be a map[string]any")
 	require.Equal(t, "CC", firstDetail["currentEnrollmentStatus"])
 }
 
@@ -164,7 +167,7 @@ func TestLookupEnrollmentStatus_Non2xxReturnsError(t *testing.T) {
 		DateOfBirth: "1988-10-24",
 	})
 	require.Error(t, err)
-	require.False(t, errors.Is(err, ErrNotFound))
+	require.NotErrorIs(t, err, ErrNotFound)
 }
 
 func TestLookupEnrollmentStatus_CurrentlyNotEnrolledReturnsNotFound(t *testing.T) {

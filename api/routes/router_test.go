@@ -26,7 +26,7 @@ func getRedisAddr() string {
 
 func TestRegisterRoutes_RegistersOpenAPISpecEndpoint(t *testing.T) {
 	app := fiber.New()
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	rdb := redis.NewClient(&redis.Options{
 		Addr: getRedisAddr(),
 	})
@@ -52,7 +52,7 @@ func TestRegisterRoutes_RegistersOpenAPISpecEndpoint(t *testing.T) {
 
 func TestRegisterRoutes_RegistersVeteranDisabilityEndpoint(t *testing.T) {
 	app := fiber.New()
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	rdb := redis.NewClient(&redis.Options{
 		Addr: getRedisAddr(),
 	})
@@ -67,12 +67,12 @@ func TestRegisterRoutes_RegistersVeteranDisabilityEndpoint(t *testing.T) {
 		}
 	}
 
-	t.Fatalf("expected POST /api/v0/veteran-disability-ratings to be registered")
+	t.Fatal("expected POST /api/v0/veteran-disability-ratings to be registered")
 }
 
 func TestRegisterRoutes_RegistersEducationEnrollmentsEndpoint(t *testing.T) {
 	app := fiber.New()
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	rdb := redis.NewClient(&redis.Options{
 		Addr: getRedisAddr(),
 	})
@@ -87,5 +87,5 @@ func TestRegisterRoutes_RegistersEducationEnrollmentsEndpoint(t *testing.T) {
 		}
 	}
 
-	t.Fatalf("expected POST /api/v0/education-enrollments to be registered")
+	t.Fatal("expected POST /api/v0/education-enrollments to be registered")
 }

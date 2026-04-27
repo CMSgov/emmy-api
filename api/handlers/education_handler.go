@@ -16,6 +16,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+var errMissingRequiredField = errors.New("missing required field")
+
 func EducationHandler(cfg *core.Config, edu education.Service, reporter reporting.Reporter, logger *slog.Logger) fiber.Handler {
 	const contextTimeout time.Duration = 30 * time.Second
 
@@ -38,8 +40,8 @@ func EducationHandler(cfg *core.Config, edu education.Service, reporter reportin
 			return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
 		}
 
-		if missing := missingEducationIdentityField(reqBody); missing != "" {
-			err := fmt.Errorf("missing required field %s", missing)
+		if missing := missingEducationIdentityField(&reqBody); missing != "" {
+			err := fmt.Errorf("%w: %s", errMissingRequiredField, missing)
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
@@ -104,7 +106,11 @@ func EducationHandler(cfg *core.Config, edu education.Service, reporter reportin
 	}
 }
 
-func missingEducationIdentityField(req education.Request) string {
+func missingEducationIdentityField(req *education.Request) string {
+	if req == nil {
+		return "firstName"
+	}
+
 	switch {
 	case strings.TrimSpace(req.FirstName) == "":
 		return "firstName"

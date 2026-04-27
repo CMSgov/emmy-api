@@ -1,14 +1,12 @@
 package routes
 
 import (
-	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
-	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
@@ -17,8 +15,6 @@ import (
 
 func TestStatusEndpoint(t *testing.T) {
 	app := fiber.New()
-
-	cfg := core.Config{}
 
 	addr := os.Getenv("REDIS_ADDR")
 	if addr == "" {
@@ -29,9 +25,9 @@ func TestStatusEndpoint(t *testing.T) {
 		Addr: addr,
 	})
 
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
-	StatusRouter(app, cfg, rdb, logger)
+	StatusRouter(app, rdb, logger)
 
 	req := httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
 

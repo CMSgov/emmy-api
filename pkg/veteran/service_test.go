@@ -12,10 +12,10 @@ import (
 )
 
 type fakeTransport struct {
-	called bool
+	err    error
 	req    *http.Request
 	resp   *http.Response
-	err    error
+	called bool
 }
 
 func (f *fakeTransport) Do(req *http.Request) (*http.Response, error) {
@@ -119,9 +119,13 @@ func TestLookupDisabilityRating_Success(t *testing.T) {
 
 	rawData, ok := out.RawData.(map[string]any)
 	require.True(t, ok, "RawData should be a map[string]any")
-	data := rawData["data"].(map[string]any)
-	attributes := data["attributes"].(map[string]any)
-	require.Equal(t, float64(70), attributes["combined_disability_rating"])
+	data, ok := rawData["data"].(map[string]any)
+	require.True(t, ok, "data should be a map[string]any")
+	attributes, ok := data["attributes"].(map[string]any)
+	require.True(t, ok, "attributes should be a map[string]any")
+	combined, ok := attributes["combined_disability_rating"].(float64)
+	require.True(t, ok, "combined_disability_rating should be a float64")
+	require.InEpsilon(t, 70.0, combined, 0.0001)
 }
 
 func TestLookupDisabilityRating_AddressOnlySuccess(t *testing.T) {
@@ -161,9 +165,13 @@ func TestLookupDisabilityRating_AddressOnlySuccess(t *testing.T) {
 
 	rawData, ok := out.RawData.(map[string]any)
 	require.True(t, ok, "RawData should be a map[string]any")
-	data := rawData["data"].(map[string]any)
-	attributes := data["attributes"].(map[string]any)
-	require.Equal(t, float64(80), attributes["combined_disability_rating"])
+	data, ok := rawData["data"].(map[string]any)
+	require.True(t, ok, "data should be a map[string]any")
+	attributes, ok := data["attributes"].(map[string]any)
+	require.True(t, ok, "attributes should be a map[string]any")
+	combined, ok := attributes["combined_disability_rating"].(float64)
+	require.True(t, ok, "combined_disability_rating should be a float64")
+	require.InEpsilon(t, 80.0, combined, 0.0001)
 
 	reqBody, err := io.ReadAll(ft.req.Body)
 	require.NoError(t, err)

@@ -1,12 +1,12 @@
 package education
 
 type Request struct {
+	Address     *Address `json:"address,omitempty"`
 	FirstName   string   `json:"firstName"`
 	MiddleName  string   `json:"middleName,omitempty"`
 	LastName    string   `json:"lastName"`
 	DateOfBirth string   `json:"dateOfBirth"`
 	SSN         string   `json:"ssn,omitempty"`
-	Address     *Address `json:"address,omitempty"`
 }
 
 type Address struct {
@@ -20,19 +20,19 @@ type Address struct {
 }
 
 type nscRequest struct {
-	AccountID        string                     `json:"accountId"`
-	OrganizationName string                     `json:"organizationName,omitempty"`
-	CaseReferenceID  string                     `json:"caseReferenceId,omitempty"`
+	IdentityDetails  *nscRequestIdentityDetails `json:"identityDetails,omitempty"`
 	ContactEmail     string                     `json:"contactEmail,omitempty"`
+	CaseReferenceID  string                     `json:"caseReferenceId,omitempty"`
+	AccountID        string                     `json:"accountId"`
 	DateOfBirth      string                     `json:"dateOfBirth"`
 	LastName         string                     `json:"lastName"`
 	FirstName        string                     `json:"firstName"`
 	MiddleName       string                     `json:"middleName,omitempty"`
 	SSN              string                     `json:"ssn,omitempty"`
-	IdentityDetails  *nscRequestIdentityDetails `json:"identityDetails,omitempty"`
+	OrganizationName string                     `json:"organizationName,omitempty"`
 	EndClient        string                     `json:"endClient"`
-	PreviousNames    []nscPreviousName          `json:"previousNames,omitempty"`
 	Terms            string                     `json:"terms"`
+	PreviousNames    []nscPreviousName          `json:"previousNames,omitempty"`
 }
 
 type nscRequestIdentityDetails struct {

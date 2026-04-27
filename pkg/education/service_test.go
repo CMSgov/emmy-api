@@ -9,10 +9,10 @@ import (
 )
 
 type fakeTransport struct {
-	called bool
+	err    error
 	req    *http.Request
 	resp   *http.Response
-	err    error
+	called bool
 }
 
 func (f *fakeTransport) Do(req *http.Request) (*http.Response, error) {

@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 )
@@ -10,11 +11,15 @@ type contextHandler struct {
 	slog.Handler
 }
 
+//nolint:gocritic // slog.Handler requires slog.Record by value.
 func (h *contextHandler) Handle(ctx context.Context, r slog.Record) error {
 	if rid, ok := ctx.Value(RequestContextKey).(string); ok {
 		r.AddAttrs(slog.String("request_id", rid))
 	}
-	return h.Handler.Handle(ctx, r)
+	if err := h.Handler.Handle(ctx, r); err != nil {
+		return fmt.Errorf("handle slog record: %w", err)
+	}
+	return nil
 }
 
 func (h *contextHandler) WithAttrs(attrs []slog.Attr) slog.Handler {

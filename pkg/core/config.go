@@ -17,12 +17,12 @@ const (
 	defaultRedisInsecureSkip bool   = false
 
 	keyNSCSubmitURL   string = "NSC_SUBMIT_URL"
-	keyTokenURL       string = "NSC_TOKEN_URL"
-	keyClientSecret   string = "NSC_CLIENT_SECRET"
+	keyTokenURL       string = "NSC_TOKEN_URL"     //nolint:gosec // Environment variable key name, not a credential.
+	keyClientSecret   string = "NSC_CLIENT_SECRET" //nolint:gosec // Environment variable key name, not a credential.
 	keyClientID       string = "NSC_CLIENT_ID"
 	keyAccountID      string = "NSC_ACCOUNT_ID"
 	keyVABaseURL      string = "VA_BASE_URL"
-	keyVATokenURL     string = "VA_TOKEN_URL"
+	keyVATokenURL     string = "VA_TOKEN_URL" //nolint:gosec // Environment variable key name, not a credential.
 	keyVAClientID     string = "VA_CLIENT_ID"
 	keyVAAudience     string = "VA_AUD"
 	keyVAKeyPath      string = "VA_PRIVATE_KEY_PATH"
