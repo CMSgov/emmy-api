@@ -7,7 +7,6 @@ import (
 	"log/slog"
 
 	"github.com/aws/aws-lambda-go/events"
-	_ "github.com/lib/pq"
 )
 
 // LambdaHandler handles SQS events and logs ReportData
