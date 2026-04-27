@@ -99,11 +99,11 @@ func run() error {
 		return ErrRunFailed
 	}
 
-	params := &routes.RouterParams{
-		CFG: &cfg,
-		RDB: rdb,
+	params := routes.RouterParams{
+		CFG:      &cfg,
+		RDB:      rdb,
 		Reporter: reporter,
-		Logger: logger,
+		Logger:   logger,
 	}
 
 	routes.RegisterRoutes(app, params)

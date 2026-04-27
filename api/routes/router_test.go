@@ -32,7 +32,12 @@ func TestRegisterRoutes_RegistersOpenAPISpecEndpoint(t *testing.T) {
 	})
 	reporter := reporting.NewMockReporter()
 
-	RegisterRoutes(app, &core.Config{}, rdb, reporter, logger)
+	RegisterRoutes(app, RouterParams{
+		CFG:      &core.Config{},
+		RDB:      rdb,
+		Reporter: reporter,
+		Logger:   logger,
+	})
 
 	req := httptest.NewRequest(http.MethodGet, "/api-spec/v1/verify", http.NoBody)
 	resp, err := app.Test(req)
@@ -58,7 +63,12 @@ func TestRegisterRoutes_RegistersVeteranDisabilityEndpoint(t *testing.T) {
 	})
 	reporter := reporting.NewMockReporter()
 
-	RegisterRoutes(app, &core.Config{}, rdb, reporter, logger)
+	RegisterRoutes(app, RouterParams{
+		CFG:      &core.Config{},
+		RDB:      rdb,
+		Reporter: reporter,
+		Logger:   logger,
+	})
 
 	routes := app.GetRoutes(true)
 	for _, route := range routes {
@@ -78,7 +88,12 @@ func TestRegisterRoutes_RegistersEducationEnrollmentsEndpoint(t *testing.T) {
 	})
 	reporter := reporting.NewMockReporter()
 
-	RegisterRoutes(app, &core.Config{}, rdb, reporter, logger)
+	RegisterRoutes(app, RouterParams{
+		CFG:      &core.Config{},
+		RDB:      rdb,
+		Reporter: reporter,
+		Logger:   logger,
+	})
 
 	routes := app.GetRoutes(true)
 	for _, route := range routes {

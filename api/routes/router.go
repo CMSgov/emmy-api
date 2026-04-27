@@ -51,5 +51,6 @@ func RegisterRoutes(app fiber.Router, params RouterParams) {
 	})
 
 	api.Post("/v0/education-enrollments", withCB(handlers.EducationHandler(params.CFG, edu, params.Reporter, params.Logger)))
+
 	api.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(params.CFG, veteranService, params.Reporter, params.Logger)))
 }

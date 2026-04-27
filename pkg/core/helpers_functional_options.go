@@ -40,4 +40,3 @@ func WithSkipAuth(value ...bool) func(*Config) {
 		c.SkipAuth = val
 	}
 }
-

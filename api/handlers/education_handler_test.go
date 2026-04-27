@@ -207,4 +207,3 @@ func TestEducationHandler_VendorErrorReturnsBadGateway(t *testing.T) {
 
 	require.Equal(t, fiber.StatusBadGateway, resp.StatusCode)
 }
-
