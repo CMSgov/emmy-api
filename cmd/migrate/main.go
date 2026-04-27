@@ -62,7 +62,6 @@ func main() {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
 		cfg.Database.User, password, dbHostPort, cfg.Database.Name, cfg.Database.SSLMode)
 
-
 	m, err := migrate.New(
 		"file://"+migrationPath,
 		dsn,
