@@ -129,7 +129,7 @@ func BatchEducationHandler(_ *core.Config, edu education.Service, reporter repor
 
 		err := edu.RegisterBatch(c.UserContext(), reqBody)
 		if err != nil {
-			logger.ErrorContext(c.UserContext(), "failed to register education batch", slog.Any("error", err))
+			logger.ErrorContext(c.UserContext(), "Failed to initiate batch. Please reach out to emmy support with the transaction id", slog.Any("error", err))
 			reporter.Report(c.Context(), &reporting.ReportData{
 				Endpoint:   c.Path(),
 				Success:    false,
