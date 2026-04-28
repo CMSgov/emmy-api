@@ -262,7 +262,7 @@ func resolveEnrollmentStatus(resp nscResponse) (EnrollmentStatus, bool) {
 			return 4
 		case EnrollmentStatusHalfTime:
 			return 3
-		case EnrollmentStatusLessThanPartTime:
+		case EnrollmentStatusLessThanHalfTime:
 			return 2
 		case EnrollmentStatusUnknown:
 			return 1
@@ -323,8 +323,8 @@ func normalizeEnrollmentStatus(value string) (EnrollmentStatus, bool) {
 		return EnrollmentStatusThreeQuartersTime, true
 	case string(EnrollmentStatusHalfTime), "H":
 		return EnrollmentStatusHalfTime, true
-	case string(EnrollmentStatusLessThanPartTime), "LESS_THAN_HALF_TIME", "L":
-		return EnrollmentStatusLessThanPartTime, true
+	case string(EnrollmentStatusLessThanHalfTime), "L":
+		return EnrollmentStatusLessThanHalfTime, true
 	case string(EnrollmentStatusUnknown), "Y":
 		return EnrollmentStatusUnknown, true
 	default:

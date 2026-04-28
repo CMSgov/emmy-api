@@ -10,7 +10,7 @@ const (
 	EnrollmentStatusFullTime          EnrollmentStatus = "FULL_TIME"
 	EnrollmentStatusThreeQuartersTime EnrollmentStatus = "THREE_QUARTERS_TIME"
 	EnrollmentStatusHalfTime          EnrollmentStatus = "HALF_TIME"
-	EnrollmentStatusLessThanPartTime  EnrollmentStatus = "LESS_THAN_PART_TIME"
+	EnrollmentStatusLessThanHalfTime  EnrollmentStatus = "LESS_THAN_HALF_TIME"
 	EnrollmentStatusUnknown           EnrollmentStatus = "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"
 )
 
