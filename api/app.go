@@ -72,9 +72,9 @@ func stackTraceHandler(logger *slog.Logger) func(*fiber.Ctx, any) {
 }
 
 type Config struct {
-	Logger *slog.Logger
-	Redis  *redis.Client
-	Core   core.Config
+	Logger     *slog.Logger
+	Redis      *redis.Client
+	Core       core.Config
 	DB         *sql.DB
 	Encryption encryption.Service
 	Reporter   reporting.Reporter

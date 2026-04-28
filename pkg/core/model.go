@@ -14,6 +14,7 @@ type NSCConfig struct {
 	ClientSecret string
 	ClientID     string
 	AccountID    string
+	SQSQueueURL  string
 }
 
 type VAConfig struct {

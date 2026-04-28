@@ -16,27 +16,28 @@ const (
 	defaultRedisUseTLS       bool   = true
 	defaultRedisInsecureSkip bool   = false
 
-	keyNSCSubmitURL   string = "NSC_SUBMIT_URL"
-	keyTokenURL       string = "NSC_TOKEN_URL"     //nolint:gosec // Environment variable key name, not a credential.
-	keyClientSecret   string = "NSC_CLIENT_SECRET" //nolint:gosec // Environment variable key name, not a credential.
-	keyClientID       string = "NSC_CLIENT_ID"
-	keyAccountID      string = "NSC_ACCOUNT_ID"
-	keyVABaseURL      string = "VA_BASE_URL"
-	keyVATokenURL     string = "VA_TOKEN_URL" //nolint:gosec // Environment variable key name, not a credential.
-	keyVAClientID     string = "VA_CLIENT_ID"
-	keyVAAudience     string = "VA_AUD"
-	keyVAKeyPath      string = "VA_PRIVATE_KEY_PATH"
-	keyVATimeout      string = "VA_TIMEOUT_SECONDS"
-	keySQSQueueURL    string = "SQS_QUEUE_URL"
-	keyDBHost         string = "DB_HOST"
-	keyDBPort         string = "DB_PORT"
-	keyDBName         string = "DB_NAME"
-	keyDBUser         string = "DB_USER"
-	keyDBPassword     string = ""
-	keyDBSSLMode      string = "DB_SSLMODE"
-	keyDBIAMAuth      string = "DB_IAM_AUTH"
-	keyKMSKeyID       string = "KMS_KEY_ID"
-	keyServiceVersion string = "SERVICE_VERSION"
+	keyNSCSubmitURL     string = "NSC_SUBMIT_URL"
+	keyTokenURL         string = "NSC_TOKEN_URL"     //nolint:gosec // Environment variable key name, not a credential.
+	keyClientSecret     string = "NSC_CLIENT_SECRET" //nolint:gosec // Environment variable key name, not a credential.
+	keyClientID         string = "NSC_CLIENT_ID"
+	keyAccountID        string = "NSC_ACCOUNT_ID"
+	keyVABaseURL        string = "VA_BASE_URL"
+	keyVATokenURL       string = "VA_TOKEN_URL" //nolint:gosec // Environment variable key name, not a credential.
+	keyVAClientID       string = "VA_CLIENT_ID"
+	keyVAAudience       string = "VA_AUD"
+	keyVAKeyPath        string = "VA_PRIVATE_KEY_PATH"
+	keyVATimeout        string = "VA_TIMEOUT_SECONDS"
+	keySQSQueueURL      string = "SQS_QUEUE_URL"
+	keySQSBatchQueueURL string = "BATCH_SQS_QUEUE_URL"
+	keyDBHost           string = "DB_HOST"
+	keyDBPort           string = "DB_PORT"
+	keyDBName           string = "DB_NAME"
+	keyDBUser           string = "DB_USER"
+	keyDBPassword       string = ""
+	keyDBSSLMode        string = "DB_SSLMODE"
+	keyDBIAMAuth        string = "DB_IAM_AUTH"
+	keyKMSKeyID         string = "KMS_KEY_ID"
+	keyServiceVersion   string = "SERVICE_VERSION"
 )
 
 func DefaultConfig() Config {
@@ -59,6 +60,7 @@ func DefaultConfig() Config {
 			ClientSecret: getEnv(keyClientSecret, ""),
 			ClientID:     getEnv(keyClientID, ""),
 			AccountID:    getEnv(keyAccountID, ""),
+			SQSQueueURL:  getEnv(keySQSBatchQueueURL, ""),
 		},
 
 		VA: VAConfig{
