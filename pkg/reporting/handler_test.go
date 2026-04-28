@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -32,10 +33,10 @@ func TestLambdaHandler_HandleRequest(t *testing.T) {
 		},
 	}
 
-	handler := NewLambdaHandler(nil)
+	handler := NewLambdaHandler(nil, nil)
 	err = handler.HandleRequest(context.Background(), sqsEvent)
 
-	require.NoError(t, err)
+	assert.NoError(t, err)
 }
 
 func TestLambdaHandler_HandleRequest_InvalidJSON(t *testing.T) {
@@ -48,8 +49,8 @@ func TestLambdaHandler_HandleRequest_InvalidJSON(t *testing.T) {
 		},
 	}
 
-	handler := NewLambdaHandler(nil)
+	handler := NewLambdaHandler(nil, nil)
 	err := handler.HandleRequest(context.Background(), sqsEvent)
 
-	require.NoError(t, err) // Should log error and continue, not return error
+	assert.NoError(t, err) // Should log error and continue, not return error
 }

@@ -29,15 +29,26 @@ type ReportingConfig struct {
 	SQSQueueURL string
 }
 
+type DatabaseConfig struct {
+	Host     string
+	Port     string
+	Name     string
+	User     string
+	Password string
+	SSLMode  string
+	IAMAuth  bool
+}
+
 type Config struct {
-	NSC            NSCConfig
 	Environment    string
-	Reporting      ReportingConfig
-	ServiceVersion string
-	VA             VAConfig
-	Redis          RedisConfig
 	Port           int
 	SkipAuth       bool
+	ServiceVersion string
+	Redis          RedisConfig
+	Database       DatabaseConfig
+	NSC            NSCConfig
+	VA             VAConfig
+	Reporting      ReportingConfig
 }
 
 type ctxKey int
