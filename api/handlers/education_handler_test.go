@@ -28,10 +28,11 @@ func (r *fakeReporter) Report(_ context.Context, data *reporting.ReportData) {
 }
 
 type fakeEducationService struct {
-	lastReq  education.Request
-	err      error
-	response education.Response
-	calls    int
+	err          error
+	response     education.Response
+	lastReq      education.Request
+	lastBatchReq education.BatchRequest
+	calls        int
 }
 
 var errVendorRequestFailed = errors.New("vendor request failed")
@@ -41,6 +42,12 @@ func (s *fakeEducationService) LookupEnrollmentStatus(_ context.Context, req edu
 	s.calls++
 	s.lastReq = req
 	return s.response, s.err
+}
+
+func (s *fakeEducationService) RegisterBatch(_ context.Context, req education.BatchRequest) error {
+	s.calls++
+	s.lastBatchReq = req
+	return s.err
 }
 
 func TestEducationHandler_Success(t *testing.T) {
@@ -209,4 +216,63 @@ func TestEducationHandler_VendorErrorReturnsBadGateway(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusBadGateway, resp.StatusCode)
+}
+
+func TestBatchEducationHandler_Success(t *testing.T) {
+	app := fiber.New()
+	cfg := &core.Config{}
+	logger := slog.New(slog.DiscardHandler)
+	service := &fakeEducationService{}
+	reporter := &fakeReporter{}
+
+	app.Post("/api/v0/batch-education-enrollments", BatchEducationHandler(cfg, service, reporter, logger))
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/batch-education-enrollments", strings.NewReader(`{
+		"batchId": "batch-2026-001",
+		"submittedBy": "org-unit-42",
+		"callbackUrl": "https://your-system.example.com/webhooks/enrollment",
+		"students": [
+			{
+				"recordId": "rec-001",
+				"firstName": "Alfredo",
+				"lastName": "Armstrong",
+				"dateOfBirth": "1993-06-08",
+				"ssn": "796-01-2476"
+			}
+		]
+	}`))
+	req.Header.Set("Content-Type", fiber.MIMEApplicationJSON)
+
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, fiber.StatusAccepted, resp.StatusCode)
+	require.Equal(t, 1, service.calls)
+
+	require.Len(t, reporter.calls, 1)
+	require.True(t, reporter.calls[0].Success)
+	require.Equal(t, fiber.StatusAccepted, reporter.calls[0].StatusCode)
+}
+
+func TestBatchEducationHandler_MissingBatchIDReturnsBadRequest(t *testing.T) {
+	app := fiber.New()
+	cfg := &core.Config{}
+	logger := slog.New(slog.DiscardHandler)
+	service := &fakeEducationService{}
+	reporter := &fakeReporter{}
+
+	app.Post("/api/v0/batch-education-enrollments", BatchEducationHandler(cfg, service, reporter, logger))
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v0/batch-education-enrollments", strings.NewReader(`{
+		"submittedBy": "org-unit-42",
+		"students": []
+	}`))
+	req.Header.Set("Content-Type", fiber.MIMEApplicationJSON)
+
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
 }
