@@ -106,6 +106,54 @@ func EducationHandler(cfg *core.Config, edu education.Service, reporter reportin
 	}
 }
 
+func BatchEducationHandler(_ *core.Config, edu education.Service, reporter reporting.Reporter, logger *slog.Logger) fiber.Handler {
+	if logger == nil {
+		logger = slog.Default()
+	}
+	logger = logger.With(slog.String("handler", "BatchEducationHandler"))
+
+	return func(c *fiber.Ctx) error {
+		clientID, ok := c.Locals("sub").(string)
+		if !ok {
+			clientID = ""
+		}
+
+		var reqBody education.BatchRequest
+		if err := c.BodyParser(&reqBody); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+		}
+
+		if reqBody.BatchID == "" {
+			return fiber.NewError(fiber.StatusBadRequest, "missing required field batchId")
+		}
+
+		err := edu.RegisterBatch(c.UserContext(), reqBody)
+		if err != nil {
+			logger.ErrorContext(c.UserContext(), "failed to register education batch", slog.Any("error", err))
+			reporter.Report(c.Context(), &reporting.ReportData{
+				Endpoint:   c.Path(),
+				Success:    false,
+				DataSource: "NSC",
+				ClientID:   clientID,
+				Timestamp:  time.Now(),
+				StatusCode: fiber.StatusInternalServerError,
+			})
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to record batch")
+		}
+
+		reporter.Report(c.Context(), &reporting.ReportData{
+			Endpoint:   c.Path(),
+			Success:    true,
+			DataSource: "NSC",
+			ClientID:   clientID,
+			Timestamp:  time.Now(),
+			StatusCode: fiber.StatusAccepted,
+		})
+
+		return c.SendStatus(fiber.StatusAccepted)
+	}
+}
+
 func missingEducationIdentityField(req *education.Request) string {
 	if req == nil {
 		return "firstName"

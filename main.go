@@ -2,18 +2,26 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
+	"net"
+	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
+	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/cmsgov/emmy-api/api"
-	"github.com/cmsgov/emmy-api/api/routes"
 	"github.com/cmsgov/emmy-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/encryption"
 	"github.com/cmsgov/emmy-api/pkg/redis"
 	"github.com/cmsgov/emmy-api/pkg/reporting"
+	_ "github.com/lib/pq"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -88,12 +96,46 @@ func run() error {
 		}
 	}()
 
-	reporter := reporting.NewReporter(ctx, cfg.Reporting, logger)
+	db, err := initDatabase(ctx, &cfg, logger)
+	if err != nil {
+		logger.ErrorContext(ctx, "database initialization failed", "err", err)
+		return ErrRunFailed
+	}
+	defer func() {
+		if closeError := db.Close(); closeError != nil {
+			logger.Error("failed to close db", "error", closeError)
+		}
+	}()
 
+	awsCfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		logger.ErrorContext(ctx, "failed to load AWS config", "err", err)
+		return ErrRunFailed
+	}
+
+	var encryptionService encryption.Service
+	if cfg.KMS.KeyID != "" {
+		kmsClient := kms.NewFromConfig(awsCfg)
+		encryptionService = encryption.NewKMSService(kmsClient, cfg.KMS.KeyID)
+		logger.Info("KMS encryption service initialized", "key_id", cfg.KMS.KeyID)
+	} else {
+		if cfg.Environment != "development" {
+			logger.Error("KMS_KEY_ID not set", "env", cfg.Environment)
+			return ErrRunFailed
+		}
+
+		encryptionService = encryption.NewMockEncryptionService()
+		logger.Warn("KMS_KEY_ID not set, using mock encryption service")
+	}
+
+	reporter := reporting.NewReporter(ctx, cfg.Reporting, logger)
 	app, err := api.New(&api.Config{
-		Core:   cfg,
-		Logger: initLogger,
-		Redis:  rdb,
+		Core:       cfg,
+		Logger:     initLogger,
+		Redis:      rdb,
+		DB:         db,
+		Encryption: encryptionService,
+		Reporter:   reporter,
 	})
 	if err != nil {
 		logger.ErrorContext(
@@ -103,8 +145,6 @@ func run() error {
 		)
 		return ErrRunFailed
 	}
-
-	routes.RegisterRoutes(app, &cfg, rdb, reporter, logger)
 
 	addr, err := listenAddr(cfg.Port)
 	if err != nil {
@@ -128,6 +168,44 @@ func run() error {
 	}
 
 	return nil
+}
+
+func initDatabase(ctx context.Context, cfg *core.Config, logger *slog.Logger) (*sql.DB, error) {
+	password := cfg.Database.Password
+	if cfg.Database.IAMAuth {
+		var awsConfigErr error
+		awsConfig, awsConfigErr := config.LoadDefaultConfig(ctx)
+		if awsConfigErr != nil {
+			logger.Error("failed to load AWS config for IAM auth", "error", awsConfigErr)
+		} else {
+			endpoint := net.JoinHostPort(cfg.Database.Host, cfg.Database.Port)
+			token, tokenErr := auth.BuildAuthToken(ctx, endpoint, awsConfig.Region, cfg.Database.User, awsConfig.Credentials)
+			if tokenErr != nil {
+				logger.Error("failed to build auth token", "error", tokenErr)
+			} else {
+				password = url.QueryEscape(token)
+			}
+		}
+	}
+
+	dbHostPort := net.JoinHostPort(cfg.Database.Host, cfg.Database.Port)
+	dsn := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
+		cfg.Database.User, password, dbHostPort, cfg.Database.Name, cfg.Database.SSLMode)
+
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open database: %w", err)
+	}
+
+	err = db.PingContext(ctx)
+	if err != nil {
+		if closeErr := db.Close(); closeErr != nil {
+			logger.Error("failed to close db", "error", closeErr)
+		}
+		return nil, fmt.Errorf("failed to ping database: %w", err)
+	}
+
+	return db, nil
 }
 
 func listenAddr(port int) (string, error) {

@@ -48,3 +48,18 @@ type nscPreviousName struct {
 	MiddleName string `json:"middleName,omitempty"`
 	LastName   string `json:"lastName,omitempty"`
 }
+
+type BatchRequest struct {
+	BatchID     string         `json:"batchId"`
+	SubmittedBy string         `json:"submittedBy"`
+	CallbackURL string         `json:"callbackUrl"`
+	Students    []BatchStudent `json:"students"`
+}
+
+type BatchStudent struct {
+	RecordID    string `json:"recordId"`
+	FirstName   string `json:"firstName"`
+	LastName    string `json:"lastName"`
+	DateOfBirth string `json:"dateOfBirth"`
+	SSN         string `json:"ssn"`
+}

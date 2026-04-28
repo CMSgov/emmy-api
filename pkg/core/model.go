@@ -39,16 +39,21 @@ type DatabaseConfig struct {
 	IAMAuth  bool
 }
 
+type KMSConfig struct {
+	KeyID string
+}
+
 type Config struct {
 	Environment    string
 	Port           int
 	SkipAuth       bool
-	ServiceVersion string
 	Redis          RedisConfig
 	Database       DatabaseConfig
 	NSC            NSCConfig
 	VA             VAConfig
+	KMS            KMSConfig
 	Reporting      ReportingConfig
+	ServiceVersion string
 }
 
 type ctxKey int

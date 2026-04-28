@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/cmsgov/emmy-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/encryption"
 	"github.com/cmsgov/emmy-api/pkg/reporting"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
@@ -31,8 +32,9 @@ func TestRegisterRoutes_RegistersOpenAPISpecEndpoint(t *testing.T) {
 		Addr: getRedisAddr(),
 	})
 	reporter := reporting.NewMockReporter()
+	encrypt := encryption.NewMockEncryptionService()
 
-	RegisterRoutes(app, &core.Config{}, rdb, reporter, logger)
+	RegisterRoutes(app, &core.Config{}, rdb, nil, encrypt, reporter, logger)
 
 	req := httptest.NewRequest(http.MethodGet, "/api-spec/v1/verify", http.NoBody)
 	resp, err := app.Test(req)
@@ -57,8 +59,9 @@ func TestRegisterRoutes_RegistersVeteranDisabilityEndpoint(t *testing.T) {
 		Addr: getRedisAddr(),
 	})
 	reporter := reporting.NewMockReporter()
+	encrypt := encryption.NewMockEncryptionService()
 
-	RegisterRoutes(app, &core.Config{}, rdb, reporter, logger)
+	RegisterRoutes(app, &core.Config{}, rdb, nil, encrypt, reporter, logger)
 
 	routes := app.GetRoutes(true)
 	for _, route := range routes {
@@ -77,8 +80,9 @@ func TestRegisterRoutes_RegistersEducationEnrollmentsEndpoint(t *testing.T) {
 		Addr: getRedisAddr(),
 	})
 	reporter := reporting.NewMockReporter()
+	encrypt := encryption.NewMockEncryptionService()
 
-	RegisterRoutes(app, &core.Config{}, rdb, reporter, logger)
+	RegisterRoutes(app, &core.Config{}, rdb, nil, encrypt, reporter, logger)
 
 	routes := app.GetRoutes(true)
 	for _, route := range routes {
