@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM artifactory.cloud.cms.gov/docker-remote/golang:1.25-alpine AS builder
+FROM --platform=$BUILDPLATFORM artifactory.cloud.cms.gov/docker-remote/library/golang:1.25-alpine AS builder
 
 ARG TARGETOS
 ARG TARGETARCH
