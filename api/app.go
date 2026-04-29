@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"log/slog"
 	"runtime/debug"
@@ -9,6 +10,8 @@ import (
 	"github.com/cmsgov/emmy-api/api/middleware"
 	"github.com/cmsgov/emmy-api/api/routes"
 	"github.com/cmsgov/emmy-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/encryption"
+	"github.com/cmsgov/emmy-api/pkg/reporting"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -72,6 +75,9 @@ type Config struct {
 	Logger *slog.Logger
 	Redis  *redis.Client
 	Core   core.Config
+	DB         *sql.DB
+	Encryption encryption.Service
+	Reporter   reporting.Reporter
 }
 
 func New(cfg *Config) (*fiber.App, error) {
@@ -112,6 +118,7 @@ func New(cfg *Config) (*fiber.App, error) {
 	app.Use(middleware.SubjectMiddleware(cfg.Logger))
 
 	routes.StatusRouter(app, cfg.Redis, logger)
+	routes.RegisterRoutes(app, &cfg.Core, cfg.Redis, cfg.DB, cfg.Encryption, cfg.Reporter, logger)
 
 	if cfg.Core.SkipAuth {
 		app.Use(middleware.SkipAuthMiddleware())

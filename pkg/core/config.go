@@ -35,6 +35,7 @@ const (
 	keyDBPassword     string = ""
 	keyDBSSLMode      string = "DB_SSLMODE"
 	keyDBIAMAuth      string = "DB_IAM_AUTH"
+	keyKMSKeyID       string = "KMS_KEY_ID"
 	keyServiceVersion string = "SERVICE_VERSION"
 )
 
@@ -76,6 +77,9 @@ func DefaultConfig() Config {
 			Password: getEnv(keyDBPassword, ""),
 			SSLMode:  getEnv(keyDBSSLMode, "allow"),
 			IAMAuth:  getEnv(keyDBIAMAuth, "false") == "true",
+		},
+		KMS: KMSConfig{
+			KeyID: getEnv(keyKMSKeyID, ""),
 		},
 		Reporting: ReportingConfig{
 			SQSQueueURL: getEnv(keySQSQueueURL, ""),
@@ -140,6 +144,8 @@ func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
 		setFromEnv(&cfg.Database.Password, "DB_PASSWORD"),
 		setFromEnv(&cfg.Database.SSLMode, "DB_SSLMODE"),
 		setFromEnv(&cfg.Database.IAMAuth, "DB_IAM_AUTH"),
+
+		setFromEnv(&cfg.KMS.KeyID, "KMS_KEY_ID"),
 
 		setFromEnv(&cfg.Reporting.SQSQueueURL, "SQS_QUEUE_URL"),
 		setFromEnv(&cfg.ServiceVersion, "SERVICE_VERSION"),
