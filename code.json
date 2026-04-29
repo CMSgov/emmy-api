@@ -1,0 +1,52 @@
+{
+  "name": "emmy-api",
+  "description": "An API that provides a unified, standard interface to the data sources needed to verify community engagement for the purpose of evaluating Medicaid eligibility.",
+  "status": "Development",
+  "permissions": {
+    "licenses": [
+      {
+        "name": "CC0-1.0",
+        "URL": "https://github.com/CMSgov/emmy-api/blob/main/LICENSE"
+      }
+    ],
+    "usageType": ["openSource"]
+  },
+  "organization": "Centers for Medicare & Medicaid Services",
+  "repositoryURL": "https://github.com/CMSgov/emmy-api",
+  "repositoryVisibility": "public",
+  "vcs": "git",
+  "laborHours": 7278,
+  "reuseFrequency": {
+    "forks": 3
+  },
+  "languages": ["Go", "Shell", "Makefile", "JavaScript", "HTML", "Dockerfile", "CSS"],
+  "maintenance": "internal",
+  "contractNumber": ["47QTCA18D008M:75FCMC23F0124:"],
+  "SBOM": "https://github.com/CMSgov/emmy-api/network/dependencies",
+  "date": {
+    "created": "2026-01-22T19:15:23Z",
+    "lastModified": "2026-04-29T14:08:37Z",
+    "metadataLastUpdated": "2026-04-29T15:01:38.552Z"
+  },
+  "tags": [
+    "Income Verification",
+    "Medicaid",
+    "Community Engagement",
+    "Work Requirement",
+    "HR 1",
+    "One Big Beautiful Bill Act",
+    "Medicaid Expansion",
+    "Eligibility Determination",
+    "Work Program",
+    "Education",
+    "Education Program",
+    "Center for Medicaid and Children Services",
+    "CMS",
+    "Open Source"
+  ],
+  "contact": {
+    "email": "emmy@cms.hhs.gov"
+  },
+  "feedbackMechanism": "https://github.com/CMSgov/emmy-api/issues",
+  "AIUseCaseID": "0"
+}
