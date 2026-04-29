@@ -55,7 +55,9 @@ jobs:
           name: cms-builder-${{ github.run_id }}
           driver: docker-container
           driver-opts: |
-           network=host
+            network=host
+            env.NO_PROXY=artifactory.cloud.cms.gov,.cloud.cms.gov,10.0.0.0/8,169.254.169.254,169.254.170.2
+            env.no_proxy=artifactory.cloud.cms.gov,.cloud.cms.gov,10.0.0.0/8,169.254.169.254,169.254.170.2
 
       - name: Derive image metadata
         id: image-metadata
@@ -122,11 +124,33 @@ jobs:
           username: ${{ steps.artifactory-credentials.outputs.username }}
           password: ${{ steps.artifactory-credentials.outputs.password }}
 
+      - name: Probe Artifactory NLB nodes
+        shell: bash
+        run: |
+          set +e
+          ips="$(getent ahostsv4 artifactory.cloud.cms.gov | awk '{print $1}' | sort -u)"
+
+          for ip in $ips; do
+            echo "::group::host curl $ip"
+            curl --noproxy '*' -vk --connect-timeout 10 \
+              --resolve "artifactory.cloud.cms.gov:443:$ip" \
+              https://artifactory.cloud.cms.gov/v2/
+            echo "::endgroup::"
+
+            echo "::group::host-network container curl $ip"
+            docker run --rm --network host curlimages/curl:latest \
+              --noproxy '*' -vk --connect-timeout 10 \
+              --resolve "artifactory.cloud.cms.gov:443:$ip" \
+              https://artifactory.cloud.cms.gov/v2/
+            echo "::endgroup::"
+          done
+
       - name: Build and push
         env:
           IMAGE_URI: ${{ steps.image-metadata.outputs.image_uri }}
           LATEST_IMAGE_URI: ${{ steps.image-metadata.outputs.latest_image_uri }}
           NO_PROXY: artifactory.cloud.cms.gov,.cloud.cms.gov,10.0.0.0/8,169.254.169.254,169.254.170.2
+          no_proxy: artifactory.cloud.cms.gov,.cloud.cms.gov,10.0.0.0/8,169.254.169.254,169.254.170.2
         run: |
           docker buildx build \
             --builder "${{ steps.buildx.outputs.name }}" \
