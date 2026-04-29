@@ -56,8 +56,8 @@ jobs:
           driver: docker-container
           driver-opts: |
             network=host
-            env.NO_PROXY=artifactory.cloud.cms.gov,.cloud.cms.gov,10.0.0.0/8,169.254.169.254,169.254.170.2
-            env.no_proxy=artifactory.cloud.cms.gov,.cloud.cms.gov,10.0.0.0/8,169.254.169.254,169.254.170.2
+            env.NO_PROXY=artifactory.cloud.cms.gov
+            env.no_proxy=artifactory.cloud.cms.gov
 
       - name: Derive image metadata
         id: image-metadata
