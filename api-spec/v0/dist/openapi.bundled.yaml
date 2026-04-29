@@ -413,7 +413,7 @@ components:
         - FULL_TIME
         - THREE_QUARTERS_TIME
         - HALF_TIME
-        - LESS_THAN_PART_TIME
+        - LESS_THAN_HALF_TIME
         - ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
       examples:
         - FULL_TIME

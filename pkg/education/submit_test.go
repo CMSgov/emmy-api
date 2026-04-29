@@ -120,7 +120,7 @@ func TestLookupEnrollmentStatus_MapsLessThanHalfTimeToLessThanPartTime(t *testin
 		DateOfBirth: "1988-10-24",
 	})
 	require.NoError(t, err)
-	require.Equal(t, EnrollmentStatusLessThanPartTime, out.EnrollmentStatus)
+	require.Equal(t, EnrollmentStatusLessThanHalfTime, out.EnrollmentStatus)
 }
 
 func TestLookupEnrollmentStatus_NoHitReturnsNotFound(t *testing.T) {
@@ -344,7 +344,7 @@ func TestResolveEnrollmentStatus_PrioritizesStatus(t *testing.T) {
 					},
 				},
 			},
-			expected: EnrollmentStatusLessThanPartTime,
+			expected: EnrollmentStatusLessThanHalfTime,
 		},
 		{
 			name: "Unknown when only Unknown is present",
