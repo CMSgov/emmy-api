@@ -54,13 +54,6 @@ jobs:
           driver-opts: |
             network=host
 
-      - name: Check Artifactory reachability
-        run: |
-            getent hosts artifactory.cloud.cms.gov
-            curl -vk --connect-timeout 10 https://artifactory.cloud.cms.gov/v2/
-            docker run --rm curlimages/curl:latest -vk --connect-timeout 10 https://artifactory.cloud.cms.gov/v2/
-
-
       - name: Derive image metadata
         id: image-metadata
         shell: bash
@@ -125,6 +118,12 @@ jobs:
           registry: artifactory.cloud.cms.gov
           username: ${{ steps.artifactory-credentials.outputs.username }}
           password: ${{ steps.artifactory-credentials.outputs.password }}
+
+      - name: Check Artifactory reachability
+        run: |
+            getent hosts artifactory.cloud.cms.gov
+            curl -vk --connect-timeout 10 https://artifactory.cloud.cms.gov/v2/
+            docker run --rm curlimages/curl:latest -vk --connect-timeout 10 https://artifactory.cloud.cms.gov/v2/
 
       - name: Push Docker image
         env:
