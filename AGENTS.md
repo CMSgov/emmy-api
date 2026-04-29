@@ -79,6 +79,8 @@ Do not modify these without an explicit task and approval:
 - Allowed: review security, auth, secret-scanning, and CI/workflow files; edit them only when explicitly asked
 - Forbidden: make unapproved changes to auth, secrets policy, workflow policy, or sensitive root files
 - Escalate when: any requested change touches security posture, scanning rules, or workflow enforcement
+- When editing `.github/workflows/*.yml`, require the exact runner label `runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"` for every job that declares `runs-on`; do not swap in GitHub-hosted runner labels
+- Reusable workflow-call jobs that use top-level `uses:` cannot declare `runs-on`; if you convert one into a direct job or add a new direct job, add the required runner label
 - Decision authority: review by default; edit only with explicit approval
 
 Agents may decide within their boundary, but must escalate before crossing into
