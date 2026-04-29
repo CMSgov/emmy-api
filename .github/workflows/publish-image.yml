@@ -3,7 +3,7 @@ name: Publish Docker Image
 on:
   push:
     branches:
-      - codex/publish-image-workflow-test
+      - main
     paths:
       - ".github/workflows/publish-image.yml"
       - "**/*.go"
@@ -123,27 +123,6 @@ jobs:
           registry: artifactory.cloud.cms.gov
           username: ${{ steps.artifactory-credentials.outputs.username }}
           password: ${{ steps.artifactory-credentials.outputs.password }}
-
-      - name: Probe Artifactory NLB nodes
-        shell: bash
-        run: |
-          set +e
-          ips="$(getent ahostsv4 artifactory.cloud.cms.gov | awk '{print $1}' | sort -u)"
-
-          for ip in $ips; do
-            echo "::group::host curl $ip"
-            curl --noproxy '*' -vk --connect-timeout 10 \
-              --resolve "artifactory.cloud.cms.gov:443:$ip" \
-              https://artifactory.cloud.cms.gov/v2/
-            echo "::endgroup::"
-
-            echo "::group::host-network container curl $ip"
-            docker run --rm --network host curlimages/curl:latest \
-              --noproxy '*' -vk --connect-timeout 10 \
-              --resolve "artifactory.cloud.cms.gov:443:$ip" \
-              https://artifactory.cloud.cms.gov/v2/
-            echo "::endgroup::"
-          done
 
       - name: Build and push
         env:
