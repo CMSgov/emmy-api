@@ -130,13 +130,6 @@ jobs:
           username: ${{ steps.artifactory-credentials.outputs.username }}
           password: ${{ steps.artifactory-credentials.outputs.password }}
 
-      - name: Check Artifactory reachability
-        run: |
-            getent hosts artifactory.cloud.cms.gov
-            curl -vk --connect-timeout 10 https://artifactory.cloud.cms.gov/v2/
-            docker run --rm --network host curlimages/curl:latest \
-              -vk --connect-timeout 10 https://artifactory.cloud.cms.gov/v2/
-
       - name: Build and push
         env:
           IMAGE_URI: ${{ steps.image-metadata.outputs.image_uri }}
