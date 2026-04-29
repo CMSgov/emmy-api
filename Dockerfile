@@ -13,7 +13,7 @@ COPY . .
 ENV CGO_ENABLED=0
 RUN GOOS="${TARGETOS:-linux}" GOARCH="$TARGETARCH" go build -ldflags="-s -w" -a -o apiserver .
 
-FROM artifactory.cloud.cms.gov/docker-remote/alpine:3.22
+FROM artifactory.cloud.cms.gov/docker-remote/library/alpine:3.23
 
 COPY --chmod=0755 --from=builder ["/build/apiserver", "/"]
 
