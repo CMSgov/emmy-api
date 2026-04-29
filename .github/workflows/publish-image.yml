@@ -57,14 +57,6 @@ jobs:
           driver-opts: |
            network=host
 
-      - name: Inspect Buildx networking
-        run: |
-          docker buildx ls
-          docker buildx inspect --bootstrap
-          docker ps --filter name=buildx_buildkit
-          docker inspect $(docker ps -q --filter name=buildx_buildkit) \
-            --format '{{.Name}} NetworkMode={{.HostConfig.NetworkMode}}'
-
       - name: Derive image metadata
         id: image-metadata
         shell: bash
