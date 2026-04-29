@@ -150,7 +150,6 @@ jobs:
           IMAGE_URI: ${{ steps.image-metadata.outputs.image_uri }}
           LATEST_IMAGE_URI: ${{ steps.image-metadata.outputs.latest_image_uri }}
           NO_PROXY: artifactory.cloud.cms.gov,.cloud.cms.gov,10.0.0.0/8,169.254.169.254,169.254.170.2
-          no_proxy: artifactory.cloud.cms.gov,.cloud.cms.gov,10.0.0.0/8,169.254.169.254,169.254.170.2
         run: |
           docker buildx build \
             --builder "${{ steps.buildx.outputs.name }}" \
