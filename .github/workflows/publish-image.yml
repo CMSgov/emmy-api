@@ -63,8 +63,7 @@ jobs:
           docker buildx inspect --bootstrap
           docker ps --filter name=buildx_buildkit
           docker inspect $(docker ps -q --filter name=buildx_buildkit) \
-            --format '{{.Name}}
-        NetworkMode={{.HostConfig.NetworkMode}}'
+            --format '{{.Name}} NetworkMode={{.HostConfig.NetworkMode}}'
 
       - name: Derive image metadata
         id: image-metadata
