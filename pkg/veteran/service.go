@@ -181,7 +181,6 @@ func (s *service) LookupDisabilityRating(ctx context.Context, reqBody Request) (
 	if err != nil {
 		s.logger.ErrorContext(ctx, "va disability rating request failed",
 			slog.Any("error", err),
-			slog.Any("vaReq", vaReq),
 			slog.Duration("latency", latency),
 		)
 		return Response{}, fmt.Errorf("do disability rating request: %w", err)
