@@ -2,13 +2,17 @@
 
 ## Problem Statement
 
-The API requires request authentication that can validate Cognito-issued access tokens efficiently and securely.
+If the runtime restores token enforcement, the API will need request
+authentication that can validate Cognito-issued access tokens efficiently and
+securely. The current branch does not implement that verifier.
 
 ## Alternatives Considered
 
-- Offline JWT validation using Cognito JWKS (current).
+- Offline JWT validation using Cognito JWKS.
 - Token introspection against upstream auth server.
 - API gateway-only auth with no in-app verification.
+- Keep the current subject-extraction-only middleware and rely on upstream
+  controls.
 
 ## Trade-offs
 
@@ -21,10 +25,15 @@ The API requires request authentication that can validate Cognito-issued access 
 - Gateway-only:
   - Pros: less app code.
   - Cons: reduced defense-in-depth and local context extraction flexibility.
+- Subject extraction only:
+  - Pros: simple local behavior and low overhead.
+  - Cons: no token verification or claim enforcement in service code.
 
-## Why Current Approach Was Selected (Inferred)
+## Current Branch Status
 
-The middleware design and `jwk.Cache` usage imply preference for low-latency local validation with explicit issuer/client claim checks.
+The checked-in middleware only extracts a `sub` value from headers or an
+unverified bearer token. The stronger Cognito/JWKS validation path described in
+older docs is not present in the current implementation.
 
 ## Benchmarks / Status
 
@@ -35,8 +44,10 @@ The middleware design and `jwk.Cache` usage imply preference for low-latency loc
 
 - `api/middleware/middleware.go`
 - `api/app.go`
-- Dependencies: `github.com/lestrrat-go/jwx/v2`
+- Dependency used by current subject extraction: `github.com/lestrrat-go/jwx/v2`
 
 ## Assumptions
 
-- **Medium confidence:** Upstream architecture expects service-level auth enforcement even when requests may already pass through trusted infrastructure.
+- **Medium confidence:** A future verified-auth middleware will likely build on
+  the same request-local identity fields (`sub`, `username`, `scope`,
+  `groups`) used today.

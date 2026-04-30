@@ -33,30 +33,24 @@ This project uses [pre-commit](https://pre-commit.com/ "pre-commit Docs") to reg
 pre-commit install
 ```
 
-For OpenAPI spec maintenance, the repo also includes utility scripts under
-`scripts/`:
+For OpenAPI spec maintenance, use the supported local commands from the project
+root:
 
 ```sh
-# 1. Rebuild the bundled YAML and JSON artifacts from the design-time source spec
-./scripts/bundle-api-spec
+# 1. Rebuild the bundled artifacts from the design-time source spec
+pnpm run bundle:api-spec
 
-# 2. Validate the bundled YAML artifact
-./scripts/validate-api-spec
+# 2. Validate the bundled artifact
+pnpm run validate:api-spec
 
-# 3. Lint the bundled YAML artifact with the repo Spectral ruleset
-./scripts/lint-api-spec
+# 3. Lint the bundled artifact with the repo Spectral ruleset
+pnpm run lint:api-spec
 
-# 4. Lint hand-authored YAML files
-./scripts/lint-yaml-files
-
-# 5. Check formatting for contract YAML and JSON files
+# 4. Check formatting for contract YAML and JSON files
 ./scripts/check-format-contract-files
 
-# 6. Compile standalone JSON Schemas
+# 5. Compile standalone JSON Schemas
 ./scripts/check-json-schemas
-
-# 7. Check for breaking OpenAPI changes against a base ref
-./scripts/check-openapi-breaking [base-ref]
 ```
 
 If you use [mise](https://mise.jdx.dev/), install the pinned runtimes from
@@ -65,15 +59,12 @@ If you use [mise](https://mise.jdx.dev/), install the pinned runtimes from
 ```sh
 # Install the pinned Go and Node runtimes for this repo
 mise install
-
-# Run the full local contract/spec workflow
-mise run check-contract-files
 ```
 
-You can also run each step individually with `mise run bundle-api-spec`,
-`mise run validate-api-spec`, `mise run lint-api-spec`,
-`mise run lint-yaml-files`, `mise run check-format-contract-files`,
-`mise run check-json-schemas`, and `mise run check-openapi-breaking`.
+You can then run the wired `mise` tasks individually with
+`mise run bundle-api-spec`, `mise run validate-api-spec`,
+`mise run lint-api-spec`, `mise run check-format-contract-files`, and
+`mise run check-json-schemas`.
 
 ## Policies
 

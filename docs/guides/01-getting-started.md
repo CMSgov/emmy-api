@@ -71,9 +71,9 @@ _(Review the [Authentication Guide](02-authentication.md) for more details on au
 
 ### Step 2: Prepare your Request Payload
 
-Requests to the Emmy API use JSON content payloads in the request body. First, review the [Emmy API specification](https://cmsgov.github.io/emmy-api/swagger-ui) for the operation you would like to perform. In this example, we will make request a member's educational enrollment information from the Emmy API's `/v0/education-enrollments` endpoint.
+Requests to the Emmy API use JSON content payloads in the request body. First, review the [Emmy API specification](https://cmsgov.github.io/emmy-api/swagger-ui) for the operation you would like to perform. In this example, we will request a member's educational enrollment information from the Emmy API's `/api/v0/education-enrollments` endpoint.
 
-In the [API specs for `/v0/education-enrollments`](https://cmsgov.github.io/emmy-api/swagger-ui/#/Education%20Verification/getEducationEnrollmentStatus), you can see the structure of the request body. Build a JSON body using your member's information, like so:
+In the [API specs for `/api/v0/education-enrollments`](https://cmsgov.github.io/emmy-api/swagger-ui/#/Education%20Verification/getEducationEnrollmentStatus), you can see the structure of the request body. Build a JSON body using your member's information, like so:
 
 ```json
 {
@@ -90,12 +90,12 @@ With your JSON payload prepared, you can now [make a request to the Emmy API](01
 
 ### Step 3: Invoke an Emmy API Request
 
-In this step, we will again use the `curl` tool to make a request to the Emmy API. We will continue the example from step 2 and request member information from the [Education `/v0/education-enrollments`](https://cmsgov.github.io/emmy-api/swagger-ui/#/Education%20Verification/getEducationEnrollmentStatus) endpoint.
+In this step, we will again use the `curl` tool to make a request to the Emmy API. We will continue the example from step 2 and request member information from the [Education `/api/v0/education-enrollments`](https://cmsgov.github.io/emmy-api/swagger-ui/#/Education%20Verification/getEducationEnrollmentStatus) endpoint.
 
 This request is slightly more complex since it now has HTTP authorization, a content body, and a different endpoint. Use this example by substituting the values for your environment:
 
 ```bash
-curl --location --request POST '<API_BASE>/v0/education-enrollments' \
+curl --location --request POST '<API_BASE>/api/v0/education-enrollments' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data '{

@@ -3,8 +3,8 @@
 ## Purpose
 
 The Verification Service API provides a unified HTTP interface for eligibility
-verification workflows, currently focused on a runtime education scaffold, a
-Redis-backed health check, and the checked-in v0 veteran disability contract.
+verification workflows, currently focused on Redis-backed health checks and the
+checked-in v0 education and veteran verification routes.
 
 This service evolved from consent-based verification work and is intended to
 reduce manual burden during benefits eligibility evaluation.
@@ -21,16 +21,19 @@ Runtime dependencies in current implementation:
 - Fiber (`github.com/gofiber/fiber/v2`) for HTTP server and routing.
 - Redis (`github.com/redis/go-redis/v9`) for health checks and distributed circuit-breaker state.
 - NSC endpoints (`NSC_TOKEN_URL`, `NSC_SUBMIT_URL`) for education verification.
-- AWS Cognito JWKS/JWT validation for request authentication (when `SKIP_AUTH=false`).
+- Request-subject extraction from `X-Sub` or bearer tokens, plus optional
+  skip-auth identity injection for local workflows.
 - Datadog Orchestrion for build-time automatic instrumentation.
 
 ## Key Packages
 
 - `main`: process bootstrap, env/config load, Redis client init, route registration, graceful shutdown.
 - `api`: Fiber app construction and shared middleware setup.
-- `api/routes`: endpoint registration (`/`, `/health`, `/api/edu`, `/api/v0/veteran-disability-ratings`).
+- `api/routes`: endpoint registration (`/`, `/health`,
+  `/api-spec/v1/verify`, `/api/v0/education-enrollments`, and
+  `/api/v0/veteran-disability-ratings`).
 - `api/handlers`: HTTP handlers for Redis health, education scaffolding, and veteran verification.
-- `api/middleware`: Cognito auth and circuit-breaker middleware.
+- `api/middleware`: request identity helpers and circuit-breaker middleware.
 - `pkg/core`: configuration, logger.
 - `pkg/education`: NSC service abstraction and HTTP/OAuth submit flow.
 - `pkg/veteran`: VA service abstraction and JWT client-assertion flow.
@@ -50,31 +53,32 @@ Runtime dependencies in current implementation:
 flowchart TD
     A[Client] --> B[Fiber App]
     B --> C[Recover + CORS + Slog middleware]
-    C --> D{SKIP_AUTH == false?}
-    D -->|Yes| E[Cognito JWT Verifier]
-    D -->|No| F[Route Handler]
-    E --> F
+    C --> D[SubjectMiddleware]
+    D --> E{SKIP_AUTH == true?}
+    E -->|Yes| F[SkipAuthMiddleware]
+    E -->|No| G[Route Handler]
+    F --> G
 
-    F --> G{Circuit Breaker Allow?}
-    G -->|No| H[503 Service Unavailable]
+    G --> H{Circuit Breaker Allow?}
+    H -->|No| I[503 Service Unavailable]
 
-    G -->|Yes: /health| I[Redis Ping]
-    I --> J[200 OK or Fiber Error]
+    H -->|Yes: /health| J[Redis Ping]
+    J --> K[200 OK or Fiber Error]
 
-    G -->|Yes: /api/edu| K[EducationService.Submit]
-    K --> L[OAuth2 client credentials token]
-    L --> M[NSC submit endpoint]
-    M --> N[JSON response]
+    H -->|Yes: /api/v0/education-enrollments| L[EducationService.LookupEnrollmentStatus]
+    L --> M[OAuth2 client credentials token]
+    M --> N[NSC submit endpoint]
+    N --> O[JSON response]
 
-    G -->|Yes: /api/v0/veteran-disability-ratings| V[VeteranService.LookupDisabilityRating]
-    V --> W[VA token exchange]
-    W --> X[VA disability endpoint]
-    X --> Y[JSON response]
+    H -->|Yes: /api/v0/veteran-disability-ratings| P[VeteranService.LookupDisabilityRating]
+    P --> Q[VA token exchange]
+    Q --> R[VA disability endpoint]
+    R --> S[JSON response]
 
-    B -.-> O[Datadog Agent]
-    I -.-> O
-    K -.-> O
-    V -.-> O
+    B -.-> T[Datadog Agent]
+    J -.-> T
+    L -.-> T
+    P -.-> T
 ```
 
 Current wiring caveat on `main`: `api.New` now receives a Redis client from
@@ -104,8 +108,9 @@ Initial requirements referenced `/docs/planing`; this repo standardizes on
 
 - **High confidence:** Redis is the only persistent/shared runtime store
   currently used by this service.
-- **High confidence:** `/api/edu` is presently implementation scaffolding and
-  should not be treated as the public contract for this branch.
+- **High confidence:** `POST /api/v0/education-enrollments` and
+  `POST /api/v0/veteran-disability-ratings` are the currently wired
+  verification routes.
 - **High confidence:** `POST /api/v0/veteran-disability-ratings` is the current
   checked-in v0 contract path for veteran verification.
 - **Medium confidence:** Additional verification domains beyond the current
