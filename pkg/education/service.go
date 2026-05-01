@@ -9,12 +9,16 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/cmsgov/emmy-api/pkg/batching"
 	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/cmsgov/emmy-api/pkg/encryption"
 )
 
-var ErrNotFound = errors.New("education enrollment not found")
-var ErrDatabaseConnectionNotAvailable = errors.New("database connection not available")
+var (
+	ErrNotFound                       = errors.New("education enrollment not found")
+	ErrDatabaseConnectionNotAvailable = errors.New("database connection not available")
+	ErrBatchNotAvailable              = errors.New("sqs batching is missing")
+)
 
 type Service interface {
 	LookupEnrollmentStatus(ctx context.Context, req Request) (Response, error)
@@ -39,12 +43,13 @@ type Options struct {
 }
 
 type service struct {
-	cfg        *core.NSCConfig
-	client     HTTPTransport
-	logger     *slog.Logger
-	db         *sql.DB
-	encryption encryption.Service
-	opts       Options
+	cfg         *core.NSCConfig
+	client      HTTPTransport
+	logger      *slog.Logger
+	db          *sql.DB
+	encryption  encryption.Service
+	opts        Options
+	batchQueuer batching.BatchQueuer
 }
 
 func New(cfg *core.NSCConfig, opts Options) Service {
@@ -64,13 +69,18 @@ func New(cfg *core.NSCConfig, opts Options) Service {
 		client = nscHTTPClient(context.Background(), cfg, logger)
 	}
 
+	ctx := context.Background()
+
+	batchQueuer := batching.NewBatchQueuer(ctx, cfg, logger)
+
 	return &service{
-		cfg:        cfg,
-		client:     client,
-		logger:     logger,
-		db:         opts.DB,
-		encryption: opts.Encryption,
-		opts:       opts,
+		cfg:         cfg,
+		client:      client,
+		logger:      logger,
+		db:          opts.DB,
+		encryption:  opts.Encryption,
+		opts:        opts,
+		batchQueuer: batchQueuer,
 	}
 }
 
@@ -128,6 +138,16 @@ func (s *service) RegisterBatch(ctx context.Context, req BatchRequest) error {
 		return fmt.Errorf("RegisterBatch: Commit failed: batch_id=%q batch_db_id=%q: %w",
 			req.BatchID, batchDBID, err)
 	}
+
+	data := &batching.BatchData{
+		BatchID:   req.BatchID,
+		Timestamp: time.Now().UTC(),
+	}
+
+	if s.batchQueuer == nil {
+		return fmt.Errorf("RegisterBatch: s.batchQueuer is nil: %w", ErrBatchNotAvailable)
+	}
+	s.batchQueuer.Batch(ctx, data)
 
 	return nil
 }
