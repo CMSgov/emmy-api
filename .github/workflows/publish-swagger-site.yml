@@ -17,7 +17,7 @@ env:
 jobs:
   publish:
     name: publish swagger docs
-    runs-on: self-hosted
+    runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     steps:
       - name: Validate required configuration
         shell: bash
