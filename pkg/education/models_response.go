@@ -52,6 +52,23 @@ type BatchJobStatusResponse struct {
 	FailureCount            int        `json:"failureCount"`
 }
 
+type BatchJobDetailsResponse struct {
+	BatchJobID string               `json:"batchJobId"`
+	Results    []BatchStudentResult `json:"results"`
+}
+
+type BatchStudentResult struct {
+	Results         *StudentResults `json:"results,omitempty"`
+	RecordID        string          `json:"recordId"`
+	Status          string          `json:"status"`
+	FoundEnrollment bool            `json:"foundEnrollment"`
+}
+
+type StudentResults struct {
+	EnrollmentStatus  EnrollmentStatus   `json:"enrollmentStatus"`
+	EnrollmentDetails []EnrollmentDetail `json:"enrollmentDetails"`
+}
+
 type nscResponse struct {
 	ClientData          nscClientData          `json:"clientData"`
 	IdentityDetails     []nscMatchDetail       `json:"identityDetails"`

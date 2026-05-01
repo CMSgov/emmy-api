@@ -202,6 +202,54 @@ func GetBatchStatusHandler(edu education.Service, reporter reporting.Reporter, l
 	}
 }
 
+func GetBatchDetailsHandler(edu education.Service, reporter reporting.Reporter, logger *slog.Logger) fiber.Handler {
+	if logger == nil {
+		logger = slog.Default()
+	}
+	logger = logger.With(slog.String("handler", "GetBatchDetailsHandler"))
+
+	return func(c *fiber.Ctx) error {
+		clientID, ok := c.Locals("sub").(string)
+		if !ok {
+			clientID = ""
+		}
+
+		batchJobID := c.Params("batchJobId")
+		if batchJobID == "" {
+			return fiber.NewError(fiber.StatusBadRequest, "missing required parameter batchJobId")
+		}
+
+		result, err := edu.GetBatchDetails(c.UserContext(), batchJobID)
+		if err != nil {
+			if errors.Is(err, education.ErrNotFound) {
+				return c.SendStatus(fiber.StatusNotFound)
+			}
+
+			logger.ErrorContext(c.UserContext(), "failed to get batch details", slog.String("batchJobId", batchJobID), slog.Any("error", err))
+			reporter.Report(c.Context(), &reporting.ReportData{
+				Endpoint:   c.Path(),
+				Success:    false,
+				DataSource: "Postgres",
+				ClientID:   clientID,
+				Timestamp:  time.Now(),
+				StatusCode: fiber.StatusInternalServerError,
+			})
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to get batch details")
+		}
+
+		reporter.Report(c.Context(), &reporting.ReportData{
+			Endpoint:   c.Path(),
+			Success:    true,
+			DataSource: "Postgres",
+			ClientID:   clientID,
+			Timestamp:  time.Now(),
+			StatusCode: fiber.StatusOK,
+		})
+
+		return c.Status(fiber.StatusOK).JSON(result)
+	}
+}
+
 func missingEducationIdentityField(req *education.Request) string {
 	if req == nil {
 		return "firstName"
