@@ -54,10 +54,6 @@ type Config struct {
 	KMS            KMSConfig
 	Reporting      ReportingConfig
 	ServiceVersion string
-	VA             VAConfig
-	Redis          RedisConfig
-	Port           int
-	SkipAuth       bool
 }
 
 type ctxKey int
