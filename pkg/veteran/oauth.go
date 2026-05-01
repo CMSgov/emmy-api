@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -48,6 +49,7 @@ type vaTokenSource struct {
 	cfg    *core.VAConfig
 	client *http.Client
 	now    func() time.Time
+	logger *slog.Logger
 }
 
 func vaHTTPClient(ctx context.Context, cfg *core.VAConfig) *http.Client {
@@ -101,6 +103,10 @@ func (s *vaTokenSource) Token() (*oauth2.Token, error) {
 		s.now = time.Now
 	}
 
+	if s.logger == nil {
+		s.logger = slog.Default()
+	}
+
 	assertion, err := signedClientAssertion(s.cfg, s.now())
 	if err != nil {
 		return nil, fmt.Errorf("build client assertion: %w", err)
@@ -131,6 +137,9 @@ func (s *vaTokenSource) Token() (*oauth2.Token, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read token response body: %w", err)
 	}
+	s.logger.Error("va oauth token request failed",
+		slog.Any("error", resp.Status),
+	)
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("%w: status=%d", errVATokenRequestFailed, resp.StatusCode)

@@ -63,8 +63,7 @@ func (s *service) LookupEnrollmentStatus(ctx context.Context, reqBody Request) (
 		slog.Bool("has_ssn", strings.TrimSpace(reqBody.SSN) != ""),
 		slog.Bool("has_date_of_birth", strings.TrimSpace(reqBody.DateOfBirth) != ""),
 		slog.Bool("has_middle_name", strings.TrimSpace(reqBody.MiddleName) != ""),
-		slog.Bool("has_address", reqBody.Address != nil),
-		slog.Bool("has_identity_details", nscReqBody.IdentityDetails != nil),
+		slog.Bool("has_address", nscReqBody.Address1 != ""),
 		slog.Bool("has_context_deadline", hasContextDeadline(ctx)),
 		slog.Int64("deadline_remaining_ms", deadlineRemainingMillis(ctx)),
 	)
@@ -178,13 +177,11 @@ func toNSCRequest(cfg *core.NSCConfig, reqBody Request) nscRequest {
 	}
 
 	if reqBody.Address != nil {
-		out.IdentityDetails = &nscRequestIdentityDetails{
-			Address1: reqBody.Address.Street1,
-			Address2: firstNonEmpty(reqBody.Address.Street2, reqBody.Address.Street3),
-			City:     reqBody.Address.City,
-			State:    reqBody.Address.State,
-			ZipCode:  reqBody.Address.PostalCode,
-		}
+		out.Address1 = reqBody.Address.Street1
+		out.Address2 = reqBody.Address.Street2
+		out.City = reqBody.Address.City
+		out.State = reqBody.Address.State
+		out.ZipCode = reqBody.Address.PostalCode
 	}
 
 	return out

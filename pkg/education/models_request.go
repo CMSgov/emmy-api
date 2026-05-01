@@ -20,7 +20,6 @@ type Address struct {
 }
 
 type nscRequest struct {
-	IdentityDetails  *nscRequestIdentityDetails `json:"identityDetails,omitempty"`
 	ContactEmail     string                     `json:"contactEmail,omitempty"`
 	CaseReferenceID  string                     `json:"caseReferenceId,omitempty"`
 	AccountID        string                     `json:"accountId"`
@@ -33,9 +32,6 @@ type nscRequest struct {
 	EndClient        string                     `json:"endClient"`
 	Terms            string                     `json:"terms"`
 	PreviousNames    []nscPreviousName          `json:"previousNames,omitempty"`
-}
-
-type nscRequestIdentityDetails struct {
 	Address1 string `json:"address1,omitempty"`
 	Address2 string `json:"address2,omitempty"`
 	City     string `json:"city,omitempty"`
