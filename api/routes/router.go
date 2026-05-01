@@ -17,10 +17,12 @@ import (
 )
 
 type RouterParams struct {
-	CFG      *core.Config
-	RDB      *redis.Client
-	Reporter reporting.Reporter
-	Logger   *slog.Logger
+	CFG        *core.Config
+	RDB        *redis.Client
+	Reporter   reporting.Reporter
+	Logger     *slog.Logger
+	Encryption encryption.Service
+	DB         *sql.DB
 }
 
 func RegisterRoutes(app fiber.Router, params RouterParams) {
@@ -35,8 +37,10 @@ func RegisterRoutes(app fiber.Router, params RouterParams) {
 
 	api := app.Group("/api")
 
-	edu := education.New(&cfg.NSC, education.Options{
-		Logger: logger,
+	edu := education.New(&params.CFG.NSC, education.Options{
+		Logger:     params.Logger,
+		DB:         params.DB,
+		Encryption: params.Encryption,
 	})
 	veteranService := veteran.New(&params.CFG.VA, veteran.Options{
 		Logger: params.Logger,
@@ -52,6 +56,8 @@ func RegisterRoutes(app fiber.Router, params RouterParams) {
 		)
 	})
 
-	api.Post("/v0/education-enrollments", withCB(handlers.EducationHandler(cfg, edu, reporter, logger)))
-	api.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(cfg, veteranService, reporter, logger)))
+	api.Post("/v0/education-enrollments", withCB(handlers.EducationHandler(params.CFG, edu, params.Reporter, params.Logger)))
+	api.Post("/v0/batch-education-enrollments", withCB(handlers.BatchEducationHandler(params.CFG, edu, params.Reporter, params.Logger)))
+	api.Get("/v0/batch-education-enrollments/:batchJobId", handlers.GetBatchStatusHandler(edu, params.Reporter, params.Logger))
+	api.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(params.CFG, veteranService, params.Reporter, params.Logger)))
 }
