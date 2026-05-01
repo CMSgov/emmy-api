@@ -32,6 +32,7 @@ type fakeEducationService struct {
 	response     education.Response
 	lastReq      education.Request
 	lastBatchReq education.BatchRequest
+	batchStatus  education.BatchJobStatusResponse
 	calls        int
 }
 
@@ -48,6 +49,11 @@ func (s *fakeEducationService) RegisterBatch(_ context.Context, req education.Ba
 	s.calls++
 	s.lastBatchReq = req
 	return s.err
+}
+
+func (s *fakeEducationService) GetBatchStatus(_ context.Context, _ string) (education.BatchJobStatusResponse, error) {
+	s.calls++
+	return s.batchStatus, s.err
 }
 
 func TestEducationHandler_Success(t *testing.T) {
@@ -275,4 +281,56 @@ func TestBatchEducationHandler_MissingBatchIDReturnsBadRequest(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+}
+
+func TestGetBatchStatusHandler_Success(t *testing.T) {
+	app := fiber.New()
+	logger := slog.New(slog.DiscardHandler)
+	batchJobID := "job-123"
+	expectedStatus := education.BatchJobStatusResponse{
+		BatchJobID:       batchJobID,
+		Status:           "IN_PROGRESS",
+		TotalRecords:     10,
+		ProcessedRecords: 5,
+		SuccessCount:     4,
+		FailureCount:     1,
+	}
+	service := &fakeEducationService{
+		batchStatus: expectedStatus,
+	}
+	reporter := &fakeReporter{}
+
+	app.Get("/api/v0/batch-education-enrollments/:batchJobId", GetBatchStatusHandler(service, reporter, logger))
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v0/batch-education-enrollments/"+batchJobID, http.NoBody)
+
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, fiber.StatusOK, resp.StatusCode)
+	require.Equal(t, 1, service.calls)
+
+	require.Len(t, reporter.calls, 1)
+	require.True(t, reporter.calls[0].Success)
+	require.Equal(t, fiber.StatusOK, reporter.calls[0].StatusCode)
+}
+
+func TestGetBatchStatusHandler_NotFound(t *testing.T) {
+	app := fiber.New()
+	logger := slog.New(slog.DiscardHandler)
+	service := &fakeEducationService{
+		err: education.ErrNotFound,
+	}
+	reporter := &fakeReporter{}
+
+	app.Get("/api/v0/batch-education-enrollments/:batchJobId", GetBatchStatusHandler(service, reporter, logger))
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v0/batch-education-enrollments/missing", http.NoBody)
+
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, fiber.StatusNotFound, resp.StatusCode)
 }

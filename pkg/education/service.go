@@ -23,6 +23,7 @@ var (
 type Service interface {
 	LookupEnrollmentStatus(ctx context.Context, req Request) (Response, error)
 	RegisterBatch(ctx context.Context, req BatchRequest) error
+	GetBatchStatus(ctx context.Context, batchJobID string) (BatchJobStatusResponse, error)
 }
 
 type HTTPTransport interface {
@@ -150,4 +151,54 @@ func (s *service) RegisterBatch(ctx context.Context, req BatchRequest) error {
 	s.batchQueuer.Batch(ctx, data)
 
 	return nil
+}
+
+func (s *service) GetBatchStatus(ctx context.Context, batchJobID string) (BatchJobStatusResponse, error) {
+	if s.db == nil {
+		return BatchJobStatusResponse{}, fmt.Errorf("GetBatchStatus: s.db is nil: %w", ErrDatabaseConnectionNotAvailable)
+	}
+
+	query := `
+		SELECT
+			b.batch_id,
+			b.status,
+			b.created_at,
+			COUNT(s.id) as total_records,
+			COUNT(CASE WHEN s.status IN ('SUCCESS', 'FAILED', 'NO_HIT') THEN 1 END) as processed_records,
+			COUNT(CASE WHEN s.status = 'SUCCESS' THEN 1 END) as success_count,
+			COUNT(CASE WHEN s.status = 'FAILED' THEN 1 END) as failure_count
+		FROM enrollment_batches b
+		LEFT JOIN batch_students s ON b.id = s.batch_db_id
+		WHERE b.batch_id = $1
+		GROUP BY b.id, b.batch_id, b.status, b.created_at
+	`
+
+	var (
+		res         BatchJobStatusResponse
+		submittedAt time.Time
+	)
+
+	err := s.db.QueryRowContext(ctx, query, batchJobID).Scan(
+		&res.BatchJobID,
+		&res.Status,
+		&submittedAt,
+		&res.TotalRecords,
+		&res.ProcessedRecords,
+		&res.SuccessCount,
+		&res.FailureCount,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return BatchJobStatusResponse{}, fmt.Errorf("GetBatchStatus: batch not found: %s: %w", batchJobID, ErrNotFound)
+		}
+		return BatchJobStatusResponse{}, fmt.Errorf("GetBatchStatus: query failed: %w", err)
+	}
+
+	res.SubmittedAt = &submittedAt
+	// For now, we don't have an updatedAt or estimatedCompletionTime in the schema,
+	// but we can set UpdatedAt to now or similar if we want to follow the requirement's example.
+	now := time.Now()
+	res.UpdatedAt = &now
+
+	return res, nil
 }

@@ -144,6 +144,56 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /api/v0/batch-education-enrollments/{batchJobId}:
+    get:
+      tags:
+        - Education Verification
+      summary: Get batch job status
+      description: >
+        Returns the status and progress of a previously submitted batch education enrollment job.
+      operationId: getBatchJobStatus
+      parameters:
+        - name: batchJobId
+          in: path
+          required: true
+          description: The unique identifier for the batch job.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Batch job status retrieved successfully.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchJobStatusResponse"
+              examples:
+                inProgress:
+                  value:
+                    batchJobId: "job-8f3a2c1d-4e5b-4f6a-9c7d-0e1f2a3b4c5d"
+                    status: "IN_PROGRESS"
+                    totalRecords: 2
+                    processedRecords: 1
+                    successCount: 1
+                    failureCount: 0
+                    submittedAt: "2026-04-24T10:30:00Z"
+                    updatedAt: "2026-04-24T10:32:00Z"
+                    estimatedCompletionTime: "2026-04-24T10:35:00Z"
+        "404":
+          description: Batch job not found.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                notFound:
+                  value:
+                    error: "Not Found"
   /api/v0/veteran-disability-ratings:
     post:
       tags:
@@ -286,6 +336,58 @@ components:
           pattern: '^\d{3}-\d{2}-\d{4}$'
           description: Student's Social Security Number.
           example: "796-01-2476"
+    BatchJobStatusResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - batchJobId
+        - status
+        - totalRecords
+        - processedRecords
+        - successCount
+        - failureCount
+        - submittedAt
+        - updatedAt
+      properties:
+        batchJobId:
+          type: string
+          description: Unique identifier for the batch job.
+          example: "job-8f3a2c1d-4e5b-4f6a-9c7d-0e1f2a3b4c5d"
+        status:
+          type: string
+          description: The current status of the batch job.
+          example: "IN_PROGRESS"
+        totalRecords:
+          type: integer
+          description: Total number of student records in the batch.
+          example: 2
+        processedRecords:
+          type: integer
+          description: Number of student records processed so far.
+          example: 1
+        successCount:
+          type: integer
+          description: Number of student records processed successfully.
+          example: 1
+        failureCount:
+          type: integer
+          description: Number of student records that failed processing.
+          example: 0
+        submittedAt:
+          type: string
+          format: date-time
+          description: The time the batch job was submitted.
+          example: "2026-04-24T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: The last time the batch job status was updated.
+          example: "2026-04-24T10:32:00Z"
+        estimatedCompletionTime:
+          type: string
+          format: date-time
+          description: The estimated time when the batch job will be completed.
+          example: "2026-04-24T10:35:00Z"
     EducationEnrollmentResponse:
       type: object
       additionalProperties: false
