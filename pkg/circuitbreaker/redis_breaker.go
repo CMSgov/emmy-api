@@ -2,6 +2,7 @@ package circuitbreaker
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"strconv"
 	"time"
@@ -9,15 +10,16 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+//nolint:govet // Field order prioritizes readability of runtime dependencies.
 type RedisBreaker struct {
+	// Logger for observability.
+	logger *slog.Logger
 	// Redis client used to read and update the circuit state.
 	rdb *redis.Client
-	// Name of the redis circuitbreaker that is used in combination with keys when constructing redis keys.
-	name string
-	// Defines the behaviour and timing characteristics of the breaker.
+	// Defines the behavior and timing characteristics of the breaker.
 	opts Options
-	// Logger for observability
-	logger *slog.Logger
+	// Name of the redis circuit breaker used when constructing Redis keys.
+	name string
 }
 
 var _ Breaker = (*RedisBreaker)(nil)
@@ -40,7 +42,7 @@ func NewRedisBreaker(rdb *redis.Client, name string, opts Options, logger *slog.
 	return &RedisBreaker{rdb: rdb, name: name, opts: opts, logger: logger}
 }
 
-func (b *RedisBreaker) keys() (stateKey, failsKey string) {
+func (b *RedisBreaker) keys() (string, string) {
 	base := b.opts.Prefix + b.name
 	return base, base + ":fails"
 }
@@ -49,7 +51,7 @@ func (b *RedisBreaker) Allow(ctx context.Context) error {
 	stateKey, _ := b.keys()
 
 	val, err := b.rdb.Get(ctx, stateKey).Result()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		return nil
 	}
 	if err != nil {
@@ -58,7 +60,6 @@ func (b *RedisBreaker) Allow(ctx context.Context) error {
 			return nil
 		}
 		return ErrCircuitOpen
-
 	}
 
 	timeToHalfOpenMs, convErr := strconv.ParseInt(val, 10, 64)
@@ -81,7 +82,9 @@ func (b *RedisBreaker) Allow(ctx context.Context) error {
 
 func (b *RedisBreaker) OnSuccess(ctx context.Context) {
 	stateKey, failsKey := b.keys()
-	_ = b.rdb.Del(ctx, stateKey, failsKey).Err()
+	if err := b.rdb.Del(ctx, stateKey, failsKey).Err(); err != nil {
+		b.logger.DebugContext(ctx, "redis DEL failed", "state_key", stateKey, "fails_key", failsKey, "err", err)
+	}
 }
 
 func (b *RedisBreaker) OnFailure(ctx context.Context) {
@@ -95,7 +98,9 @@ func (b *RedisBreaker) OnFailure(ctx context.Context) {
 
 	ttl, err := b.rdb.PTTL(ctx, failsKey).Result()
 	if err == nil && ttl < 0 {
-		_ = b.rdb.PExpire(ctx, failsKey, b.opts.FailWindow).Err()
+		if pexpErr := b.rdb.PExpire(ctx, failsKey, b.opts.FailWindow).Err(); pexpErr != nil {
+			b.logger.DebugContext(ctx, "redis PEXPIRE failed", "key", failsKey, "err", pexpErr)
+		}
 	}
 
 	if int(fails) >= b.opts.FailureThreshold {
@@ -106,8 +111,12 @@ func (b *RedisBreaker) OnFailure(ctx context.Context) {
 			stateTTL = b.opts.OpenCoolDown
 		}
 
-		_ = b.rdb.Set(ctx, stateKey, strconv.FormatInt(timeToHalfOpenMs, 10), stateTTL).Err()
+		if setErr := b.rdb.Set(ctx, stateKey, strconv.FormatInt(timeToHalfOpenMs, 10), stateTTL).Err(); setErr != nil {
+			b.logger.DebugContext(ctx, "redis SET failed", "key", stateKey, "err", setErr)
+		}
 
-		_ = b.rdb.Del(ctx, failsKey).Err()
+		if delErr := b.rdb.Del(ctx, failsKey).Err(); delErr != nil {
+			b.logger.DebugContext(ctx, "redis DEL failed", "key", failsKey, "err", delErr)
+		}
 	}
 }

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"database/sql"
 	"log/slog"
 
 	"github.com/cmsgov/emmy-api/api/handlers"
@@ -8,6 +9,7 @@ import (
 	"github.com/cmsgov/emmy-api/pkg/circuitbreaker"
 	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/cmsgov/emmy-api/pkg/education"
+	"github.com/cmsgov/emmy-api/pkg/encryption"
 	"github.com/cmsgov/emmy-api/pkg/reporting"
 	"github.com/cmsgov/emmy-api/pkg/veteran"
 	"github.com/gofiber/fiber/v2"
@@ -33,8 +35,8 @@ func RegisterRoutes(app fiber.Router, params RouterParams) {
 
 	api := app.Group("/api")
 
-	edu := education.New(&params.CFG.NSC, education.Options{
-		Logger: params.Logger,
+	edu := education.New(&cfg.NSC, education.Options{
+		Logger: logger,
 	})
 	veteranService := veteran.New(&params.CFG.VA, veteran.Options{
 		Logger: params.Logger,
@@ -50,7 +52,6 @@ func RegisterRoutes(app fiber.Router, params RouterParams) {
 		)
 	})
 
-	api.Post("/v0/education-enrollments", withCB(handlers.EducationHandler(params.CFG, edu, params.Reporter, params.Logger)))
-
-	api.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(params.CFG, veteranService, params.Reporter, params.Logger)))
+	api.Post("/v0/education-enrollments", withCB(handlers.EducationHandler(cfg, edu, reporter, logger)))
+	api.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(cfg, veteranService, reporter, logger)))
 }

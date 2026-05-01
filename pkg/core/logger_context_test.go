@@ -20,7 +20,7 @@ func TestContextHandler(t *testing.T) {
 		ctx := context.WithValue(context.Background(), RequestContextKey, rid)
 		logger.InfoContext(ctx, "test message")
 
-		var logRecord map[string]interface{}
+		var logRecord map[string]any
 		if err := json.Unmarshal(buf.Bytes(), &logRecord); err != nil {
 			t.Fatalf("failed to unmarshal log record: %v", err)
 		}
@@ -40,7 +40,7 @@ func TestContextHandler(t *testing.T) {
 		loggerWith := logger.With(slog.String("foo", "bar"))
 		loggerWith.InfoContext(ctx, "test message")
 
-		var logRecord map[string]interface{}
+		var logRecord map[string]any
 		if err := json.Unmarshal(buf.Bytes(), &logRecord); err != nil {
 			t.Fatalf("failed to unmarshal log record: %v", err)
 		}
@@ -57,7 +57,7 @@ func TestContextHandler(t *testing.T) {
 		buf.Reset()
 		logger.InfoContext(context.Background(), "test message")
 
-		var logRecord map[string]interface{}
+		var logRecord map[string]any
 		if err := json.Unmarshal(buf.Bytes(), &logRecord); err != nil {
 			t.Fatalf("failed to unmarshal log record: %v", err)
 		}

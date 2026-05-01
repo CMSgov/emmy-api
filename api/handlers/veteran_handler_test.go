@@ -18,12 +18,15 @@ import (
 )
 
 type fakeVeteranService struct {
-	response veteran.Response
-	err      error
-	calls    int
 	lastReq  veteran.Request
+	err      error
+	response veteran.Response
+	calls    int
 }
 
+var errProviderFailed = errors.New("provider failed")
+
+//nolint:gocritic // Interface requires value parameter.
 func (s *fakeVeteranService) LookupDisabilityRating(_ context.Context, req veteran.Request) (veteran.Response, error) {
 	s.calls++
 	s.lastReq = req
@@ -39,7 +42,7 @@ func TestVeteranDisabilityHandler_Success(t *testing.T) {
 		return c.Next()
 	})
 	cfg := &core.Config{Environment: "test", ServiceVersion: "1.3.0"}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	service := &fakeVeteranService{
 		response: veteran.Response{CombinedDisabilityRating: 70},
 	}
@@ -82,7 +85,7 @@ func TestVeteranDisabilityHandler_Success(t *testing.T) {
 func TestVeteranDisabilityHandler_AddressOnlySuccess(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	service := &fakeVeteranService{
 		response: veteran.Response{CombinedDisabilityRating: 70},
 	}
@@ -117,7 +120,7 @@ func TestVeteranDisabilityHandler_AddressOnlySuccess(t *testing.T) {
 func TestVeteranDisabilityHandler_InvalidJSONReturnsBadRequest(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(cfg, &fakeVeteranService{}, &fakeReporter{}, logger))
 
@@ -134,7 +137,7 @@ func TestVeteranDisabilityHandler_InvalidJSONReturnsBadRequest(t *testing.T) {
 func TestVeteranDisabilityHandler_MissingRequiredFieldReturnsBadRequest(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(cfg, &fakeVeteranService{}, &fakeReporter{}, logger))
 
@@ -155,7 +158,7 @@ func TestVeteranDisabilityHandler_MissingRequiredFieldReturnsBadRequest(t *testi
 func TestVeteranDisabilityHandler_MissingSSNAndAddressReturnsBadRequestWithoutCallingProvider(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	service := &fakeVeteranService{}
 
 	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(cfg, service, &fakeReporter{}, logger))
@@ -178,7 +181,7 @@ func TestVeteranDisabilityHandler_MissingSSNAndAddressReturnsBadRequestWithoutCa
 func TestVeteranDisabilityHandler_IncompleteAddressWithoutSSNReturnsBadRequestWithoutCallingProvider(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	service := &fakeVeteranService{}
 
 	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(cfg, service, &fakeReporter{}, logger))
@@ -205,7 +208,7 @@ func TestVeteranDisabilityHandler_IncompleteAddressWithoutSSNReturnsBadRequestWi
 func TestVeteranDisabilityHandler_UpstreamNotFoundReturnsNotFound(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(cfg, &fakeVeteranService{
 		err: veteran.ErrNotFound,
@@ -229,10 +232,10 @@ func TestVeteranDisabilityHandler_UpstreamNotFoundReturnsNotFound(t *testing.T) 
 func TestVeteranDisabilityHandler_UpstreamErrorReturnsBadGateway(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(cfg, &fakeVeteranService{
-		err: errors.New("provider failed"),
+		err: errProviderFailed,
 	}, &fakeReporter{}, logger))
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v0/veteran-disability-ratings", strings.NewReader(`{
@@ -253,7 +256,7 @@ func TestVeteranDisabilityHandler_UpstreamErrorReturnsBadGateway(t *testing.T) {
 func TestVeteranDisabilityHandler_CircuitOpenReturnsServiceUnavailable(t *testing.T) {
 	app := fiber.New()
 	cfg := &core.Config{}
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	app.Post("/api/v0/veteran-disability-ratings", VeteranDisabilityHandler(cfg, &fakeVeteranService{
 		err: resilience.ErrCircuitOpen,

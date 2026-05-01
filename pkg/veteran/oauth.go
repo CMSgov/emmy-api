@@ -8,6 +8,8 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -27,16 +29,27 @@ const (
 	clientAssertionLifetime = 60 * time.Second
 )
 
+var (
+	errVAConfigRequired            = errors.New("va config is required")
+	errVATokenClientRequired       = errors.New("va token client is required")
+	errVATokenRequestFailed        = errors.New("token request failed")
+	errVATokenResponseMissingToken = errors.New("token response missing access_token")
+	errVAPrivateKeyPathRequired    = errors.New("va private key path is required")
+	errVAPrivateKeyInvalidPEM      = errors.New("private key is not valid PEM")
+	errVAPrivateKeyNotRSA          = errors.New("private key is not RSA")
+)
+
 type tokenResponse struct {
-	AccessToken string `json:"access_token"`
-	TokenType   string `json:"token_type"`
-	ExpiresIn   int64  `json:"expires_in"`
+	AccessToken string `json:"access_token"` //nolint:tagliatelle // OAuth response uses snake_case.
+	TokenType   string `json:"token_type"`   //nolint:tagliatelle // OAuth response uses snake_case.
+	ExpiresIn   int64  `json:"expires_in"`   //nolint:tagliatelle // OAuth response uses snake_case.
 }
 
 type vaTokenSource struct {
 	cfg    *core.VAConfig
 	client *http.Client
 	now    func() time.Time
+	logger *slog.Logger
 }
 
 func vaHTTPClient(ctx context.Context, cfg *core.VAConfig) *http.Client {
@@ -81,13 +94,17 @@ func newVABaseHTTPClient() *http.Client {
 
 func (s *vaTokenSource) Token() (*oauth2.Token, error) {
 	if s == nil || s.cfg == nil {
-		return nil, errors.New("va config is required")
+		return nil, errVAConfigRequired
 	}
 	if s.client == nil {
-		return nil, errors.New("va token client is required")
+		return nil, errVATokenClientRequired
 	}
 	if s.now == nil {
 		s.now = time.Now
+	}
+
+	if s.logger == nil {
+		s.logger = slog.Default()
 	}
 
 	assertion, err := signedClientAssertion(s.cfg, s.now())
@@ -112,18 +129,28 @@ func (s *vaTokenSource) Token() (*oauth2.Token, error) {
 	if err != nil {
 		return nil, fmt.Errorf("request token: %w", err)
 	}
-	defer resp.Body.Close()
+
+	respBytes, err := io.ReadAll(resp.Body)
+	if closeErr := resp.Body.Close(); closeErr != nil {
+		return nil, fmt.Errorf("close token response body: %w", closeErr)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("read token response body: %w", err)
+	}
+	s.logger.Error("va oauth token request failed",
+		slog.Any("error", resp.Status),
+	)
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("token request failed: status=%d", resp.StatusCode)
+		return nil, fmt.Errorf("%w: status=%d", errVATokenRequestFailed, resp.StatusCode)
 	}
 
 	var tokenResp tokenResponse
-	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
+	if err := json.Unmarshal(respBytes, &tokenResp); err != nil {
 		return nil, fmt.Errorf("decode token response: %w", err)
 	}
 	if tokenResp.AccessToken == "" {
-		return nil, errors.New("token response missing access_token")
+		return nil, errVATokenResponseMissingToken
 	}
 
 	tokenType := tokenResp.TokenType
@@ -170,9 +197,10 @@ func signedClientAssertion(cfg *core.VAConfig, now time.Time) (string, error) {
 
 func loadRSAPrivateKey(path string) (*rsa.PrivateKey, error) {
 	if strings.TrimSpace(path) == "" {
-		return nil, errors.New("va private key path is required")
+		return nil, errVAPrivateKeyPathRequired
 	}
 
+	//nolint:gosec // Path is sourced from validated runtime configuration.
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("read private key: %w", err)
@@ -180,10 +208,10 @@ func loadRSAPrivateKey(path string) (*rsa.PrivateKey, error) {
 
 	block, _ := pem.Decode(data)
 	if block == nil {
-		return nil, errors.New("private key is not valid PEM")
+		return nil, errVAPrivateKeyInvalidPEM
 	}
 
-	if key, err := x509.ParsePKCS1PrivateKey(block.Bytes); err == nil {
+	if key, parseErr := x509.ParsePKCS1PrivateKey(block.Bytes); parseErr == nil {
 		return key, nil
 	}
 
@@ -194,7 +222,7 @@ func loadRSAPrivateKey(path string) (*rsa.PrivateKey, error) {
 
 	key, ok := pkcs8Key.(*rsa.PrivateKey)
 	if !ok {
-		return nil, errors.New("private key is not RSA")
+		return nil, errVAPrivateKeyNotRSA
 	}
 
 	return key, nil

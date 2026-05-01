@@ -14,6 +14,7 @@ type NSCConfig struct {
 	ClientSecret string
 	ClientID     string
 	AccountID    string
+	SQSQueueURL  string
 }
 
 type VAConfig struct {
@@ -29,13 +30,29 @@ type ReportingConfig struct {
 	SQSQueueURL string
 }
 
+type DatabaseConfig struct {
+	Host     string
+	Port     string
+	Name     string
+	User     string
+	Password string
+	SSLMode  string
+	IAMAuth  bool
+}
+
+type KMSConfig struct {
+	KeyID string
+}
+
 type Config struct {
 	Environment    string
 	Port           int
 	SkipAuth       bool
 	Redis          RedisConfig
+	Database       DatabaseConfig
 	NSC            NSCConfig
 	VA             VAConfig
+	KMS            KMSConfig
 	Reporting      ReportingConfig
 	ServiceVersion string
 }

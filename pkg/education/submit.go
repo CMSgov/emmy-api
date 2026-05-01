@@ -15,6 +15,14 @@ import (
 	"github.com/cmsgov/emmy-api/pkg/core"
 )
 
+var (
+	errNSCSubmitFailed            = errors.New("nsc submit failed")
+	errNSCMissingEnrollmentStatus = errors.New("nsc response missing enrollment status")
+	errReadNSCSubmitResponseBody  = errors.New("read nsc submit response body")
+	errCloseNSCSubmitResponseBody = errors.New("close nsc submit response body")
+)
+
+//nolint:gocritic // Request is treated as an immutable API payload value.
 func (s *service) LookupEnrollmentStatus(ctx context.Context, reqBody Request) (Response, error) {
 	if s.opts.Timeout > 0 {
 		if _, hasDeadline := ctx.Deadline(); !hasDeadline {
@@ -55,8 +63,7 @@ func (s *service) LookupEnrollmentStatus(ctx context.Context, reqBody Request) (
 		slog.Bool("has_ssn", strings.TrimSpace(reqBody.SSN) != ""),
 		slog.Bool("has_date_of_birth", strings.TrimSpace(reqBody.DateOfBirth) != ""),
 		slog.Bool("has_middle_name", strings.TrimSpace(reqBody.MiddleName) != ""),
-		slog.Bool("has_address", reqBody.Address != nil),
-		slog.Bool("has_identity_details", nscReqBody.IdentityDetails != nil),
+		slog.Bool("has_address", nscReqBody.Address1 != ""),
 		slog.Bool("has_context_deadline", hasContextDeadline(ctx)),
 		slog.Int64("deadline_remaining_ms", deadlineRemainingMillis(ctx)),
 	)
@@ -66,7 +73,7 @@ func (s *service) LookupEnrollmentStatus(ctx context.Context, reqBody Request) (
 	latency := time.Since(start)
 
 	if err != nil {
-		if errors.Is(err, context.DeadlineExceeded) || ctx.Err() == context.DeadlineExceeded {
+		if errors.Is(err, context.DeadlineExceeded) || errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			log.ErrorContext(ctx, "nsc submit request timed out",
 				slog.Any("error", err),
 				slog.Duration("latency", latency),
@@ -76,15 +83,22 @@ func (s *service) LookupEnrollmentStatus(ctx context.Context, reqBody Request) (
 			log.ErrorContext(ctx, "nsc submit request failed",
 				slog.Any("error", err),
 				slog.Duration("latency", latency),
-				slog.Bool("context_canceled", ctx.Err() == context.Canceled),
-				slog.Bool("context_deadline_exceeded", ctx.Err() == context.DeadlineExceeded),
+				slog.Bool("context_canceled", errors.Is(ctx.Err(), context.Canceled)),
+				slog.Bool("context_deadline_exceeded", errors.Is(ctx.Err(), context.DeadlineExceeded)),
 			)
 		}
 		return Response{}, fmt.Errorf("submit request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.WarnContext(ctx, errCloseNSCSubmitResponseBody.Error(), slog.Any("error", closeErr))
+		}
+	}()
 
-	respBytes, _ := io.ReadAll(resp.Body)
+	respBytes, readErr := io.ReadAll(resp.Body)
+	if readErr != nil {
+		return Response{}, fmt.Errorf("%w: %w", errReadNSCSubmitResponseBody, readErr)
+	}
 	snippet := bodySnippet(respBytes)
 
 	log.InfoContext(ctx, "nsc submit response received",
@@ -111,7 +125,7 @@ func (s *service) LookupEnrollmentStatus(ctx context.Context, reqBody Request) (
 			slog.String("body_snippet", snippet),
 		)
 
-		return Response{}, fmt.Errorf("nsc submit failed: status=%d", resp.StatusCode)
+		return Response{}, fmt.Errorf("%w: status=%d", errNSCSubmitFailed, resp.StatusCode)
 	}
 
 	var out nscResponse
@@ -144,6 +158,7 @@ func (s *service) LookupEnrollmentStatus(ctx context.Context, reqBody Request) (
 	return translateNSCResponse(out, rawBody)
 }
 
+//nolint:gocritic // Request is treated as an immutable API payload value.
 func toNSCRequest(cfg *core.NSCConfig, reqBody Request) nscRequest {
 	accountID := ""
 	if cfg != nil {
@@ -162,18 +177,17 @@ func toNSCRequest(cfg *core.NSCConfig, reqBody Request) nscRequest {
 	}
 
 	if reqBody.Address != nil {
-		out.IdentityDetails = &nscRequestIdentityDetails{
-			Address1: reqBody.Address.Street1,
-			Address2: firstNonEmpty(reqBody.Address.Street2, reqBody.Address.Street3),
-			City:     reqBody.Address.City,
-			State:    reqBody.Address.State,
-			ZipCode:  reqBody.Address.PostalCode,
-		}
+		out.Address1 = reqBody.Address.Street1
+		out.Address2 = reqBody.Address.Street2
+		out.City = reqBody.Address.City
+		out.State = reqBody.Address.State
+		out.ZipCode = reqBody.Address.PostalCode
 	}
 
 	return out
 }
 
+//nolint:gocritic // Response is treated as an immutable API payload value.
 func translateNSCResponse(resp nscResponse, rawBody any) (Response, error) {
 	if isNSCNoHit(resp) || isNSCNotCurrentlyEnrolled(resp) {
 		return Response{}, ErrNotFound
@@ -181,7 +195,7 @@ func translateNSCResponse(resp nscResponse, rawBody any) (Response, error) {
 
 	status, ok := resolveEnrollmentStatus(resp)
 	if !ok {
-		return Response{}, errors.New("nsc response missing enrollment status")
+		return Response{}, errNSCMissingEnrollmentStatus
 	}
 
 	details := []EnrollmentDetail{}
@@ -208,6 +222,7 @@ func translateNSCResponse(resp nscResponse, rawBody any) (Response, error) {
 	}, nil
 }
 
+//nolint:gocritic // Response is treated as an immutable API payload value.
 func isNSCNoHit(resp nscResponse) bool {
 	switch strings.ToUpper(strings.TrimSpace(resp.TransactionDetails.NSCHit)) {
 	case "N", "NO", "FALSE", "0":
@@ -217,6 +232,7 @@ func isNSCNoHit(resp nscResponse) bool {
 	return false
 }
 
+//nolint:gocritic // Response is treated as an immutable API payload value.
 func isNSCNotCurrentlyEnrolled(resp nscResponse) bool {
 	if len(resp.EnrollmentDetails) == 0 {
 		return false
@@ -231,6 +247,7 @@ func isNSCNotCurrentlyEnrolled(resp nscResponse) bool {
 	return false
 }
 
+//nolint:gocritic // Response is treated as an immutable API payload value.
 func resolveEnrollmentStatus(resp nscResponse) (EnrollmentStatus, bool) {
 	var best EnrollmentStatus
 
@@ -242,7 +259,7 @@ func resolveEnrollmentStatus(resp nscResponse) (EnrollmentStatus, bool) {
 			return 4
 		case EnrollmentStatusHalfTime:
 			return 3
-		case EnrollmentStatusLessThanPartTime:
+		case EnrollmentStatusLessThanHalfTime:
 			return 2
 		case EnrollmentStatusUnknown:
 			return 1
@@ -278,17 +295,14 @@ func resolveEnrollmentStatus(resp nscResponse) (EnrollmentStatus, bool) {
 	return "", false
 }
 
+//nolint:gocritic // Response is treated as an immutable API payload value.
 func isNSCPositiveHit(resp nscResponse) bool {
 	switch strings.ToUpper(strings.TrimSpace(resp.TransactionDetails.NSCHit)) {
 	case "Y", "YES", "TRUE", "1":
 		return true
 	}
 
-	if strings.EqualFold(strings.TrimSpace(resp.Status.Code), "0") {
-		return true
-	}
-
-	return false
+	return strings.EqualFold(strings.TrimSpace(resp.Status.Code), "0")
 }
 
 func normalizeEnrollmentStatus(value string) (EnrollmentStatus, bool) {
@@ -300,22 +314,14 @@ func normalizeEnrollmentStatus(value string) (EnrollmentStatus, bool) {
 	normalized = strings.NewReplacer("-", "_", " ", "_").Replace(normalized)
 
 	switch normalized {
-	case string(EnrollmentStatusFullTime):
+	case string(EnrollmentStatusFullTime), "F":
 		return EnrollmentStatusFullTime, true
-	case "F":
-		return EnrollmentStatusFullTime, true
-	case string(EnrollmentStatusThreeQuartersTime):
+	case string(EnrollmentStatusThreeQuartersTime), "Q", "THREE_QUARTER_TIME":
 		return EnrollmentStatusThreeQuartersTime, true
-	case "Q", "THREE_QUARTER_TIME":
-		return EnrollmentStatusThreeQuartersTime, true
-	case string(EnrollmentStatusHalfTime):
+	case string(EnrollmentStatusHalfTime), "H":
 		return EnrollmentStatusHalfTime, true
-	case "H":
-		return EnrollmentStatusHalfTime, true
-	case string(EnrollmentStatusLessThanPartTime):
-		return EnrollmentStatusLessThanPartTime, true
-	case "LESS_THAN_HALF_TIME", "L":
-		return EnrollmentStatusLessThanPartTime, true
+	case string(EnrollmentStatusLessThanHalfTime), "L":
+		return EnrollmentStatusLessThanHalfTime, true
 	case string(EnrollmentStatusUnknown), "Y":
 		return EnrollmentStatusUnknown, true
 	default:
@@ -369,6 +375,7 @@ func deadlineRemainingMillis(ctx context.Context) int64 {
 	return time.Until(deadline).Milliseconds()
 }
 
+//nolint:gocritic // Response is treated as an immutable API payload value.
 func currentEnrollmentStatus(resp nscResponse) string {
 	if len(resp.EnrollmentDetails) == 0 {
 		return ""
@@ -377,6 +384,7 @@ func currentEnrollmentStatus(resp nscResponse) string {
 	return strings.TrimSpace(resp.EnrollmentDetails[0].CurrentEnrollmentStatus)
 }
 
+//nolint:gocritic // Response is treated as an immutable API payload value.
 func enrollmentRecordCount(resp nscResponse) int {
 	count := 0
 	for _, detail := range resp.EnrollmentDetails {

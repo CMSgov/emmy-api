@@ -1,6 +1,8 @@
 package education
 
 import (
+	"time"
+
 	"github.com/cmsgov/emmy-api/pkg/core"
 )
 
@@ -10,7 +12,7 @@ const (
 	EnrollmentStatusFullTime          EnrollmentStatus = "FULL_TIME"
 	EnrollmentStatusThreeQuartersTime EnrollmentStatus = "THREE_QUARTERS_TIME"
 	EnrollmentStatusHalfTime          EnrollmentStatus = "HALF_TIME"
-	EnrollmentStatusLessThanPartTime  EnrollmentStatus = "LESS_THAN_PART_TIME"
+	EnrollmentStatusLessThanHalfTime  EnrollmentStatus = "LESS_THAN_HALF_TIME"
 	EnrollmentStatusUnknown           EnrollmentStatus = "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"
 )
 
@@ -38,6 +40,18 @@ type Metadata struct {
 	DatasourceDurationMillis int64  `json:"datasourceDurationMillis"`
 }
 
+type BatchJobStatusResponse struct {
+	SubmittedAt             *time.Time `json:"submittedAt"`
+	UpdatedAt               *time.Time `json:"updatedAt"`
+	EstimatedCompletionTime *time.Time `json:"estimatedCompletionTime,omitempty"`
+	BatchJobID              string     `json:"batchJobID"` //nolint:tagliatelle // kebab-case is required for batch-job-id for compatibility
+	Status                  string     `json:"status"`
+	TotalRecords            int        `json:"totalRecords"`
+	ProcessedRecords        int        `json:"processedRecords"`
+	SuccessCount            int        `json:"successCount"`
+	FailureCount            int        `json:"failureCount"`
+}
+
 type nscResponse struct {
 	ClientData          nscClientData          `json:"clientData"`
 	IdentityDetails     []nscMatchDetail       `json:"identityDetails"`
@@ -48,7 +62,7 @@ type nscResponse struct {
 }
 
 type nscClientData struct {
-	AccountID        string `json:"zaccountID"`
+	AccountID        string `json:"zaccountID"` //nolint:tagliatelle // NSC payload uses this exact casing.
 	CaseReferenceID  string `json:"caseReferenceId"`
 	ContactEmail     string `json:"contactEmail"`
 	OrganizationName string `json:"organizationName"`
@@ -88,11 +102,11 @@ type nscTransactionDetails struct {
 }
 
 type nscEnrollmentDetails struct {
+	StudentAddress          *nscStudentAddress  `json:"studentAddress"`
 	OfficialSchoolName      string              `json:"officialSchoolName"`
 	EnrollmentSinceDate     string              `json:"enrollmentSinceDate"`
 	CurrentEnrollmentStatus string              `json:"currentEnrollmentStatus"`
 	EnrollmentData          []nscEnrollmentData `json:"enrollmentData"`
-	StudentAddress          *nscStudentAddress  `json:"studentAddress"`
 }
 
 type nscEnrollmentData struct {

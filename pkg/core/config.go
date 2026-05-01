@@ -16,19 +16,28 @@ const (
 	defaultRedisUseTLS       bool   = true
 	defaultRedisInsecureSkip bool   = false
 
-	keyNSCSubmitURL   string = "NSC_SUBMIT_URL"
-	keyTokenURL       string = "NSC_TOKEN_URL"      // #nosec G101 -- env var key name, not a credential
-	keyClientSecret   string = "NSC_CLIENT_SECRET"  // #nosec G101 -- env var key name, not a credential
-	keyClientID       string = "NSC_CLIENT_ID"
-	keyAccountID      string = "NSC_ACCOUNT_ID"
-	keyVABaseURL      string = "VA_BASE_URL"
-	keyVATokenURL     string = "VA_TOKEN_URL"       // #nosec G101 -- env var key name, not a credential
-	keyVAClientID     string = "VA_CLIENT_ID"
-	keyVAAudience     string = "VA_AUD"
-	keyVAKeyPath      string = "VA_PRIVATE_KEY_PATH"
-	keyVATimeout      string = "VA_TIMEOUT_SECONDS"
-	keySQSQueueURL    string = "SQS_QUEUE_URL"
-	keyServiceVersion string = "SERVICE_VERSION"
+	keyNSCSubmitURL     string = "NSC_SUBMIT_URL"
+	keyTokenURL         string = "NSC_TOKEN_URL"     //nolint:gosec // Environment variable key name, not a credential.
+	keyClientSecret     string = "NSC_CLIENT_SECRET" //nolint:gosec // Environment variable key name, not a credential.
+	keyClientID         string = "NSC_CLIENT_ID"
+	keyAccountID        string = "NSC_ACCOUNT_ID"
+	keyVABaseURL        string = "VA_BASE_URL"
+	keyVATokenURL       string = "VA_TOKEN_URL" //nolint:gosec // Environment variable key name, not a credential.
+	keyVAClientID       string = "VA_CLIENT_ID"
+	keyVAAudience       string = "VA_AUD"
+	keyVAKeyPath        string = "VA_PRIVATE_KEY_PATH"
+	keyVATimeout        string = "VA_TIMEOUT_SECONDS"
+	keySQSQueueURL      string = "SQS_QUEUE_URL"
+	keySQSBatchQueueURL string = "BATCH_SQS_QUEUE_URL"
+	keyDBHost           string = "DB_HOST"
+	keyDBPort           string = "DB_PORT"
+	keyDBName           string = "DB_NAME"
+	keyDBUser           string = "DB_USER"
+	keyDBPassword       string = ""
+	keyDBSSLMode        string = "DB_SSLMODE"
+	keyDBIAMAuth        string = "DB_IAM_AUTH"
+	keyKMSKeyID         string = "KMS_KEY_ID"
+	keyServiceVersion   string = "SERVICE_VERSION"
 )
 
 func DefaultConfig() Config {
@@ -51,6 +60,7 @@ func DefaultConfig() Config {
 			ClientSecret: getEnv(keyClientSecret, ""),
 			ClientID:     getEnv(keyClientID, ""),
 			AccountID:    getEnv(keyAccountID, ""),
+			SQSQueueURL:  getEnv(keySQSBatchQueueURL, ""),
 		},
 
 		VA: VAConfig{
@@ -60,6 +70,18 @@ func DefaultConfig() Config {
 			TokenAudience:  getEnv(keyVAAudience, ""),
 			PrivateKeyPath: getEnv(keyVAKeyPath, ""),
 			TimeoutSeconds: defaultVATimeoutSeconds,
+		},
+		Database: DatabaseConfig{
+			Host:     getEnv(keyDBHost, "localhost"),
+			Port:     getEnv(keyDBPort, "5432"),
+			Name:     getEnv(keyDBName, "emmy"),
+			User:     getEnv(keyDBUser, "postgres"),
+			Password: getEnv(keyDBPassword, ""),
+			SSLMode:  getEnv(keyDBSSLMode, "allow"),
+			IAMAuth:  getEnv(keyDBIAMAuth, "false") == "true",
+		},
+		KMS: KMSConfig{
+			KeyID: getEnv(keyKMSKeyID, ""),
 		},
 		Reporting: ReportingConfig{
 			SQSQueueURL: getEnv(keySQSQueueURL, ""),
@@ -116,6 +138,16 @@ func NewConfigFromEnv(options ...func(*Config)) (Config, error) {
 		setFromEnv(&cfg.VA.TokenAudience, "VA_AUD"),
 		setFromEnv(&cfg.VA.PrivateKeyPath, "VA_PRIVATE_KEY_PATH"),
 		setFromEnv(&cfg.VA.TimeoutSeconds, "VA_TIMEOUT_SECONDS"),
+
+		setFromEnv(&cfg.Database.Host, "DB_HOST"),
+		setFromEnv(&cfg.Database.Port, "DB_PORT"),
+		setFromEnv(&cfg.Database.Name, "DB_NAME"),
+		setFromEnv(&cfg.Database.User, "DB_USER"),
+		setFromEnv(&cfg.Database.Password, "DB_PASSWORD"),
+		setFromEnv(&cfg.Database.SSLMode, "DB_SSLMODE"),
+		setFromEnv(&cfg.Database.IAMAuth, "DB_IAM_AUTH"),
+
+		setFromEnv(&cfg.KMS.KeyID, "KMS_KEY_ID"),
 
 		setFromEnv(&cfg.Reporting.SQSQueueURL, "SQS_QUEUE_URL"),
 		setFromEnv(&cfg.ServiceVersion, "SERVICE_VERSION"),
