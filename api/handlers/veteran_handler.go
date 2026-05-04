@@ -75,7 +75,9 @@ func VeteranDisabilityHandler(cfg *core.Config, service veteran.Service, reporte
 			})
 
 			if statusCode == fiber.StatusNotFound {
-				return c.SendStatus(fiber.StatusNotFound)
+				return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+					"error": "Not Found",
+				})
 			}
 			return fiber.NewError(statusCode, http.StatusText(statusCode))
 		}

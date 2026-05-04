@@ -130,6 +130,10 @@ func TestEducationHandler_InvalidJSONReturnsBadRequest(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.Equal(t, "invalid request body", string(body))
 }
 
 func TestEducationHandler_MissingRequiredFieldReturnsBadRequest(t *testing.T) {
@@ -152,6 +156,10 @@ func TestEducationHandler_MissingRequiredFieldReturnsBadRequest(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.Equal(t, "missing required field: firstName", string(body))
 }
 
 func TestEducationHandler_NotFoundReturnsNotFound(t *testing.T) {
@@ -177,6 +185,10 @@ func TestEducationHandler_NotFoundReturnsNotFound(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusNotFound, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.JSONEq(t, `{"error": "Not Found"}`, string(body))
 
 	require.Len(t, reporter.calls, 1)
 	require.False(t, reporter.calls[0].Success)
@@ -287,6 +299,10 @@ func TestBatchEducationHandler_MissingBatchIDReturnsBadRequest(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.Equal(t, "missing required field batchId", string(body))
 }
 
 func TestGetBatchStatusHandler_Success(t *testing.T) {
@@ -339,6 +355,10 @@ func TestGetBatchStatusHandler_NotFound(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusNotFound, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.JSONEq(t, `{"error": "Not Found"}`, string(body))
 }
 
 func TestGetBatchDetailsHandler_Success(t *testing.T) {
@@ -405,4 +425,8 @@ func TestGetBatchDetailsHandler_NotFound(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusNotFound, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.JSONEq(t, `{"error": "Not Found"}`, string(body))
 }
