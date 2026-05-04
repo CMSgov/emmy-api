@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"context"
 	"io"
 	"log/slog"
 	"net/http"
@@ -10,12 +11,37 @@ import (
 	"testing"
 
 	"github.com/cmsgov/emmy-api/pkg/core"
-	"github.com/cmsgov/emmy-api/pkg/encryption"
+	"github.com/cmsgov/emmy-api/pkg/education"
 	"github.com/cmsgov/emmy-api/pkg/reporting"
+	"github.com/cmsgov/emmy-api/pkg/veteran"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
 )
+
+type stubEducationService struct{}
+
+func (s *stubEducationService) LookupEnrollmentStatus(_ context.Context, _ education.Request) (education.Response, error) {
+	return education.Response{}, nil
+}
+
+func (s *stubEducationService) RegisterBatch(_ context.Context, _ education.BatchRequest) error {
+	return nil
+}
+
+func (s *stubEducationService) GetBatchStatus(_ context.Context, _ string) (education.BatchJobStatusResponse, error) {
+	return education.BatchJobStatusResponse{}, nil
+}
+
+func (s *stubEducationService) GetBatchDetails(_ context.Context, _ string) (education.BatchJobDetailsResponse, error) {
+	return education.BatchJobDetailsResponse{}, nil
+}
+
+type stubVeteranService struct{}
+
+func (s *stubVeteranService) LookupDisabilityRating(_ context.Context, _ veteran.Request) (veteran.Response, error) {
+	return veteran.Response{}, nil
+}
 
 func getRedisAddr() string {
 	addr := os.Getenv("REDIS_ADDR")
@@ -32,14 +58,17 @@ func TestRegisterRoutes_RegistersOpenAPISpecEndpoint(t *testing.T) {
 		Addr: getRedisAddr(),
 	})
 	reporter := reporting.NewMockReporter()
-	encrypt := encryption.NewMockEncryptionService()
 
 	RegisterRoutes(app, RouterParams{
-		CFG:        &core.Config{},
-		RDB:        rdb,
-		Reporter:   reporter,
-		Logger:     logger,
-		Encryption: encrypt,
+		CFG:      &core.Config{},
+		RDB:      rdb,
+		Reporter: reporter,
+		Logger:   logger,
+		EDU:      &stubEducationService{},
+		VA:       &stubVeteranService{},
+		WithCB: func(next fiber.Handler) fiber.Handler {
+			return next
+		},
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/api-spec/v1/verify", http.NoBody)
@@ -65,14 +94,17 @@ func TestRegisterRoutes_RegistersVeteranDisabilityEndpoint(t *testing.T) {
 		Addr: getRedisAddr(),
 	})
 	reporter := reporting.NewMockReporter()
-	encrypt := encryption.NewMockEncryptionService()
 
 	RegisterRoutes(app, RouterParams{
-		CFG:        &core.Config{},
-		RDB:        rdb,
-		Reporter:   reporter,
-		Logger:     logger,
-		Encryption: encrypt,
+		CFG:      &core.Config{},
+		RDB:      rdb,
+		Reporter: reporter,
+		Logger:   logger,
+		EDU:      &stubEducationService{},
+		VA:       &stubVeteranService{},
+		WithCB: func(next fiber.Handler) fiber.Handler {
+			return next
+		},
 	})
 
 	routes := app.GetRoutes(true)
@@ -92,14 +124,17 @@ func TestRegisterRoutes_RegistersEducationEnrollmentsEndpoint(t *testing.T) {
 		Addr: getRedisAddr(),
 	})
 	reporter := reporting.NewMockReporter()
-	encrypt := encryption.NewMockEncryptionService()
 
 	RegisterRoutes(app, RouterParams{
-		CFG:        &core.Config{},
-		RDB:        rdb,
-		Reporter:   reporter,
-		Logger:     logger,
-		Encryption: encrypt,
+		CFG:      &core.Config{},
+		RDB:      rdb,
+		Reporter: reporter,
+		Logger:   logger,
+		EDU:      &stubEducationService{},
+		VA:       &stubVeteranService{},
+		WithCB: func(next fiber.Handler) fiber.Handler {
+			return next
+		},
 	})
 
 	routes := app.GetRoutes(true)
