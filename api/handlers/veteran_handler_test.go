@@ -132,6 +132,10 @@ func TestVeteranDisabilityHandler_InvalidJSONReturnsBadRequest(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.Equal(t, "invalid request body", string(body))
 }
 
 func TestVeteranDisabilityHandler_MissingRequiredFieldReturnsBadRequest(t *testing.T) {
@@ -153,6 +157,10 @@ func TestVeteranDisabilityHandler_MissingRequiredFieldReturnsBadRequest(t *testi
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.Equal(t, "request must include first name, last name, date of birth, and either SSN or a complete address", string(body))
 }
 
 func TestVeteranDisabilityHandler_MissingSSNAndAddressReturnsBadRequestWithoutCallingProvider(t *testing.T) {
@@ -227,6 +235,10 @@ func TestVeteranDisabilityHandler_UpstreamNotFoundReturnsNotFound(t *testing.T) 
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusNotFound, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.JSONEq(t, `{"error": "Not Found"}`, string(body))
 }
 
 func TestVeteranDisabilityHandler_UpstreamErrorReturnsBadGateway(t *testing.T) {

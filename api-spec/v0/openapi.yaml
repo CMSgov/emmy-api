@@ -194,6 +194,62 @@ paths:
                 notFound:
                   value:
                     error: "Not Found"
+  /api/v0/batch-education-enrollments/{batchJobId}/details:
+    get:
+      tags:
+        - Education Verification
+      summary: Get batch job details
+      description: >
+        Returns the detailed results for each student in a previously submitted batch education enrollment job.
+      operationId: getBatchJobDetails
+      parameters:
+        - name: batchJobId
+          in: path
+          required: true
+          description: The unique identifier for the batch job.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Batch job details retrieved successfully.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchJobDetailsResponse"
+              examples:
+                standard:
+                  value:
+                    batchJobId: "job-8f3a2c1d-4e5b-4f6a-9c7d-0e1f2a3b4c5d"
+                    results:
+                      - recordId: "rec-001"
+                        status: "SUCCESS"
+                        foundEnrollment: true
+                        results:
+                          enrollmentStatus: "THREE_QUARTERS_TIME"
+                          enrollmentDetails:
+                            - schoolName: "Trident University International"
+                              termBeginDate: "2024-05-31"
+                              termEndDate: "2024-11-19"
+                              enrollmentStatus: "THREE_QUARTERS_TIME"
+                      - recordId: "rec-002"
+                        status: "NO_HIT"
+                        foundEnrollment: false
+        "404":
+          description: Batch job not found.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                notFound:
+                  value:
+                    error: "Not Found"
   /api/v0/veteran-disability-ratings:
     post:
       tags:
@@ -388,6 +444,54 @@ components:
           format: date-time
           description: The estimated time when the batch job will be completed.
           example: "2026-04-24T10:35:00Z"
+    BatchJobDetailsResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - batchJobId
+        - results
+      properties:
+        batchJobId:
+          type: string
+          description: Unique identifier for the batch job.
+          example: "job-8f3a2c1d-4e5b-4f6a-9c7d-0e1f2a3b4c5d"
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/BatchStudentResult"
+    BatchStudentResult:
+      type: object
+      additionalProperties: false
+      required:
+        - recordId
+        - status
+        - foundEnrollment
+      properties:
+        recordId:
+          type: string
+          description: Unique identifier for the student record within the batch.
+        status:
+          type: string
+          description: The current processing status of the student record.
+          example: "SUCCESS"
+        foundEnrollment:
+          type: boolean
+          description: Whether enrollment data was found for this student.
+        results:
+          $ref: "#/components/schemas/StudentResults"
+    StudentResults:
+      type: object
+      additionalProperties: false
+      required:
+        - enrollmentStatus
+        - enrollmentDetails
+      properties:
+        enrollmentStatus:
+          $ref: ../../schema/v0/school_enrollment_status.schema.json
+        enrollmentDetails:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnrollmentDetail"
     EducationEnrollmentResponse:
       type: object
       additionalProperties: false

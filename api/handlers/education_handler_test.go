@@ -33,6 +33,7 @@ type fakeEducationService struct {
 	lastReq      education.Request
 	lastBatchReq education.BatchRequest
 	batchStatus  education.BatchJobStatusResponse
+	batchDetails education.BatchJobDetailsResponse
 	calls        int
 }
 
@@ -54,6 +55,11 @@ func (s *fakeEducationService) RegisterBatch(_ context.Context, req education.Ba
 func (s *fakeEducationService) GetBatchStatus(_ context.Context, _ string) (education.BatchJobStatusResponse, error) {
 	s.calls++
 	return s.batchStatus, s.err
+}
+
+func (s *fakeEducationService) GetBatchDetails(_ context.Context, _ string) (education.BatchJobDetailsResponse, error) {
+	s.calls++
+	return s.batchDetails, s.err
 }
 
 func TestEducationHandler_Success(t *testing.T) {
@@ -124,6 +130,10 @@ func TestEducationHandler_InvalidJSONReturnsBadRequest(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.Equal(t, "invalid request body", string(body))
 }
 
 func TestEducationHandler_MissingRequiredFieldReturnsBadRequest(t *testing.T) {
@@ -146,6 +156,10 @@ func TestEducationHandler_MissingRequiredFieldReturnsBadRequest(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.Equal(t, "missing required field: firstName", string(body))
 }
 
 func TestEducationHandler_NotFoundReturnsNotFound(t *testing.T) {
@@ -171,6 +185,10 @@ func TestEducationHandler_NotFoundReturnsNotFound(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusNotFound, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.JSONEq(t, `{"error": "Not Found"}`, string(body))
 
 	require.Len(t, reporter.calls, 1)
 	require.False(t, reporter.calls[0].Success)
@@ -281,6 +299,10 @@ func TestBatchEducationHandler_MissingBatchIDReturnsBadRequest(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.Equal(t, "missing required field batchId", string(body))
 }
 
 func TestGetBatchStatusHandler_Success(t *testing.T) {
@@ -333,4 +355,78 @@ func TestGetBatchStatusHandler_NotFound(t *testing.T) {
 	defer resp.Body.Close()
 
 	require.Equal(t, fiber.StatusNotFound, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.JSONEq(t, `{"error": "Not Found"}`, string(body))
+}
+
+func TestGetBatchDetailsHandler_Success(t *testing.T) {
+	app := fiber.New()
+	logger := slog.New(slog.DiscardHandler)
+	batchJobID := "job-123"
+	expectedDetails := education.BatchJobDetailsResponse{
+		BatchJobID: batchJobID,
+		Results: []education.BatchStudentResult{
+			{
+				RecordID:        "rec-1",
+				Status:          "SUCCESS",
+				FoundEnrollment: true,
+				Results: &education.StudentResults{
+					EnrollmentStatus: education.EnrollmentStatusFullTime,
+					EnrollmentDetails: []education.EnrollmentDetail{
+						{
+							SchoolName: "Test School",
+						},
+					},
+				},
+			},
+			{
+				RecordID:        "rec-2",
+				Status:          "NO_HIT",
+				FoundEnrollment: false,
+			},
+		},
+	}
+	service := &fakeEducationService{
+		batchDetails: expectedDetails,
+	}
+	reporter := &fakeReporter{}
+
+	app.Get("/api/v0/batch-education-enrollments/:batchJobId/details", GetBatchDetailsHandler(service, reporter, logger))
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v0/batch-education-enrollments/"+batchJobID+"/details", http.NoBody)
+
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, fiber.StatusOK, resp.StatusCode)
+	require.Equal(t, 1, service.calls)
+
+	require.Len(t, reporter.calls, 1)
+	require.True(t, reporter.calls[0].Success)
+}
+
+func TestGetBatchDetailsHandler_NotFound(t *testing.T) {
+	app := fiber.New()
+	logger := slog.New(slog.DiscardHandler)
+	service := &fakeEducationService{
+		err: education.ErrNotFound,
+	}
+	reporter := &fakeReporter{}
+
+	app.Get("/api/v0/batch-education-enrollments/:batchJobId/details", GetBatchDetailsHandler(service, reporter, logger))
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v0/batch-education-enrollments/missing/details", http.NoBody)
+
+	resp, err := app.Test(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, fiber.StatusNotFound, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.JSONEq(t, `{"error": "Not Found"}`, string(body))
 }
