@@ -20,25 +20,25 @@ import (
 
 type stubEducationService struct{}
 
-func (s *stubEducationService) LookupEnrollmentStatus(_ context.Context, _ education.Request) (education.Response, error) {
+func (_ *stubEducationService) LookupEnrollmentStatus(_ context.Context, _ education.Request) (education.Response, error) {
 	return education.Response{}, nil
 }
 
-func (s *stubEducationService) RegisterBatch(_ context.Context, _ education.BatchRequest) error {
+func (_ *stubEducationService) RegisterBatch(_ context.Context, _ education.BatchRequest) error {
 	return nil
 }
 
-func (s *stubEducationService) GetBatchStatus(_ context.Context, _ string) (education.BatchJobStatusResponse, error) {
+func (_ *stubEducationService) GetBatchStatus(_ context.Context, _ string) (education.BatchJobStatusResponse, error) {
 	return education.BatchJobStatusResponse{}, nil
 }
 
-func (s *stubEducationService) GetBatchDetails(_ context.Context, _ string) (education.BatchJobDetailsResponse, error) {
+func (_ *stubEducationService) GetBatchDetails(_ context.Context, _ string) (education.BatchJobDetailsResponse, error) {
 	return education.BatchJobDetailsResponse{}, nil
 }
 
 type stubVeteranService struct{}
 
-func (s *stubVeteranService) LookupDisabilityRating(_ context.Context, _ veteran.Request) (veteran.Response, error) {
+func (_ *stubVeteranService) LookupDisabilityRating(_ context.Context, _ veteran.Request) (veteran.Response, error) {
 	return veteran.Response{}, nil
 }
 
