@@ -1,6 +1,8 @@
 package education
 
 import (
+	"time"
+
 	"github.com/cmsgov/emmy-api/pkg/core"
 )
 
@@ -36,6 +38,18 @@ type Metadata struct {
 	ResponseTimestamp        string `json:"responseTimestamp"`
 	TransactionID            string `json:"transaction-id"` //nolint:tagliatelle // kebab-case is required for transaction-id for compatibility
 	DatasourceDurationMillis int64  `json:"datasourceDurationMillis"`
+}
+
+type BatchJobStatusResponse struct {
+	SubmittedAt             *time.Time `json:"submittedAt"`
+	UpdatedAt               *time.Time `json:"updatedAt"`
+	EstimatedCompletionTime *time.Time `json:"estimatedCompletionTime,omitempty"`
+	BatchJobID              string     `json:"batchJobID"` //nolint:tagliatelle // kebab-case is required for batch-job-id for compatibility
+	Status                  string     `json:"status"`
+	TotalRecords            int        `json:"totalRecords"`
+	ProcessedRecords        int        `json:"processedRecords"`
+	SuccessCount            int        `json:"successCount"`
+	FailureCount            int        `json:"failureCount"`
 }
 
 type nscResponse struct {

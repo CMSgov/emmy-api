@@ -9,16 +9,21 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/cmsgov/emmy-api/pkg/batching"
 	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/cmsgov/emmy-api/pkg/encryption"
 )
 
-var ErrNotFound = errors.New("education enrollment not found")
-var ErrDatabaseConnectionNotAvailable = errors.New("database connection not available")
+var (
+	ErrNotFound                       = errors.New("education enrollment not found")
+	ErrDatabaseConnectionNotAvailable = errors.New("database connection not available")
+	ErrBatchNotAvailable              = errors.New("sqs batching is missing")
+)
 
 type Service interface {
 	LookupEnrollmentStatus(ctx context.Context, req Request) (Response, error)
 	RegisterBatch(ctx context.Context, req BatchRequest) error
+	GetBatchStatus(ctx context.Context, batchJobID string) (BatchJobStatusResponse, error)
 }
 
 type HTTPTransport interface {
@@ -39,12 +44,13 @@ type Options struct {
 }
 
 type service struct {
-	cfg        *core.NSCConfig
-	client     HTTPTransport
-	logger     *slog.Logger
-	db         *sql.DB
-	encryption encryption.Service
-	opts       Options
+	cfg         *core.NSCConfig
+	client      HTTPTransport
+	logger      *slog.Logger
+	db          *sql.DB
+	encryption  encryption.Service
+	opts        Options
+	batchQueuer batching.BatchQueuer
 }
 
 func New(cfg *core.NSCConfig, opts Options) Service {
@@ -64,13 +70,18 @@ func New(cfg *core.NSCConfig, opts Options) Service {
 		client = nscHTTPClient(context.Background(), cfg, logger)
 	}
 
+	ctx := context.Background()
+
+	batchQueuer := batching.NewBatchQueuer(ctx, cfg, logger)
+
 	return &service{
-		cfg:        cfg,
-		client:     client,
-		logger:     logger,
-		db:         opts.DB,
-		encryption: opts.Encryption,
-		opts:       opts,
+		cfg:         cfg,
+		client:      client,
+		logger:      logger,
+		db:          opts.DB,
+		encryption:  opts.Encryption,
+		opts:        opts,
+		batchQueuer: batchQueuer,
 	}
 }
 
@@ -129,5 +140,65 @@ func (s *service) RegisterBatch(ctx context.Context, req BatchRequest) error {
 			req.BatchID, batchDBID, err)
 	}
 
+	data := &batching.BatchData{
+		BatchID:   req.BatchID,
+		Timestamp: time.Now().UTC(),
+	}
+
+	if s.batchQueuer == nil {
+		return fmt.Errorf("RegisterBatch: s.batchQueuer is nil: %w", ErrBatchNotAvailable)
+	}
+	s.batchQueuer.Batch(ctx, data)
+
 	return nil
+}
+
+func (s *service) GetBatchStatus(ctx context.Context, batchJobID string) (BatchJobStatusResponse, error) {
+	if s.db == nil {
+		return BatchJobStatusResponse{}, fmt.Errorf("GetBatchStatus: s.db is nil: %w", ErrDatabaseConnectionNotAvailable)
+	}
+
+	query := `
+		SELECT
+			b.batch_id,
+			b.status,
+			b.created_at,
+			COUNT(s.id) as total_records,
+			COUNT(CASE WHEN s.status IN ('SUCCESS', 'FAILED', 'NO_HIT') THEN 1 END) as processed_records,
+			COUNT(CASE WHEN s.status = 'SUCCESS' THEN 1 END) as success_count,
+			COUNT(CASE WHEN s.status = 'FAILED' THEN 1 END) as failure_count
+		FROM enrollment_batches b
+		LEFT JOIN batch_students s ON b.id = s.batch_db_id
+		WHERE b.batch_id = $1
+		GROUP BY b.id, b.batch_id, b.status, b.created_at
+	`
+
+	var (
+		res         BatchJobStatusResponse
+		submittedAt time.Time
+	)
+
+	err := s.db.QueryRowContext(ctx, query, batchJobID).Scan(
+		&res.BatchJobID,
+		&res.Status,
+		&submittedAt,
+		&res.TotalRecords,
+		&res.ProcessedRecords,
+		&res.SuccessCount,
+		&res.FailureCount,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return BatchJobStatusResponse{}, fmt.Errorf("GetBatchStatus: batch not found: %s: %w", batchJobID, ErrNotFound)
+		}
+		return BatchJobStatusResponse{}, fmt.Errorf("GetBatchStatus: query failed: %w", err)
+	}
+
+	res.SubmittedAt = &submittedAt
+	// For now, we don't have an updatedAt or estimatedCompletionTime in the schema,
+	// but we can set UpdatedAt to now or similar if we want to follow the requirement's example.
+	now := time.Now()
+	res.UpdatedAt = &now
+
+	return res, nil
 }
