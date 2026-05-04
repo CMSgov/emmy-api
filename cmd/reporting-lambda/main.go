@@ -61,10 +61,6 @@ func main() {
 					logger.Error("failed to close database", "error", err)
 				}
 				db = nil
-			} else {
-				if err := db.Close(); err != nil {
-					logger.Error("failed to close db", "error", err)
-				}
 			}
 		}
 	}
