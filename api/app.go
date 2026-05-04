@@ -137,15 +137,12 @@ func New(cfg *Config) (*fiber.App, error) {
 	routes.StatusRouter(app, cfg.Redis, logger)
 
 	params := routes.RouterParams{
-		CFG:        &cfg.Core,
-		RDB:        cfg.Redis,
-		DB:         cfg.DB,
-		Encryption: cfg.Encryption,
-		Reporter:   cfg.Reporter,
-		Logger:     logger,
-		EDU:        eduService,
-		VA:         veteranService,
-		WithCB:     withCB,
+		CFG:      &cfg.Core,
+		Reporter: cfg.Reporter,
+		Logger:   logger,
+		EDU:      eduService,
+		VA:       veteranService,
+		WithCB:   withCB,
 	}
 
 	routes.RegisterRoutes(app, params)

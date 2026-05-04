@@ -1,29 +1,23 @@
 package routes
 
 import (
-	"database/sql"
 	"log/slog"
 
 	"github.com/cmsgov/emmy-api/api/handlers"
 	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/cmsgov/emmy-api/pkg/education"
-	"github.com/cmsgov/emmy-api/pkg/encryption"
 	"github.com/cmsgov/emmy-api/pkg/reporting"
 	"github.com/cmsgov/emmy-api/pkg/veteran"
 	"github.com/gofiber/fiber/v2"
-	"github.com/redis/go-redis/v9"
 )
 
 type RouterParams struct {
-	CFG        *core.Config
-	RDB        *redis.Client
-	Reporter   reporting.Reporter
-	Logger     *slog.Logger
-	Encryption encryption.Service
-	DB         *sql.DB
-	EDU        education.Service
-	VA         veteran.Service
-	WithCB     func(fiber.Handler) fiber.Handler
+	CFG      *core.Config
+	Reporter reporting.Reporter
+	Logger   *slog.Logger
+	EDU      education.Service
+	VA       veteran.Service
+	WithCB   func(fiber.Handler) fiber.Handler
 }
 
 func RegisterRoutes(app fiber.Router, params RouterParams) {
