@@ -5,8 +5,6 @@ import (
 	"log/slog"
 
 	"github.com/cmsgov/emmy-api/api/handlers"
-	"github.com/cmsgov/emmy-api/api/middleware"
-	"github.com/cmsgov/emmy-api/pkg/circuitbreaker"
 	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/cmsgov/emmy-api/pkg/education"
 	"github.com/cmsgov/emmy-api/pkg/encryption"
@@ -23,6 +21,9 @@ type RouterParams struct {
 	Logger     *slog.Logger
 	Encryption encryption.Service
 	DB         *sql.DB
+	EDU        education.Service
+	VA         veteran.Service
+	WithCB     func(fiber.Handler) fiber.Handler
 }
 
 func RegisterRoutes(app fiber.Router, params RouterParams) {
@@ -37,27 +38,13 @@ func RegisterRoutes(app fiber.Router, params RouterParams) {
 
 	api := app.Group("/api")
 
-	edu := education.New(&params.CFG.NSC, education.Options{
-		Logger:     params.Logger,
-		DB:         params.DB,
-		Encryption: params.Encryption,
-	})
-	veteranService := veteran.New(&params.CFG.VA, veteran.Options{
-		Logger: params.Logger,
-	})
+	api.Post("/v0/education-enrollments", params.WithCB(handlers.EducationHandler(params.CFG, params.EDU, params.Reporter, params.Logger)))
 
-	// One breaker per endpoint
-	withCB := middleware.WithCircuitBreaker(func(name string) circuitbreaker.Breaker {
-		return circuitbreaker.NewRedisBreaker(
-			params.RDB,
-			name,
-			circuitbreaker.DefaultOptions(),
-			params.Logger,
-		)
-	})
-	api.Post("/v0/education-enrollments", withCB(handlers.EducationHandler(params.CFG, edu, params.Reporter, params.Logger)))
-	api.Post("/v0/batch-education-enrollments", withCB(handlers.BatchEducationHandler(params.CFG, edu, params.Reporter, params.Logger)))
-	api.Get("/v0/batch-education-enrollments/:batchJobId", handlers.GetBatchStatusHandler(edu, params.Reporter, params.Logger))
-	api.Get("/v0/batch-education-enrollments/:batchJobId/details", handlers.GetBatchDetailsHandler(edu, params.Reporter, params.Logger))
-	api.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(params.CFG, veteranService, params.Reporter, params.Logger)))
+	api.Post("/v0/batch-education-enrollments", params.WithCB(handlers.BatchEducationHandler(params.CFG, params.EDU, params.Reporter, params.Logger)))
+
+	api.Get("/v0/batch-education-enrollments/:batchJobId", handlers.GetBatchStatusHandler(params.EDU, params.Reporter, params.Logger))
+
+	api.Get("/v0/batch-education-enrollments/:batchJobId/details", handlers.GetBatchDetailsHandler(params.EDU, params.Reporter, params.Logger))
+
+	api.Post("/v0/veteran-disability-ratings", params.WithCB(handlers.VeteranDisabilityHandler(params.CFG, params.VA, params.Reporter, params.Logger)))
 }

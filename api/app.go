@@ -9,9 +9,12 @@ import (
 
 	"github.com/cmsgov/emmy-api/api/middleware"
 	"github.com/cmsgov/emmy-api/api/routes"
+	"github.com/cmsgov/emmy-api/pkg/circuitbreaker"
 	"github.com/cmsgov/emmy-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/education"
 	"github.com/cmsgov/emmy-api/pkg/encryption"
 	"github.com/cmsgov/emmy-api/pkg/reporting"
+	"github.com/cmsgov/emmy-api/pkg/veteran"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -117,6 +120,20 @@ func New(cfg *Config) (*fiber.App, error) {
 
 	app.Use(middleware.SubjectMiddleware(cfg.Logger))
 
+	eduService := education.New(&cfg.Core.NSC, education.Options{
+		Logger:     logger,
+		DB:         cfg.DB,
+		Encryption: cfg.Encryption,
+	})
+
+	veteranService := veteran.New(&cfg.Core.VA, veteran.Options{
+		Logger: logger,
+	})
+
+	withCB := middleware.WithCircuitBreaker(func(name string) circuitbreaker.Breaker {
+		return circuitbreaker.NewRedisBreaker(cfg.Redis, name, circuitbreaker.DefaultOptions(), logger)
+	})
+
 	routes.StatusRouter(app, cfg.Redis, logger)
 
 	params := routes.RouterParams{
@@ -126,6 +143,9 @@ func New(cfg *Config) (*fiber.App, error) {
 		Encryption: cfg.Encryption,
 		Reporter:   cfg.Reporter,
 		Logger:     logger,
+		EDU:        eduService,
+		VA:         veteranService,
+		WithCB:     withCB,
 	}
 
 	routes.RegisterRoutes(app, params)
