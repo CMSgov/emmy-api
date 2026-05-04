@@ -55,10 +55,9 @@ func RegisterRoutes(app fiber.Router, params RouterParams) {
 			params.Logger,
 		)
 	})
-
-	api.Post("/v0/education-enrollments", withCB(handlers.EducationHandler(cfg, edu, reporter, logger)))
-	api.Post("/v0/batch-education-enrollments", withCB(handlers.BatchEducationHandler(cfg, edu, reporter, logger)))
-	api.Get("/v0/batch-education-enrollments/:batchJobId", withCB(handlers.GetBatchStatusHandler(edu, reporter, logger)))
-	api.Get("/v0/batch-education-enrollments/:batchJobId/details", withCB(handlers.GetBatchDetailsHandler(edu, reporter, logger)))
-	api.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(cfg, veteranService, reporter, logger)))
+	api.Post("/v0/education-enrollments", withCB(handlers.EducationHandler(params.CFG, edu, params.Reporter, params.Logger)))
+	api.Post("/v0/batch-education-enrollments", withCB(handlers.BatchEducationHandler(params.CFG, edu, params.Reporter, params.Logger)))
+	api.Get("/v0/batch-education-enrollments/:batchJobId", handlers.GetBatchStatusHandler(edu, params.Reporter, params.Logger))
+	api.Get("/v0/batch-education-enrollments/:batchJobId/details", handlers.GetBatchDetailsHandler(edu, params.Reporter, params.Logger))
+	api.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(params.CFG, veteranService, params.Reporter, params.Logger)))
 }
