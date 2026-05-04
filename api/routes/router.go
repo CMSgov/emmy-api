@@ -21,8 +21,26 @@ type RouterParams struct {
 }
 
 func RegisterRoutes(app fiber.Router, params RouterParams) {
+	if app == nil {
+		panic("routes: app is required")
+	}
+	if params.CFG == nil {
+		panic("routes: CFG is required")
+	}
+	if params.Reporter == nil {
+		panic("routes: Reporter is required")
+	}
 	if params.Logger == nil {
 		params.Logger = slog.Default()
+	}
+	if params.EDU == nil {
+		panic("routes: EDU service is required")
+	}
+	if params.VA == nil {
+		panic("routes: VA service is required")
+	}
+	if params.WithCB == nil {
+		panic("routes: WithCB is required")
 	}
 
 	app.Get("/", func(c *fiber.Ctx) error {

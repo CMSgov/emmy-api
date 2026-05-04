@@ -15,7 +15,6 @@ import (
 	"github.com/cmsgov/emmy-api/pkg/reporting"
 	"github.com/cmsgov/emmy-api/pkg/veteran"
 	"github.com/gofiber/fiber/v2"
-	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
 )
 
@@ -43,25 +42,13 @@ func (s *stubVeteranService) LookupDisabilityRating(_ context.Context, _ veteran
 	return veteran.Response{}, nil
 }
 
-func getRedisAddr() string {
-	addr := os.Getenv("REDIS_ADDR")
-	if addr == "" {
-		return "localhost:6379"
-	}
-	return addr
-}
-
 func TestRegisterRoutes_RegistersOpenAPISpecEndpoint(t *testing.T) {
 	app := fiber.New()
 	logger := slog.New(slog.DiscardHandler)
-	rdb := redis.NewClient(&redis.Options{
-		Addr: getRedisAddr(),
-	})
 	reporter := reporting.NewMockReporter()
 
 	RegisterRoutes(app, RouterParams{
 		CFG:      &core.Config{},
-		RDB:      rdb,
 		Reporter: reporter,
 		Logger:   logger,
 		EDU:      &stubEducationService{},
@@ -90,14 +77,10 @@ func TestRegisterRoutes_RegistersOpenAPISpecEndpoint(t *testing.T) {
 func TestRegisterRoutes_RegistersVeteranDisabilityEndpoint(t *testing.T) {
 	app := fiber.New()
 	logger := slog.New(slog.DiscardHandler)
-	rdb := redis.NewClient(&redis.Options{
-		Addr: getRedisAddr(),
-	})
 	reporter := reporting.NewMockReporter()
 
 	RegisterRoutes(app, RouterParams{
 		CFG:      &core.Config{},
-		RDB:      rdb,
 		Reporter: reporter,
 		Logger:   logger,
 		EDU:      &stubEducationService{},
@@ -120,14 +103,10 @@ func TestRegisterRoutes_RegistersVeteranDisabilityEndpoint(t *testing.T) {
 func TestRegisterRoutes_RegistersEducationEnrollmentsEndpoint(t *testing.T) {
 	app := fiber.New()
 	logger := slog.New(slog.DiscardHandler)
-	rdb := redis.NewClient(&redis.Options{
-		Addr: getRedisAddr(),
-	})
 	reporter := reporting.NewMockReporter()
 
 	RegisterRoutes(app, RouterParams{
 		CFG:      &core.Config{},
-		RDB:      rdb,
 		Reporter: reporter,
 		Logger:   logger,
 		EDU:      &stubEducationService{},
