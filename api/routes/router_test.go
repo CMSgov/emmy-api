@@ -20,6 +20,7 @@ import (
 
 type stubEducationService struct{}
 
+//nolint:gocritic // Interface requires value parameter.
 func (*stubEducationService) LookupEnrollmentStatus(_ context.Context, _ education.Request) (education.Response, error) {
 	return education.Response{}, nil
 }
@@ -38,6 +39,7 @@ func (*stubEducationService) GetBatchDetails(_ context.Context, _ string) (educa
 
 type stubVeteranService struct{}
 
+//nolint:gocritic // Interface requires value parameter.
 func (*stubVeteranService) LookupDisabilityRating(_ context.Context, _ veteran.Request) (veteran.Response, error) {
 	return veteran.Response{}, nil
 }
