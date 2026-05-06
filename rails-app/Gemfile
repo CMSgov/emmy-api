@@ -49,3 +49,4 @@ group :development, :test do
 end
 
 gem "stoplight", "~> 5.8"
+gem "aws-sdk-sqs"
