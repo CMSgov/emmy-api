@@ -1,0 +1,2 @@
+class ApiEvent < ApplicationRecord
+end

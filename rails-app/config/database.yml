@@ -5,8 +5,11 @@ default: &default
   host: <%= ENV.fetch("DB_HOST") { "localhost" } %>
   database: <%= ENV.fetch("DB_NAME") { "postgres" } %>
   username: <%= ENV.fetch("DB_USER") { "emmy" } %>
-  password: <%= ENV.fetch("DB_PASSWORD") { "emmy" } %>
+  password: <%= ENV.fetch("DB_IAM_AUTH", ENV.fetch("DB_PASSWORD", "emmy")) %>
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  sslmode: <%= ENV.fetch("DB_SSLMODE") { "prefer" } %>
+  iam_auth: <%= ENV.fetch("DB_IAM_AUTH") { "false" } %>
+  aws_rds_iam_auth_token_generator: default
 
 development:
   <<: *default
@@ -17,3 +20,4 @@ test:
 
 production:
   <<: *default
+  iam_auth: <%= ENV.fetch("DB_IAM_AUTH") { "false" } %>

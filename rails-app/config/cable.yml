@@ -6,5 +6,6 @@ test:
 
 production:
   adapter: redis
-  url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" } %>
+  url: >-
+    <%= ENV.fetch("REDIS_URL") { password = ENV.fetch("REDIS_PASSWORD", nil); addr = ENV.fetch("REDIS_ADDR", "localhost:6379"); db = ENV.fetch("REDIS_DB", "1"); password ? "redis://:#{password}@#{addr}/#{db}" : "redis://#{addr}/#{db}" } %>
   channel_prefix: rails_app_production

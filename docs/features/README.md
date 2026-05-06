@@ -17,6 +17,7 @@ controls, and resilience patterns without scanning a single flat list.
 |---|---|---|
 | [Redis](infrastructure/redis.md) | Document Redis runtime dependency and client behavior. | Covers config defaults, connection/pool settings, instrumentation hooks, ping usage, and operational failure modes. |
 | [Orchestrion](infrastructure/orchestrion.md) | Document Datadog Orchestrion integration. | Covers build-time instrumentation, environment configuration, and agent connectivity. |
+| [Datadog Rails](infrastructure/datadog-rails.md) | Document Datadog Rails integration. | Covers gem integration, environment configuration, and Docker setup. |
 
 ## Security
 
