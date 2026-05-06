@@ -82,6 +82,158 @@ paths:
                 notFound:
                   value:
                     error: Not Found
+  /api/v0/batch-education-enrollments:
+    post:
+      tags:
+        - Education Verification
+      summary: Register batch student enrollment
+      description: |
+        Registers a batch of student enrollment records for asynchronous processing. Returns 202 Accepted on successful registration.
+      operationId: registerBatchEducationEnrollment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchEducationEnrollmentRequest'
+            examples:
+              standard:
+                value:
+                  batchId: batch-2026-001
+                  submittedBy: org-unit-42
+                  callbackUrl: https://your-system.example.com/webhooks/enrollment
+                  students:
+                    - recordId: rec-001
+                      firstName: Alfredo
+                      lastName: Armstrong
+                      dateOfBirth: '1993-06-08'
+                      ssn: 796-01-2476
+                    - recordId: rec-002
+                      firstName: Maria
+                      lastName: Chen
+                      dateOfBirth: '1998-11-22'
+                      ssn: 123-45-6789
+      responses:
+        '202':
+          description: Batch registration accepted.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+        '400':
+          description: Invalid request. Missing required fields or malformed JSON.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/v0/batch-education-enrollments/{batchJobId}:
+    get:
+      tags:
+        - Education Verification
+      summary: Get batch job status
+      description: |
+        Returns the status and progress of a previously submitted batch education enrollment job.
+      operationId: getBatchJobStatus
+      parameters:
+        - name: batchJobId
+          in: path
+          required: true
+          description: The unique identifier for the batch job.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Batch job status retrieved successfully.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchJobStatusResponse'
+              examples:
+                inProgress:
+                  value:
+                    batchJobId: job-8f3a2c1d-4e5b-4f6a-9c7d-0e1f2a3b4c5d
+                    status: IN_PROGRESS
+                    totalRecords: 2
+                    processedRecords: 1
+                    successCount: 1
+                    failureCount: 0
+                    submittedAt: '2026-04-24T10:30:00Z'
+                    updatedAt: '2026-04-24T10:32:00Z'
+                    estimatedCompletionTime: '2026-04-24T10:35:00Z'
+        '404':
+          description: Batch job not found.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                notFound:
+                  value:
+                    error: Not Found
+  /api/v0/batch-education-enrollments/{batchJobId}/details:
+    get:
+      tags:
+        - Education Verification
+      summary: Get batch job details
+      description: |
+        Returns the detailed results for each student in a previously submitted batch education enrollment job.
+      operationId: getBatchJobDetails
+      parameters:
+        - name: batchJobId
+          in: path
+          required: true
+          description: The unique identifier for the batch job.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Batch job details retrieved successfully.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchJobDetailsResponse'
+              examples:
+                standard:
+                  value:
+                    batchJobId: job-8f3a2c1d-4e5b-4f6a-9c7d-0e1f2a3b4c5d
+                    results:
+                      - recordId: rec-001
+                        status: SUCCESS
+                        foundEnrollment: true
+                        results:
+                          enrollmentStatus: THREE_QUARTERS_TIME
+                          enrollmentDetails:
+                            - schoolName: Trident University International
+                              termBeginDate: '2024-05-31'
+                              termEndDate: '2024-11-19'
+                              enrollmentStatus: THREE_QUARTERS_TIME
+                      - recordId: rec-002
+                        status: NO_HIT
+                        foundEnrollment: false
+        '404':
+          description: Batch job not found.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                notFound:
+                  value:
+                    error: Not Found
   /api/v0/veteran-disability-ratings:
     post:
       tags:
@@ -159,6 +311,165 @@ components:
   schemas:
     GetEducationEnrollmentRequest:
       $ref: '#/components/schemas/identity.schema'
+    BatchEducationEnrollmentRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - batchId
+        - submittedBy
+        - callbackUrl
+        - students
+      properties:
+        batchId:
+          type: string
+          description: Unique identifier for the batch.
+          example: batch-2026-001
+        submittedBy:
+          type: string
+          description: Identifier of the organization or unit submitting the batch.
+          example: org-unit-42
+        callbackUrl:
+          type: string
+          format: uri
+          description: URL to be notified when the batch processing is complete.
+          example: https://your-system.example.com/webhooks/enrollment
+        students:
+          type: array
+          description: List of students to be enrolled in this batch.
+          items:
+            $ref: '#/components/schemas/BatchStudent'
+    BatchStudent:
+      type: object
+      additionalProperties: false
+      required:
+        - recordId
+        - firstName
+        - lastName
+        - dateOfBirth
+        - ssn
+      properties:
+        recordId:
+          type: string
+          description: Unique identifier for the student record within the batch.
+          example: rec-001
+        firstName:
+          type: string
+          description: Student's first name.
+          example: Alfredo
+        lastName:
+          type: string
+          description: Student's last name.
+          example: Armstrong
+        dateOfBirth:
+          type: string
+          format: date
+          description: Student's date of birth (YYYY-MM-DD).
+          example: '1993-06-08'
+        ssn:
+          type: string
+          pattern: ^\d{3}-\d{2}-\d{4}$
+          description: Student's Social Security Number.
+          example: 796-01-2476
+    BatchJobStatusResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - batchJobId
+        - status
+        - totalRecords
+        - processedRecords
+        - successCount
+        - failureCount
+        - submittedAt
+        - updatedAt
+      properties:
+        batchJobId:
+          type: string
+          description: Unique identifier for the batch job.
+          example: job-8f3a2c1d-4e5b-4f6a-9c7d-0e1f2a3b4c5d
+        status:
+          type: string
+          description: The current status of the batch job.
+          example: IN_PROGRESS
+        totalRecords:
+          type: integer
+          description: Total number of student records in the batch.
+          example: 2
+        processedRecords:
+          type: integer
+          description: Number of student records processed so far.
+          example: 1
+        successCount:
+          type: integer
+          description: Number of student records processed successfully.
+          example: 1
+        failureCount:
+          type: integer
+          description: Number of student records that failed processing.
+          example: 0
+        submittedAt:
+          type: string
+          format: date-time
+          description: The time the batch job was submitted.
+          example: '2026-04-24T10:30:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: The last time the batch job status was updated.
+          example: '2026-04-24T10:32:00Z'
+        estimatedCompletionTime:
+          type: string
+          format: date-time
+          description: The estimated time when the batch job will be completed.
+          example: '2026-04-24T10:35:00Z'
+    BatchJobDetailsResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - batchJobId
+        - results
+      properties:
+        batchJobId:
+          type: string
+          description: Unique identifier for the batch job.
+          example: job-8f3a2c1d-4e5b-4f6a-9c7d-0e1f2a3b4c5d
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchStudentResult'
+    BatchStudentResult:
+      type: object
+      additionalProperties: false
+      required:
+        - recordId
+        - status
+        - foundEnrollment
+      properties:
+        recordId:
+          type: string
+          description: Unique identifier for the student record within the batch.
+        status:
+          type: string
+          description: The current processing status of the student record.
+          example: SUCCESS
+        foundEnrollment:
+          type: boolean
+          description: Whether enrollment data was found for this student.
+        results:
+          $ref: '#/components/schemas/StudentResults'
+    StudentResults:
+      type: object
+      additionalProperties: false
+      required:
+        - enrollmentStatus
+        - enrollmentDetails
+      properties:
+        enrollmentStatus:
+          $ref: '#/components/schemas/school_enrollment_status.schema'
+        enrollmentDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentDetail'
     EducationEnrollmentResponse:
       type: object
       additionalProperties: false
