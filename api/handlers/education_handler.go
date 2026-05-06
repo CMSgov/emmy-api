@@ -9,17 +9,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/cmsgov/emmy-api/pkg/education"
+	"github.com/cmsgov/emmy-api/pkg/reporting"
 	"github.com/cmsgov/emmy-api/pkg/resilience"
 	"github.com/gofiber/fiber/v2"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
 )
 
-var verificationTracer = otel.Tracer("emmy-api/verification")
+var errMissingRequiredField = errors.New("missing required field")
 
-func EducationHandler(edu education.Service, logger *slog.Logger) fiber.Handler {
+func EducationHandler(cfg *core.Config, edu education.Service, reporter reporting.Reporter, logger *slog.Logger) fiber.Handler {
 	const contextTimeout time.Duration = 30 * time.Second
 
 	if logger == nil {
@@ -28,68 +27,240 @@ func EducationHandler(edu education.Service, logger *slog.Logger) fiber.Handler 
 	logger = logger.With(slog.String("handler", "EducationHandler"))
 
 	return func(c *fiber.Ctx) error {
-		ctx, verificationSpan := verificationTracer.Start(
-			c.UserContext(),
-			"verification.request",
-		)
-		defer verificationSpan.End()
+		requestStartTime := time.Now()
+		clientID, ok := c.Locals("sub").(string)
+		if !ok {
+			clientID = ""
+		}
 
-		verificationSpan.SetAttributes(
-			attribute.String("vendor.name", "nsc"),
-			attribute.String("http.route", c.Path()),
-			attribute.String("http.method", c.Method()),
-		)
+		ctx := c.UserContext()
 
 		var reqBody education.Request
 		if err := c.BodyParser(&reqBody); err != nil {
-			verificationSpan.RecordError(err)
-			verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadRequest))
 			return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
 		}
 
-		if missing := missingEducationIdentityField(reqBody); missing != "" {
-			err := fmt.Errorf("missing required field %s", missing)
-			verificationSpan.RecordError(err)
-			verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadRequest))
+		if missing := missingEducationIdentityField(&reqBody); missing != "" {
+			err := fmt.Errorf("%w: %s", errMissingRequiredField, missing)
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		ctx, cancel := context.WithTimeout(ctx, contextTimeout)
 		defer cancel()
 
-		ctx, decisionSpan := verificationTracer.Start(ctx, "decision.engine")
+		datasourceStartTime := time.Now()
 		result, err := edu.LookupEnrollmentStatus(ctx, reqBody)
+		datasourceDuration := time.Since(datasourceStartTime)
 		if err != nil {
-			decisionSpan.RecordError(err)
-			decisionSpan.SetStatus(codes.Error, "verification failed")
-			decisionSpan.End()
+			var statusCode int
+			switch {
+			case errors.Is(err, education.ErrNotFound):
+				statusCode = fiber.StatusNotFound
+			case errors.Is(err, resilience.ErrCircuitOpen):
+				statusCode = fiber.StatusServiceUnavailable
+			default:
+				statusCode = fiber.StatusBadGateway
+			}
+
+			reporter.Report(c.Context(), &reporting.ReportData{
+				Endpoint:   c.Path(),
+				Success:    false,
+				DataSource: "NSC",
+				ClientID:   clientID,
+				Timestamp:  time.Now(),
+				StatusCode: statusCode,
+			})
 
 			logger.ErrorContext(ctx, "education verification failed", slog.Any("error", err))
 
-			verificationSpan.RecordError(err)
-
-			switch {
-			case errors.Is(err, education.ErrNotFound):
-				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusNotFound))
-				return c.SendStatus(fiber.StatusNotFound)
-			case errors.Is(err, resilience.ErrCircuitOpen):
-				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusServiceUnavailable))
-				return fiber.NewError(fiber.StatusServiceUnavailable, "education enrollment lookup unavailable")
-			default:
-				verificationSpan.SetStatus(codes.Error, http.StatusText(fiber.StatusBadGateway))
-				return fiber.NewError(fiber.StatusBadGateway, "education enrollment lookup failed")
+			if statusCode == fiber.StatusNotFound {
+				return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+					"error": "Not Found",
+				})
 			}
+			return fiber.NewError(statusCode, http.StatusText(statusCode))
 		}
 
-		decisionSpan.SetStatus(codes.Ok, "decision completed")
-		decisionSpan.End()
+		responseTimestamp := time.Now()
+		rid, ok := ctx.Value(core.RequestContextKey).(string)
+		if !ok || rid == "" {
+			rid = "unknown"
+		}
+		result.Metadata = education.Metadata{
+			APIVersion:               cfg.ServiceVersion,
+			Environment:              cfg.Environment,
+			RequestTimestamp:         requestStartTime.UTC().Format("2006-01-02T15:04:05.000Z"),
+			ResponseTimestamp:        responseTimestamp.UTC().Format("2006-01-02T15:04:05.000Z"),
+			DatasourceDurationMillis: datasourceDuration.Milliseconds(),
+			TransactionID:            rid,
+		}
 
-		verificationSpan.SetStatus(codes.Ok, "verification completed")
+		reporter.Report(c.Context(), &reporting.ReportData{
+			Endpoint:   c.Path(),
+			Success:    true,
+			DataSource: "NSC",
+			ClientID:   clientID,
+			Timestamp:  time.Now(),
+			StatusCode: fiber.StatusOK,
+		})
+
 		return c.Status(fiber.StatusOK).JSON(result)
 	}
 }
 
-func missingEducationIdentityField(req education.Request) string {
+func BatchEducationHandler(_ *core.Config, edu education.Service, reporter reporting.Reporter, logger *slog.Logger) fiber.Handler {
+	if logger == nil {
+		logger = slog.Default()
+	}
+	logger = logger.With(slog.String("handler", "BatchEducationHandler"))
+
+	return func(c *fiber.Ctx) error {
+		clientID, ok := c.Locals("sub").(string)
+		if !ok {
+			clientID = ""
+		}
+
+		var reqBody education.BatchRequest
+		if err := c.BodyParser(&reqBody); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+		}
+
+		if reqBody.BatchID == "" {
+			return fiber.NewError(fiber.StatusBadRequest, "missing required field batchId")
+		}
+
+		err := edu.RegisterBatch(c.UserContext(), reqBody)
+		if err != nil {
+			logger.ErrorContext(c.UserContext(), "Failed to initiate batch. Please reach out to emmy support with the transaction id", slog.Any("error", err))
+			reporter.Report(c.Context(), &reporting.ReportData{
+				Endpoint:   c.Path(),
+				Success:    false,
+				DataSource: "NSC",
+				ClientID:   clientID,
+				Timestamp:  time.Now(),
+				StatusCode: fiber.StatusInternalServerError,
+			})
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to record batch")
+		}
+
+		reporter.Report(c.Context(), &reporting.ReportData{
+			Endpoint:   c.Path(),
+			Success:    true,
+			DataSource: "NSC",
+			ClientID:   clientID,
+			Timestamp:  time.Now(),
+			StatusCode: fiber.StatusAccepted,
+		})
+
+		return c.SendStatus(fiber.StatusAccepted)
+	}
+}
+
+func GetBatchStatusHandler(edu education.Service, reporter reporting.Reporter, logger *slog.Logger) fiber.Handler {
+	if logger == nil {
+		logger = slog.Default()
+	}
+	logger = logger.With(slog.String("handler", "GetBatchStatusHandler"))
+
+	return func(c *fiber.Ctx) error {
+		clientID, ok := c.Locals("sub").(string)
+		if !ok {
+			clientID = ""
+		}
+
+		batchJobID := c.Params("batchJobId")
+		if batchJobID == "" {
+			return fiber.NewError(fiber.StatusBadRequest, "missing required parameter batchJobId")
+		}
+
+		result, err := edu.GetBatchStatus(c.UserContext(), batchJobID)
+		if err != nil {
+			if errors.Is(err, education.ErrNotFound) {
+				return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+					"error": "Not Found",
+				})
+			}
+
+			logger.ErrorContext(c.UserContext(), "failed to get batch status", slog.String("batchJobId", batchJobID), slog.Any("error", err))
+			reporter.Report(c.Context(), &reporting.ReportData{
+				Endpoint:   c.Path(),
+				Success:    false,
+				DataSource: "Postgres",
+				ClientID:   clientID,
+				Timestamp:  time.Now(),
+				StatusCode: fiber.StatusInternalServerError,
+			})
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to get batch status")
+		}
+
+		reporter.Report(c.Context(), &reporting.ReportData{
+			Endpoint:   c.Path(),
+			Success:    true,
+			DataSource: "Postgres",
+			ClientID:   clientID,
+			Timestamp:  time.Now(),
+			StatusCode: fiber.StatusOK,
+		})
+
+		return c.Status(fiber.StatusOK).JSON(result)
+	}
+}
+
+func GetBatchDetailsHandler(edu education.Service, reporter reporting.Reporter, logger *slog.Logger) fiber.Handler {
+	if logger == nil {
+		logger = slog.Default()
+	}
+	logger = logger.With(slog.String("handler", "GetBatchDetailsHandler"))
+
+	return func(c *fiber.Ctx) error {
+		clientID, ok := c.Locals("sub").(string)
+		if !ok {
+			clientID = ""
+		}
+
+		batchJobID := c.Params("batchJobId")
+		if batchJobID == "" {
+			return fiber.NewError(fiber.StatusBadRequest, "missing required parameter batchJobId")
+		}
+
+		result, err := edu.GetBatchDetails(c.UserContext(), batchJobID)
+		if err != nil {
+			if errors.Is(err, education.ErrNotFound) {
+				return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+					"error": "Not Found",
+				})
+			}
+
+			logger.ErrorContext(c.UserContext(), "failed to get batch details", slog.String("batchJobId", batchJobID), slog.Any("error", err))
+			reporter.Report(c.Context(), &reporting.ReportData{
+				Endpoint:   c.Path(),
+				Success:    false,
+				DataSource: "Postgres",
+				ClientID:   clientID,
+				Timestamp:  time.Now(),
+				StatusCode: fiber.StatusInternalServerError,
+			})
+			return fiber.NewError(fiber.StatusInternalServerError, "failed to get batch details")
+		}
+
+		reporter.Report(c.Context(), &reporting.ReportData{
+			Endpoint:   c.Path(),
+			Success:    true,
+			DataSource: "Postgres",
+			ClientID:   clientID,
+			Timestamp:  time.Now(),
+			StatusCode: fiber.StatusOK,
+		})
+
+		return c.Status(fiber.StatusOK).JSON(result)
+	}
+}
+
+func missingEducationIdentityField(req *education.Request) string {
+	if req == nil {
+		return "firstName"
+	}
+
 	switch {
 	case strings.TrimSpace(req.FirstName) == "":
 		return "firstName"

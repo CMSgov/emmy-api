@@ -12,7 +12,7 @@
   },
   "servers": [
     {
-      "url": "https://api.dev.emmy.cms.gov",
+      "url": "https://api.uat.emmy.cms.gov",
       "description": "Emmy development environment"
     },
     {
@@ -73,8 +73,55 @@
                   "$ref": "#/components/schemas/EducationEnrollmentResponse"
                 },
                 "examples": {
-                  "enrolled": {
+                  "unknown": {
                     "$ref": "#/components/examples/EducationEnrollmentResponseExample"
+                  },
+                  "multiple": {
+                    "$ref": "#/components/examples/EducationEnrollmentMultipleResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Missing required fields or malformed JSON.",
+            "headers": {
+              "X-Request-ID": {
+                "$ref": "#/components/headers/X-Request-ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingFields": {
+                    "value": {
+                      "error": "missing required field firstName"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Person not found.",
+            "headers": {
+              "X-Request-ID": {
+                "$ref": "#/components/headers/X-Request-ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "notFound": {
+                    "value": {
+                      "error": "Not Found"
+                    }
                   }
                 }
               }
@@ -126,6 +173,50 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid request. Missing required fields or malformed JSON.",
+            "headers": {
+              "X-Request-ID": {
+                "$ref": "#/components/headers/X-Request-ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missingFields": {
+                    "value": {
+                      "error": "request must include first name, last name, date of birth, and either SSN or a complete address"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Person not found.",
+            "headers": {
+              "X-Request-ID": {
+                "$ref": "#/components/headers/X-Request-ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "notFound": {
+                    "value": {
+                      "error": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -138,8 +229,10 @@
         "description": "OAuth 2.0 bearer token proving the client application is authorized to access the Verification Service API. Only the client credentials grant is supported.\n",
         "flows": {
           "clientCredentials": {
-            "tokenUrl": "https://api.dev.emmy.cms.gov/oauth2/token",
-            "scopes": {}
+            "tokenUrl": "https://emmy-uat.auth.us-east-1.amazoncognito.com/oauth2/token",
+            "scopes": {
+              "emmy-api/emmy-api-access": "access the Emmy Verification Service API"
+            }
           }
         }
       }
@@ -161,12 +254,35 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "enrollmentStatus"
+          "enrollmentStatus",
+          "enrollmentDetails",
+          "rawData",
+          "dataSource",
+          "metadata"
         ],
         "properties": {
           "enrollmentStatus": {
             "$ref": "#/components/schemas/school_enrollment_status.schema",
-            "description": "Current enrollment status for the identified person."
+            "description": "Current enrollment status for the identified person.",
+            "example": "FULL_TIME"
+          },
+          "enrollmentDetails": {
+            "type": "array",
+            "description": "List of enrollment details filtered from the raw data.",
+            "items": {
+              "$ref": "#/components/schemas/EnrollmentDetail"
+            }
+          },
+          "rawData": {
+            "type": "object",
+            "description": "Raw response data from the National Student Clearinghouse."
+          },
+          "dataSource": {
+            "$ref": "#/components/schemas/data_source.schema",
+            "description": "The source of the enrollment data."
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
           }
         }
       },
@@ -177,12 +293,139 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "combinedDisabilityRating"
+          "combinedDisabilityRating",
+          "rawData",
+          "dataSource",
+          "metadata"
         ],
         "properties": {
           "combinedDisabilityRating": {
             "$ref": "#/components/schemas/combined_disability_rating.schema",
             "description": "VA combined disability rating for the identified person."
+          },
+          "legalEffectiveDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "The date when the disability rating became legally effective.",
+            "example": "2012-07-01"
+          },
+          "combinedEffectiveDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "The date when the combined disability rating became effective.",
+            "example": "2012-08-01"
+          },
+          "earliestRatingEndDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "The earliest end date among all individual disability ratings.",
+            "example": "2122-08-27"
+          },
+          "rawData": {
+            "type": "object",
+            "description": "Raw response data from Veterans Affairs."
+          },
+          "dataSource": {
+            "$ref": "#/components/schemas/data_source.schema",
+            "description": "The source of the disability rating data."
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        }
+      },
+      "EnrollmentDetail": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schoolName",
+          "termBeginDate",
+          "termEndDate",
+          "enrollmentStatus"
+        ],
+        "properties": {
+          "schoolName": {
+            "type": "string",
+            "description": "Official name of the school.",
+            "example": "Trident University International"
+          },
+          "termBeginDate": {
+            "type": "string",
+            "description": "The date when the enrollment term began.",
+            "example": "2024-05-31"
+          },
+          "termEndDate": {
+            "type": "string",
+            "description": "The date when the enrollment term ended.",
+            "example": "2024-11-19"
+          },
+          "enrollmentStatus": {
+            "$ref": "#/components/schemas/school_enrollment_status.schema",
+            "description": "Enrollment status for this specific term."
+          }
+        }
+      },
+      "Metadata": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "apiVersion",
+          "environment",
+          "requestTimestamp",
+          "responseTimestamp",
+          "transaction-id",
+          "datasourceDurationMillis"
+        ],
+        "properties": {
+          "apiVersion": {
+            "type": "string",
+            "description": "The build version of the service.",
+            "example": "1.3.0"
+          },
+          "environment": {
+            "type": "string",
+            "description": "The environment the service is running in.",
+            "example": "prod"
+          },
+          "requestTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the request was received.",
+            "example": "2026-04-14T12:00:00.000Z"
+          },
+          "responseTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the response was generated.",
+            "example": "2026-04-14T12:00:00.217Z"
+          },
+          "transaction-id": {
+            "type": "string",
+            "description": "Unique identifier for the transaction.",
+            "example": "123456"
+          },
+          "datasourceDurationMillis": {
+            "type": "integer",
+            "format": "int64",
+            "description": "How long the back-end spent in milliseconds.",
+            "example": 180
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "A descriptive error message.",
+            "example": "Not Found"
           }
         }
       },
@@ -214,6 +457,13 @@
         "description": "Postal address used when a lookup requires demographic matching instead of SSN matching.",
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "street1",
+          "city",
+          "state",
+          "postalCode",
+          "country"
+        ],
         "properties": {
           "street1": {
             "type": "string",
@@ -277,6 +527,18 @@
           "lastName",
           "dateOfBirth"
         ],
+        "oneOf": [
+          {
+            "required": [
+              "ssn"
+            ]
+          },
+          {
+            "required": [
+              "address"
+            ]
+          }
+        ],
         "properties": {
           "firstName": {
             "type": "string",
@@ -320,13 +582,25 @@
         "type": "string",
         "enum": [
           "FULL_TIME",
-          "PART_TIME",
-          "LESS_THAN_PART_TIME",
-          "ENROLLED"
+          "THREE_QUARTERS_TIME",
+          "HALF_TIME",
+          "LESS_THAN_HALF_TIME",
+          "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"
         ],
         "examples": [
           "FULL_TIME",
-          "ENROLLED"
+          "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"
+        ]
+      },
+      "data_source.schema": {
+        "$id": "https://emmy.cms.gov/schemas/v0/data_source.json",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Data Source",
+        "description": "The source of the verification data.",
+        "type": "string",
+        "enum": [
+          "National Student Clearinghouse",
+          "Veterans Affairs"
         ]
       },
       "combined_disability_rating.schema": {
@@ -353,7 +627,114 @@
       },
       "EducationEnrollmentResponseExample": {
         "value": {
-          "enrollmentStatus": "FULL_TIME"
+          "enrollmentStatus": "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING",
+          "enrollmentDetails": [
+            {
+              "schoolName": "Trident University International",
+              "termBeginDate": "2024-05-31",
+              "termEndDate": "2024-11-19",
+              "enrollmentStatus": "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"
+            }
+          ],
+          "rawData": {
+            "clientData": {
+              "zaccountID": "",
+              "caseReferenceId": "",
+              "contactEmail": "",
+              "organizationName": ""
+            },
+            "identityDetails": null,
+            "status": {
+              "code": "0",
+              "message": "Successful",
+              "severity": "Info"
+            },
+            "studentInfoProvided": {
+              "dateOfBirth": "1988-10-24",
+              "firstName": "Lynette",
+              "lastName": "Oyola",
+              "middleName": ""
+            },
+            "transactionDetails": {
+              "notifiedDate": "2026-04-06 15:04:06.122",
+              "nscHit": "Y",
+              "orderId": "115201183",
+              "requestedBy": "CMS Contact",
+              "requestedDate": "2026-04-06 15:04:06.122",
+              "salesTax": "0.00",
+              "transactionFee": "0.00",
+              "transactionId": "828881291",
+              "transactionStatus": "CNF",
+              "transactionTotal": "0.00",
+              "appliedLikeSchoolMatching": "",
+              "studentComments": ""
+            },
+            "enrollmentDetails": [
+              {
+                "officialSchoolName": "Trident University International",
+                "enrollmentSinceDate": "",
+                "currentEnrollmentStatus": "CC",
+                "enrollmentData": [
+                  {
+                    "enrollmentStatus": "Y",
+                    "termBeginDate": "2024-05-31",
+                    "termEndDate": "2024-11-19",
+                    "schoolCertifiedOnDate": "2024-07-16",
+                    "anticipatedGraduationDate": "2025-12-30",
+                    "studentClassCredential": ""
+                  }
+                ],
+                "studentAddress": {
+                  "address1": "2489 O Conner Street",
+                  "address2": "",
+                  "city": "Pascagoula",
+                  "state": "MS",
+                  "zipCode": "39567",
+                  "province": "",
+                  "postalCode": "",
+                  "country": "US"
+                }
+              }
+            ]
+          },
+          "dataSource": "National Student Clearinghouse",
+          "metadata": {
+            "apiVersion": "1.3.0",
+            "environment": "prod",
+            "requestTimestamp": "2026-04-14T12:00:00.000Z",
+            "responseTimestamp": "2026-04-14T12:00:00.217Z",
+            "datasourceDurationMillis": 180,
+            "transaction-id": "123456"
+          }
+        }
+      },
+      "EducationEnrollmentMultipleResponseExample": {
+        "value": {
+          "enrollmentStatus": "HALF_TIME",
+          "enrollmentDetails": [
+            {
+              "schoolName": "University A",
+              "termBeginDate": "2023-01-01",
+              "termEndDate": "2023-05-01",
+              "enrollmentStatus": "HALF_TIME"
+            },
+            {
+              "schoolName": "University B",
+              "termBeginDate": "2022-09-01",
+              "termEndDate": "2022-12-31",
+              "enrollmentStatus": "HALF_TIME"
+            }
+          ],
+          "rawData": {},
+          "dataSource": "National Student Clearinghouse",
+          "metadata": {
+            "apiVersion": "1.3.0",
+            "environment": "prod",
+            "requestTimestamp": "2026-04-14T12:00:00.000Z",
+            "responseTimestamp": "2026-04-14T12:00:00.217Z",
+            "datasourceDurationMillis": 180,
+            "transaction-id": "123456"
+          }
         }
       },
       "GetVeteranDisabilityStatusRequestExample": {
@@ -373,7 +754,65 @@
       },
       "VeteranDisabilityStatusResponseExample": {
         "value": {
-          "combinedDisabilityRating": 70
+          "combinedDisabilityRating": 40,
+          "legalEffectiveDate": "2012-07-01",
+          "combinedEffectiveDate": "2012-08-01",
+          "earliestRatingEndDate": "2122-08-27",
+          "rawData": {
+            "data": {
+              "attributes": {
+                "combined_disability_rating": 40,
+                "combined_effective_date": "2012-08-01",
+                "individual_ratings": [
+                  {
+                    "decision": "1151 Granted",
+                    "diagnostic_text": "Renal Failure",
+                    "diagnostic_type_code": "0520",
+                    "diagnostic_type_name": "Paralysis of the sciatic nerve",
+                    "disability_rating_id": "1071465",
+                    "effective_date": "2018-09-21",
+                    "rating_end_date": "2122-08-27",
+                    "rating_percentage": 80,
+                    "static_ind": true
+                  },
+                  {
+                    "decision": "Service Connected",
+                    "diagnostic_text": "DM Type II",
+                    "diagnostic_type_code": "9411",
+                    "diagnostic_type_name": "Post traumatic stress disorder",
+                    "disability_rating_id": "1071466",
+                    "effective_date": "2018-02-14",
+                    "rating_end_date": "2122-08-27",
+                    "rating_percentage": 50,
+                    "static_ind": true
+                  },
+                  {
+                    "decision": "Service Connected",
+                    "diagnostic_text": "DM Type II",
+                    "diagnostic_type_code": "9411",
+                    "diagnostic_type_name": "Post traumatic stress disorder",
+                    "disability_rating_id": "1071466",
+                    "effective_date": "2020-02-20",
+                    "rating_end_date": "2122-08-27",
+                    "rating_percentage": 30,
+                    "static_ind": true
+                  }
+                ],
+                "legal_effective_date": "2012-07-01"
+              },
+              "id": "1012667145V762142",
+              "type": "disability_ratings"
+            }
+          },
+          "dataSource": "Veterans Affairs",
+          "metadata": {
+            "apiVersion": "1.3.0",
+            "environment": "prod",
+            "requestTimestamp": "2026-04-14T12:00:00.000Z",
+            "responseTimestamp": "2026-04-14T12:00:00.217Z",
+            "datasourceDurationMillis": 180,
+            "transaction-id": "123456"
+          }
         }
       }
     }

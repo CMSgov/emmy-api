@@ -2,6 +2,8 @@ package education
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
@@ -10,6 +12,8 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )
+
+var errNSCNilOAuthToken = errors.New("oauth token source returned nil token")
 
 func nscHTTPClient(ctx context.Context, cfg *core.NSCConfig, logger *slog.Logger) *http.Client {
 	if logger == nil {
@@ -61,14 +65,19 @@ func (s *nscLoggingTokenSource) Token() (*oauth2.Token, error) {
 			slog.Any("error", err),
 			slog.Duration("latency", latency),
 		)
-		return nil, err
+		return nil, fmt.Errorf("fetch oauth token: %w", err)
 	}
+	if token == nil {
+		return nil, errNSCNilOAuthToken
+	}
+
+	expirySet := !token.Expiry.IsZero()
 
 	s.logger.Info("nsc oauth token request succeeded",
 		slog.Duration("latency", latency),
-		slog.Bool("access_token_present", token != nil && token.AccessToken != ""),
+		slog.Bool("access_token_present", token.AccessToken != ""),
 		slog.String("token_type", token.TokenType),
-		slog.Bool("expiry_set", token != nil && !token.Expiry.IsZero()),
+		slog.Bool("expiry_set", expirySet),
 		slog.Int64("expiry_unix", tokenExpiryUnix(token)),
 	)
 
@@ -97,7 +106,7 @@ func (t *nscLoggingTransport) RoundTrip(req *http.Request) (*http.Response, erro
 				slog.Any("error", err),
 				slog.Duration("latency", latency),
 			)
-			return nil, err
+			return nil, fmt.Errorf("nsc oauth token endpoint request: %w", err)
 		}
 
 		t.logger.Info("nsc oauth token endpoint response received",
@@ -117,7 +126,11 @@ func (t *nscLoggingTransport) RoundTrip(req *http.Request) (*http.Response, erro
 		)
 	}
 
-	return resp, err
+	if err != nil {
+		return nil, fmt.Errorf("nsc outbound request: %w", err)
+	}
+
+	return resp, nil
 }
 
 func tokenExpiryUnix(token *oauth2.Token) int64 {

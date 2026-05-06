@@ -10,19 +10,37 @@ import (
 	"testing"
 
 	"github.com/cmsgov/emmy-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/encryption"
+	"github.com/cmsgov/emmy-api/pkg/reporting"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
 )
 
+func getRedisAddr() string {
+	addr := os.Getenv("REDIS_ADDR")
+	if addr == "" {
+		return "localhost:6379"
+	}
+	return addr
+}
+
 func TestRegisterRoutes_RegistersOpenAPISpecEndpoint(t *testing.T) {
 	app := fiber.New()
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: getRedisAddr(),
 	})
+	reporter := reporting.NewMockReporter()
+	encrypt := encryption.NewMockEncryptionService()
 
-	RegisterRoutes(app, &core.Config{}, rdb, logger)
+	RegisterRoutes(app, RouterParams{
+		CFG:        &core.Config{},
+		RDB:        rdb,
+		Reporter:   reporter,
+		Logger:     logger,
+		Encryption: encrypt,
+	})
 
 	req := httptest.NewRequest(http.MethodGet, "/api-spec/v1/verify", http.NoBody)
 	resp, err := app.Test(req)
@@ -42,12 +60,20 @@ func TestRegisterRoutes_RegistersOpenAPISpecEndpoint(t *testing.T) {
 
 func TestRegisterRoutes_RegistersVeteranDisabilityEndpoint(t *testing.T) {
 	app := fiber.New()
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: getRedisAddr(),
 	})
+	reporter := reporting.NewMockReporter()
+	encrypt := encryption.NewMockEncryptionService()
 
-	RegisterRoutes(app, &core.Config{}, rdb, logger)
+	RegisterRoutes(app, RouterParams{
+		CFG:        &core.Config{},
+		RDB:        rdb,
+		Reporter:   reporter,
+		Logger:     logger,
+		Encryption: encrypt,
+	})
 
 	routes := app.GetRoutes(true)
 	for _, route := range routes {
@@ -56,17 +82,25 @@ func TestRegisterRoutes_RegistersVeteranDisabilityEndpoint(t *testing.T) {
 		}
 	}
 
-	t.Fatalf("expected POST /api/v0/veteran-disability-ratings to be registered")
+	t.Fatal("expected POST /api/v0/veteran-disability-ratings to be registered")
 }
 
 func TestRegisterRoutes_RegistersEducationEnrollmentsEndpoint(t *testing.T) {
 	app := fiber.New()
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: getRedisAddr(),
 	})
+	reporter := reporting.NewMockReporter()
+	encrypt := encryption.NewMockEncryptionService()
 
-	RegisterRoutes(app, &core.Config{}, rdb, logger)
+	RegisterRoutes(app, RouterParams{
+		CFG:        &core.Config{},
+		RDB:        rdb,
+		Reporter:   reporter,
+		Logger:     logger,
+		Encryption: encrypt,
+	})
 
 	routes := app.GetRoutes(true)
 	for _, route := range routes {
@@ -75,5 +109,5 @@ func TestRegisterRoutes_RegistersEducationEnrollmentsEndpoint(t *testing.T) {
 		}
 	}
 
-	t.Fatalf("expected POST /api/v0/education-enrollments to be registered")
+	t.Fatal("expected POST /api/v0/education-enrollments to be registered")
 }

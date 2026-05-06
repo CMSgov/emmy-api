@@ -20,7 +20,7 @@ info:
     highly volatile for the next several months. Breaking changes are likely as
     the alpha release evolves.
 servers:
-  - url: https://api.dev.emmy.cms.gov
+  - url: https://api.uat.emmy.cms.gov
     description: Emmy development environment
   - url: http://localhost:8000
     description: Local development
@@ -67,8 +67,189 @@ paths:
               schema:
                 $ref: "#/components/schemas/EducationEnrollmentResponse"
               examples:
-                enrolled:
+                unknown:
                   $ref: "#/components/examples/EducationEnrollmentResponseExample"
+                multiple:
+                  $ref: "#/components/examples/EducationEnrollmentMultipleResponseExample"
+        "400":
+          description: Invalid request. Missing required fields or malformed JSON.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                missingFields:
+                  value:
+                    error: "missing required field firstName"
+        "404":
+          description: Person not found.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                notFound:
+                  value:
+                    error: "Not Found"
+  /api/v0/batch-education-enrollments:
+    post:
+      tags:
+        - Education Verification
+      summary: Register batch student enrollment
+      description: >
+        Registers a batch of student enrollment records for asynchronous processing.
+        Returns 202 Accepted on successful registration.
+      operationId: registerBatchEducationEnrollment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchEducationEnrollmentRequest"
+            examples:
+              standard:
+                value:
+                  batchId: "batch-2026-001"
+                  submittedBy: "org-unit-42"
+                  callbackUrl: "https://your-system.example.com/webhooks/enrollment"
+                  students:
+                    - recordId: "rec-001"
+                      firstName: "Alfredo"
+                      lastName: "Armstrong"
+                      dateOfBirth: "1993-06-08"
+                      ssn: "796-01-2476"
+                    - recordId: "rec-002"
+                      firstName: "Maria"
+                      lastName: "Chen"
+                      dateOfBirth: "1998-11-22"
+                      ssn: "123-45-6789"
+      responses:
+        "202":
+          description: Batch registration accepted.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+        "400":
+          description: Invalid request. Missing required fields or malformed JSON.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v0/batch-education-enrollments/{batchJobId}:
+    get:
+      tags:
+        - Education Verification
+      summary: Get batch job status
+      description: >
+        Returns the status and progress of a previously submitted batch education enrollment job.
+      operationId: getBatchJobStatus
+      parameters:
+        - name: batchJobId
+          in: path
+          required: true
+          description: The unique identifier for the batch job.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Batch job status retrieved successfully.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchJobStatusResponse"
+              examples:
+                inProgress:
+                  value:
+                    batchJobId: "job-8f3a2c1d-4e5b-4f6a-9c7d-0e1f2a3b4c5d"
+                    status: "IN_PROGRESS"
+                    totalRecords: 2
+                    processedRecords: 1
+                    successCount: 1
+                    failureCount: 0
+                    submittedAt: "2026-04-24T10:30:00Z"
+                    updatedAt: "2026-04-24T10:32:00Z"
+                    estimatedCompletionTime: "2026-04-24T10:35:00Z"
+        "404":
+          description: Batch job not found.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                notFound:
+                  value:
+                    error: "Not Found"
+  /api/v0/batch-education-enrollments/{batchJobId}/details:
+    get:
+      tags:
+        - Education Verification
+      summary: Get batch job details
+      description: >
+        Returns the detailed results for each student in a previously submitted batch education enrollment job.
+      operationId: getBatchJobDetails
+      parameters:
+        - name: batchJobId
+          in: path
+          required: true
+          description: The unique identifier for the batch job.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Batch job details retrieved successfully.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchJobDetailsResponse"
+              examples:
+                standard:
+                  value:
+                    batchJobId: "job-8f3a2c1d-4e5b-4f6a-9c7d-0e1f2a3b4c5d"
+                    results:
+                      - recordId: "rec-001"
+                        status: "SUCCESS"
+                        foundEnrollment: true
+                        results:
+                          enrollmentStatus: "THREE_QUARTERS_TIME"
+                          enrollmentDetails:
+                            - schoolName: "Trident University International"
+                              termBeginDate: "2024-05-31"
+                              termEndDate: "2024-11-19"
+                              enrollmentStatus: "THREE_QUARTERS_TIME"
+                      - recordId: "rec-002"
+                        status: "NO_HIT"
+                        foundEnrollment: false
+        "404":
+          description: Batch job not found.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                notFound:
+                  value:
+                    error: "Not Found"
   /api/v0/veteran-disability-ratings:
     post:
       tags:
@@ -102,6 +283,32 @@ paths:
               examples:
                 rated:
                   $ref: "#/components/examples/VeteranDisabilityStatusResponseExample"
+        "400":
+          description: Invalid request. Missing required fields or malformed JSON.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                missingFields:
+                  value:
+                    error: "request must include first name, last name, date of birth, and either SSN or a complete address"
+        "404":
+          description: Person not found.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                notFound:
+                  value:
+                    error: "Not Found"
 components:
   securitySchemes:
     OAuth2ClientCredentials:
@@ -112,8 +319,9 @@ components:
         is supported.
       flows:
         clientCredentials:
-          tokenUrl: https://api.dev.emmy.cms.gov/oauth2/token
-          scopes: {}
+          tokenUrl: https://emmy-uat.auth.us-east-1.amazoncognito.com/oauth2/token
+          scopes:
+            emmy-api/emmy-api-access: access the Emmy Verification Service API
   headers:
     X-Request-ID:
       description: >
@@ -125,15 +333,192 @@ components:
   schemas:
     GetEducationEnrollmentRequest:
       $ref: ../../schema/v0/identity.schema.json
+    BatchEducationEnrollmentRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - batchId
+        - submittedBy
+        - callbackUrl
+        - students
+      properties:
+        batchId:
+          type: string
+          description: Unique identifier for the batch.
+          example: "batch-2026-001"
+        submittedBy:
+          type: string
+          description: Identifier of the organization or unit submitting the batch.
+          example: "org-unit-42"
+        callbackUrl:
+          type: string
+          format: uri
+          description: URL to be notified when the batch processing is complete.
+          example: "https://your-system.example.com/webhooks/enrollment"
+        students:
+          type: array
+          description: List of students to be enrolled in this batch.
+          items:
+            $ref: "#/components/schemas/BatchStudent"
+    BatchStudent:
+      type: object
+      additionalProperties: false
+      required:
+        - recordId
+        - firstName
+        - lastName
+        - dateOfBirth
+        - ssn
+      properties:
+        recordId:
+          type: string
+          description: Unique identifier for the student record within the batch.
+          example: "rec-001"
+        firstName:
+          type: string
+          description: Student's first name.
+          example: "Alfredo"
+        lastName:
+          type: string
+          description: Student's last name.
+          example: "Armstrong"
+        dateOfBirth:
+          type: string
+          format: date
+          description: Student's date of birth (YYYY-MM-DD).
+          example: "1993-06-08"
+        ssn:
+          type: string
+          pattern: '^\d{3}-\d{2}-\d{4}$'
+          description: Student's Social Security Number.
+          example: "796-01-2476"
+    BatchJobStatusResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - batchJobId
+        - status
+        - totalRecords
+        - processedRecords
+        - successCount
+        - failureCount
+        - submittedAt
+        - updatedAt
+      properties:
+        batchJobId:
+          type: string
+          description: Unique identifier for the batch job.
+          example: "job-8f3a2c1d-4e5b-4f6a-9c7d-0e1f2a3b4c5d"
+        status:
+          type: string
+          description: The current status of the batch job.
+          example: "IN_PROGRESS"
+        totalRecords:
+          type: integer
+          description: Total number of student records in the batch.
+          example: 2
+        processedRecords:
+          type: integer
+          description: Number of student records processed so far.
+          example: 1
+        successCount:
+          type: integer
+          description: Number of student records processed successfully.
+          example: 1
+        failureCount:
+          type: integer
+          description: Number of student records that failed processing.
+          example: 0
+        submittedAt:
+          type: string
+          format: date-time
+          description: The time the batch job was submitted.
+          example: "2026-04-24T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: The last time the batch job status was updated.
+          example: "2026-04-24T10:32:00Z"
+        estimatedCompletionTime:
+          type: string
+          format: date-time
+          description: The estimated time when the batch job will be completed.
+          example: "2026-04-24T10:35:00Z"
+    BatchJobDetailsResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - batchJobId
+        - results
+      properties:
+        batchJobId:
+          type: string
+          description: Unique identifier for the batch job.
+          example: "job-8f3a2c1d-4e5b-4f6a-9c7d-0e1f2a3b4c5d"
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/BatchStudentResult"
+    BatchStudentResult:
+      type: object
+      additionalProperties: false
+      required:
+        - recordId
+        - status
+        - foundEnrollment
+      properties:
+        recordId:
+          type: string
+          description: Unique identifier for the student record within the batch.
+        status:
+          type: string
+          description: The current processing status of the student record.
+          example: "SUCCESS"
+        foundEnrollment:
+          type: boolean
+          description: Whether enrollment data was found for this student.
+        results:
+          $ref: "#/components/schemas/StudentResults"
+    StudentResults:
+      type: object
+      additionalProperties: false
+      required:
+        - enrollmentStatus
+        - enrollmentDetails
+      properties:
+        enrollmentStatus:
+          $ref: ../../schema/v0/school_enrollment_status.schema.json
+        enrollmentDetails:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnrollmentDetail"
     EducationEnrollmentResponse:
       type: object
       additionalProperties: false
       required:
         - enrollmentStatus
+        - enrollmentDetails
+        - rawData
+        - dataSource
+        - metadata
       properties:
         enrollmentStatus:
           $ref: ../../schema/v0/school_enrollment_status.schema.json
           description: Current enrollment status for the identified person.
+          example: FULL_TIME
+        enrollmentDetails:
+          type: array
+          description: List of enrollment details filtered from the raw data.
+          items:
+            $ref: "#/components/schemas/EnrollmentDetail"
+        rawData:
+          type: object
+          description: Raw response data from the National Student Clearinghouse.
+        dataSource:
+          $ref: ../../schema/v0/data_source.schema.json
+          description: The source of the enrollment data.
+        metadata:
+          $ref: "#/components/schemas/Metadata"
     GetVeteranDisabilityStatusRequest:
       $ref: ../../schema/v0/identity.schema.json
     VeteranDisabilityStatusResponse:
@@ -141,10 +526,111 @@ components:
       additionalProperties: false
       required:
         - combinedDisabilityRating
+        - rawData
+        - dataSource
+        - metadata
       properties:
         combinedDisabilityRating:
           $ref: ../../schema/v0/combined_disability_rating.schema.json
           description: VA combined disability rating for the identified person.
+        legalEffectiveDate:
+          type: string
+          format: date
+          nullable: true
+          description: The date when the disability rating became legally effective.
+          example: "2012-07-01"
+        combinedEffectiveDate:
+          type: string
+          format: date
+          nullable: true
+          description: The date when the combined disability rating became effective.
+          example: "2012-08-01"
+        earliestRatingEndDate:
+          type: string
+          format: date
+          nullable: true
+          description: The earliest end date among all individual disability ratings.
+          example: "2122-08-27"
+        rawData:
+          type: object
+          description: Raw response data from Veterans Affairs.
+        dataSource:
+          $ref: ../../schema/v0/data_source.schema.json
+          description: The source of the disability rating data.
+        metadata:
+          $ref: "#/components/schemas/Metadata"
+    EnrollmentDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - schoolName
+        - termBeginDate
+        - termEndDate
+        - enrollmentStatus
+      properties:
+        schoolName:
+          type: string
+          description: Official name of the school.
+          example: "Trident University International"
+        termBeginDate:
+          type: string
+          description: The date when the enrollment term began.
+          example: "2024-05-31"
+        termEndDate:
+          type: string
+          description: The date when the enrollment term ended.
+          example: "2024-11-19"
+        enrollmentStatus:
+          $ref: ../../schema/v0/school_enrollment_status.schema.json
+          description: Enrollment status for this specific term.
+    Metadata:
+      type: object
+      additionalProperties: false
+      required:
+        - apiVersion
+        - environment
+        - requestTimestamp
+        - responseTimestamp
+        - transaction-id
+        - datasourceDurationMillis
+      properties:
+        apiVersion:
+          type: string
+          description: The build version of the service.
+          example: "1.3.0"
+        environment:
+          type: string
+          description: The environment the service is running in.
+          example: "prod"
+        requestTimestamp:
+          type: string
+          format: date-time
+          description: The timestamp when the request was received.
+          example: "2026-04-14T12:00:00.000Z"
+        responseTimestamp:
+          type: string
+          format: date-time
+          description: The timestamp when the response was generated.
+          example: "2026-04-14T12:00:00.217Z"
+        transaction-id:
+          type: string
+          description: Unique identifier for the transaction.
+          example: "123456"
+        datasourceDurationMillis:
+          type: integer
+          format: int64
+          description: How long the back-end spent in milliseconds.
+          example: 180
+    Error:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: A descriptive error message.
+          example: "Not Found"
   examples:
     GetEducationEnrollmentRequestExample:
       value:
@@ -155,7 +641,90 @@ components:
         ssn: "123-45-6789"
     EducationEnrollmentResponseExample:
       value:
-        enrollmentStatus: FULL_TIME
+        enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
+        enrollmentDetails:
+          - schoolName: "Trident University International"
+            termBeginDate: "2024-05-31"
+            termEndDate: "2024-11-19"
+            enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
+        rawData:
+          clientData:
+            zaccountID: ""
+            caseReferenceId: ""
+            contactEmail: ""
+            organizationName: ""
+          identityDetails: null
+          status:
+            code: "0"
+            message: Successful
+            severity: Info
+          studentInfoProvided:
+            dateOfBirth: "1988-10-24"
+            firstName: Lynette
+            lastName: Oyola
+            middleName: ""
+          transactionDetails:
+            notifiedDate: "2026-04-06 15:04:06.122"
+            nscHit: "Y"
+            orderId: "115201183"
+            requestedBy: CMS Contact
+            requestedDate: "2026-04-06 15:04:06.122"
+            salesTax: "0.00"
+            transactionFee: "0.00"
+            transactionId: "828881291"
+            transactionStatus: CNF
+            transactionTotal: "0.00"
+            appliedLikeSchoolMatching: ""
+            studentComments: ""
+          enrollmentDetails:
+            - officialSchoolName: Trident University International
+              enrollmentSinceDate: ""
+              currentEnrollmentStatus: CC
+              enrollmentData:
+                - enrollmentStatus: "Y"
+                  termBeginDate: "2024-05-31"
+                  termEndDate: "2024-11-19"
+                  schoolCertifiedOnDate: "2024-07-16"
+                  anticipatedGraduationDate: "2025-12-30"
+                  studentClassCredential: ""
+              studentAddress:
+                address1: 2489 O Conner Street
+                address2: ""
+                city: Pascagoula
+                state: MS
+                zipCode: "39567"
+                province: ""
+                postalCode: ""
+                country: US
+        dataSource: National Student Clearinghouse
+        metadata:
+          apiVersion: 1.3.0
+          environment: prod
+          requestTimestamp: "2026-04-14T12:00:00.000Z"
+          responseTimestamp: "2026-04-14T12:00:00.217Z"
+          datasourceDurationMillis: 180
+          transaction-id: "123456"
+    EducationEnrollmentMultipleResponseExample:
+      value:
+        enrollmentStatus: HALF_TIME
+        enrollmentDetails:
+          - schoolName: "University A"
+            termBeginDate: "2023-01-01"
+            termEndDate: "2023-05-01"
+            enrollmentStatus: HALF_TIME
+          - schoolName: "University B"
+            termBeginDate: "2022-09-01"
+            termEndDate: "2022-12-31"
+            enrollmentStatus: HALF_TIME
+        rawData: {}
+        dataSource: National Student Clearinghouse
+        metadata:
+          apiVersion: 1.3.0
+          environment: prod
+          requestTimestamp: "2026-04-14T12:00:00.000Z"
+          responseTimestamp: "2026-04-14T12:00:00.217Z"
+          datasourceDurationMillis: 180
+          transaction-id: "123456"
     GetVeteranDisabilityStatusRequestExample:
       value:
         firstName: Lynette
@@ -170,4 +739,51 @@ components:
           country: USA
     VeteranDisabilityStatusResponseExample:
       value:
-        combinedDisabilityRating: 70
+        combinedDisabilityRating: 40
+        legalEffectiveDate: "2012-07-01"
+        combinedEffectiveDate: "2012-08-01"
+        earliestRatingEndDate: "2122-08-27"
+        rawData:
+          data:
+            attributes:
+              combined_disability_rating: 40
+              combined_effective_date: "2012-08-01"
+              individual_ratings:
+                - decision: 1151 Granted
+                  diagnostic_text: Renal Failure
+                  diagnostic_type_code: "0520"
+                  diagnostic_type_name: Paralysis of the sciatic nerve
+                  disability_rating_id: "1071465"
+                  effective_date: "2018-09-21"
+                  rating_end_date: "2122-08-27"
+                  rating_percentage: 80
+                  static_ind: true
+                - decision: Service Connected
+                  diagnostic_text: DM Type II
+                  diagnostic_type_code: "9411"
+                  diagnostic_type_name: Post traumatic stress disorder
+                  disability_rating_id: "1071466"
+                  effective_date: "2018-02-14"
+                  rating_end_date: "2122-08-27"
+                  rating_percentage: 50
+                  static_ind: true
+                - decision: Service Connected
+                  diagnostic_text: DM Type II
+                  diagnostic_type_code: "9411"
+                  diagnostic_type_name: Post traumatic stress disorder
+                  disability_rating_id: "1071466"
+                  effective_date: "2020-02-20"
+                  rating_end_date: "2122-08-27"
+                  rating_percentage: 30
+                  static_ind: true
+              legal_effective_date: "2012-07-01"
+            id: 1012667145V762142
+            type: disability_ratings
+        dataSource: Veterans Affairs
+        metadata:
+          apiVersion: 1.3.0
+          environment: prod
+          requestTimestamp: "2026-04-14T12:00:00.000Z"
+          responseTimestamp: "2026-04-14T12:00:00.217Z"
+          datasourceDurationMillis: 180
+          transaction-id: "123456"

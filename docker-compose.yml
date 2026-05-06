@@ -2,13 +2,13 @@ services:
   api:
     build: .
     environment:
-      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector:4317
+      DD_AGENT_HOST: datadog-agent
+      DD_TRACE_AGENT_PORT: 8126
       REDIS_ADDR: redis:6379
       REDIS_USE_TLS: "false"
     ports:
       - "8000:8000"
     depends_on:
-      - otel-collector
       - redis
 
   redis:
@@ -17,37 +17,10 @@ services:
     ports:
       - "6379:6379"
 
-  jaeger-all-in-one:
-    image: jaegertracing/all-in-one:latest
-    restart: always
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:latest
+    environment:
+      - DD_API_KEY=dummy
+      - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true
     ports:
-      - "16686:16686"
-      - "14268"
-      - "14250"
-
-  otel-collector:
-    image: otel/opentelemetry-collector:0.67.0
-    restart: always
-    command: ["--config=/etc/otel-collector-config.yml"]
-    volumes:
-      - ./otel-collector-config.yml:/etc/otel-collector-config.yml
-    ports:
-      - "1888:1888" # pprof extension
-      - "8888:8888" # Prometheus metrics exposed by the collector
-      - "8889:8889" # Prometheus exporter metrics
-      - "13133:13133" # health_check extension
-      - "4317:4317" # OTLP gRPC receiver
-      - "4318:4318" # OTLP HTTP receiver
-      - "55679:55679" # zpages extension
-    depends_on:
-      - jaeger-all-in-one
-      - prometheus
-
-  prometheus:
-    container_name: prometheus
-    image: prom/prometheus:latest
-    restart: always
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
+      - "8126:8126"

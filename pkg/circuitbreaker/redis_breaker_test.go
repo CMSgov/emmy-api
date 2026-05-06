@@ -2,8 +2,8 @@ package circuitbreaker
 
 import (
 	"context"
-	"io"
 	"log/slog"
+	"os"
 	"strconv"
 	"testing"
 	"time"
@@ -14,7 +14,6 @@ import (
 )
 
 const (
-	redisClientAddr   = "localhost:6379"
 	redisPassword     = ""
 	redisDB           = 0
 	redisDialTimeout  = 2 * time.Second
@@ -32,11 +31,21 @@ const (
 	testPrefix           = "cb:"
 )
 
+func getRedisAddr() string {
+	addr := os.Getenv("REDIS_ADDR")
+	if addr == "" {
+		return "localhost:6379"
+	}
+	return addr
+}
+
 func newTestRedisClient(t *testing.T) *redis.Client {
 	t.Helper()
 
+	addr := getRedisAddr()
+
 	rdb := redis.NewClient(&redis.Options{
-		Addr:         redisClientAddr,
+		Addr:         addr,
 		Password:     redisPassword,
 		DB:           redisDB,
 		DialTimeout:  redisDialTimeout,
@@ -50,7 +59,7 @@ func newTestRedisClient(t *testing.T) *redis.Client {
 	// Fail fast with a clear error if Redis isn't running
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
-	require.NoError(t, rdb.Ping(ctx).Err(), "Redis must be running at %s for these tests", redisClientAddr)
+	require.NoError(t, rdb.Ping(ctx).Err(), "Redis must be running at %s for these tests", addr)
 
 	return rdb
 }
@@ -74,7 +83,7 @@ func TestNewRedisBreaker(t *testing.T) {
 
 	name := "redisBreaker:" + t.Name()
 
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	result := NewRedisBreaker(rdb, name, testBreakerOpts, logger)
 
@@ -90,7 +99,7 @@ func TestNewRedisBreaker_keys(t *testing.T) {
 
 	name := "redisBreaker:" + t.Name()
 
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	breaker := NewRedisBreaker(rdb, name, testBreakerOpts, logger)
 
@@ -109,7 +118,7 @@ func TestNewRedisBreaker_Allow(t *testing.T) {
 
 	name := "redisBreaker:" + t.Name()
 
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	breaker := NewRedisBreaker(rdb, name, testBreakerOpts, logger)
 
@@ -133,7 +142,7 @@ func TestRedisBreaker_OnFailure_TransitionsToOpen(t *testing.T) {
 
 	name := "redisBreaker:" + t.Name()
 
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	breaker := NewRedisBreaker(rdb, name, opts, logger)
 

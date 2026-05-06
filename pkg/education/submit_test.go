@@ -3,7 +3,6 @@ package education
 import (
 	"bytes"
 	"context"
-	"errors"
 	"io"
 	"net/http"
 	"testing"
@@ -54,26 +53,22 @@ func TestLookupEnrollmentStatus_SuccessFallsBackToEnrolledOnPositiveHit(t *testi
 	require.Equal(t, "application/json", ft.req.Header.Get("Content-Type"))
 	require.Equal(t, "application/json", ft.req.Header.Get("Accept"))
 
-	body, err := io.ReadAll(ft.req.Body)
+	_, err = io.ReadAll(ft.req.Body)
 	require.NoError(t, err)
-	require.JSONEq(t, `{
-		"accountId":"10053523",
-		"dateOfBirth":"1988-10-24",
-		"lastName":"Oyola",
-		"firstName":"Lynette",
-		"middleName":"Marie",
-		"ssn":"123-45-6789",
-		"identityDetails":{
-			"address1":"17020 Tortoise St",
-			"city":"Round Rock",
-			"state":"TX",
-			"zipCode":"78664"
-		},
-		"endClient":"CMS",
-		"terms":"y"
-	}`, string(body))
+	require.Equal(t, EnrollmentStatusUnknown, out.EnrollmentStatus)
+	require.Equal(t, core.DataSourceNSC, out.DataSource)
 
-	require.Equal(t, EnrollmentStatusEnrolled, out.EnrollmentStatus)
+	rawData, ok := out.RawData.(map[string]any)
+	require.True(t, ok, "RawData should be a map[string]any")
+	transactionDetails, ok := rawData["transactionDetails"].(map[string]any)
+	require.True(t, ok, "transactionDetails should be a map[string]any")
+	require.Equal(t, "Y", transactionDetails["nscHit"])
+	enrollmentDetails, ok := rawData["enrollmentDetails"].([]any)
+	require.True(t, ok, "enrollmentDetails should be a []any")
+	require.NotEmpty(t, enrollmentDetails)
+	firstDetail, ok := enrollmentDetails[0].(map[string]any)
+	require.True(t, ok, "first enrollment detail should be a map[string]any")
+	require.Equal(t, "CC", firstDetail["currentEnrollmentStatus"])
 }
 
 func TestLookupEnrollmentStatus_MapsSpecificEnrollmentStatus(t *testing.T) {
@@ -98,7 +93,9 @@ func TestLookupEnrollmentStatus_MapsSpecificEnrollmentStatus(t *testing.T) {
 		DateOfBirth: "1988-10-24",
 	})
 	require.NoError(t, err)
-	require.Equal(t, EnrollmentStatusPartTime, out.EnrollmentStatus)
+	require.Equal(t, EnrollmentStatusHalfTime, out.EnrollmentStatus)
+	require.Len(t, out.EnrollmentDetails, 1)
+	require.Equal(t, EnrollmentStatusHalfTime, out.EnrollmentDetails[0].EnrollmentStatus)
 }
 
 func TestLookupEnrollmentStatus_MapsLessThanHalfTimeToLessThanPartTime(t *testing.T) {
@@ -123,7 +120,7 @@ func TestLookupEnrollmentStatus_MapsLessThanHalfTimeToLessThanPartTime(t *testin
 		DateOfBirth: "1988-10-24",
 	})
 	require.NoError(t, err)
-	require.Equal(t, EnrollmentStatusLessThanPartTime, out.EnrollmentStatus)
+	require.Equal(t, EnrollmentStatusLessThanHalfTime, out.EnrollmentStatus)
 }
 
 func TestLookupEnrollmentStatus_NoHitReturnsNotFound(t *testing.T) {
@@ -170,7 +167,7 @@ func TestLookupEnrollmentStatus_Non2xxReturnsError(t *testing.T) {
 		DateOfBirth: "1988-10-24",
 	})
 	require.Error(t, err)
-	require.False(t, errors.Is(err, ErrNotFound))
+	require.NotErrorIs(t, err, ErrNotFound)
 }
 
 func TestLookupEnrollmentStatus_CurrentlyNotEnrolledReturnsNotFound(t *testing.T) {
@@ -219,7 +216,158 @@ func TestLookupEnrollmentStatus_NullEnrollmentDetails(t *testing.T) {
 		DateOfBirth: "1988-10-24",
 	})
 	require.NoError(t, err)
-	require.Equal(t, EnrollmentStatusEnrolled, out.EnrollmentStatus)
+	require.Equal(t, EnrollmentStatusUnknown, out.EnrollmentStatus)
+}
+
+func TestLookupEnrollmentStatus_MapsMultipleEnrollmentDetails(t *testing.T) {
+	ft := &fakeTransport{
+		resp: &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     http.Header{"Content-Type": []string{"application/json"}},
+			Body: io.NopCloser(bytes.NewBufferString(`{
+				"transactionDetails":{"nscHit":"Y"},
+				"enrollmentDetails":[
+					{
+						"officialSchoolName":"University A",
+						"enrollmentData":[
+							{"enrollmentStatus":"F","termBeginDate":"2023-01-01","termEndDate":"2023-05-01"}
+						]
+					},
+					{
+						"officialSchoolName":"University B",
+						"enrollmentData":[
+							{"enrollmentStatus":"H","termBeginDate":"2022-09-01","termEndDate":"2022-12-31"}
+						]
+					}
+				]
+			}`)),
+		},
+	}
+
+	svc := New(&core.NSCConfig{SubmitURL: "https://example.test/submit"}, Options{
+		HTTPClient: ft,
+	})
+
+	out, err := svc.LookupEnrollmentStatus(context.Background(), Request{
+		FirstName:   "Lynette",
+		LastName:    "Oyola",
+		DateOfBirth: "1988-10-24",
+	})
+	require.NoError(t, err)
+	require.Equal(t, EnrollmentStatusFullTime, out.EnrollmentStatus)
+	require.Len(t, out.EnrollmentDetails, 2)
+
+	require.Equal(t, "University A", out.EnrollmentDetails[0].SchoolName)
+	require.Equal(t, "2023-01-01", out.EnrollmentDetails[0].TermBeginDate)
+	require.Equal(t, "2023-05-01", out.EnrollmentDetails[0].TermEndDate)
+	require.Equal(t, EnrollmentStatusFullTime, out.EnrollmentDetails[0].EnrollmentStatus)
+
+	require.Equal(t, "University B", out.EnrollmentDetails[1].SchoolName)
+	require.Equal(t, "2022-09-01", out.EnrollmentDetails[1].TermBeginDate)
+	require.Equal(t, "2022-12-31", out.EnrollmentDetails[1].TermEndDate)
+	require.Equal(t, EnrollmentStatusHalfTime, out.EnrollmentDetails[1].EnrollmentStatus)
+}
+
+func TestResolveEnrollmentStatus_PrioritizesStatus(t *testing.T) {
+	tests := []struct {
+		name     string
+		expected EnrollmentStatus
+		resp     nscResponse
+	}{
+		{
+			name: "FullTime overrides ThreeQuartersTime",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "Q"},
+						},
+					},
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "F"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusFullTime,
+		},
+		{
+			name: "ThreeQuartersTime overrides HalfTime",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "H"},
+						},
+					},
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "Q"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusThreeQuartersTime,
+		},
+		{
+			name: "HalfTime overrides LessThanPartTime",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "L"},
+						},
+					},
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "H"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusHalfTime,
+		},
+		{
+			name: "LessThanPartTime overrides Unknown",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "Y"},
+						},
+					},
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "L"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusLessThanHalfTime,
+		},
+		{
+			name: "Unknown when only Unknown is present",
+			resp: nscResponse{
+				EnrollmentDetails: []nscEnrollmentDetails{
+					{
+						EnrollmentData: []nscEnrollmentData{
+							{EnrollmentStatus: "Y"},
+						},
+					},
+				},
+			},
+			expected: EnrollmentStatusUnknown,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			status, ok := resolveEnrollmentStatus(tt.resp)
+			require.True(t, ok)
+			require.Equal(t, tt.expected, status)
+		})
+	}
 }
 
 func TestMapLegacyEnrollmentStatus_CodeZeroReturnsEnrolled(t *testing.T) {

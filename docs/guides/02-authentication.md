@@ -10,7 +10,7 @@ For the checked-in v0 spec, the security scheme is defined in
 `api-spec/v0/openapi.yaml` with this token URL:
 
 ```text
-https://api.dev.emmy.cms.gov/oauth2/token
+https://emmy-uat.auth.us-east-1.amazoncognito.com/oauth2/token
 ```
 
 Your environment-specific onboarding materials may give you a different

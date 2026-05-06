@@ -2,9 +2,9 @@
 
 ## Section A: Executive Summary
 
-**Report date:** `<YYYY-MM-DD>`  
-**Scope:** `root docs + docs/**/*.md`  
-**Overall accuracy score:** **<NN>/100**  
+**Report date:** `<YYYY-MM-DD>`
+**Scope:** `root docs + docs/**/*.md`
+**Overall accuracy score:** **<NN>/100**
 **Completion gate status:** **<PASS|FAIL>**
 
 **Risk statement:**

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"log/slog"
 	"runtime/debug"
@@ -9,10 +10,9 @@ import (
 	"github.com/cmsgov/emmy-api/api/middleware"
 	"github.com/cmsgov/emmy-api/api/routes"
 	"github.com/cmsgov/emmy-api/pkg/core"
+	"github.com/cmsgov/emmy-api/pkg/encryption"
+	"github.com/cmsgov/emmy-api/pkg/reporting"
 
-	"go.opentelemetry.io/otel/codes"
-
-	"github.com/gofiber/contrib/otelfiber/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -36,12 +36,8 @@ func RequestIDToUserContext() fiber.Handler {
 	}
 }
 
-func errorHandler(logger *slog.Logger, otel core.OtelService) fiber.ErrorHandler {
+func errorHandler(logger *slog.Logger) fiber.ErrorHandler {
 	handleFiberError := func(ctx *fiber.Ctx, err *fiber.Error) error {
-		span := otel.SpanFromContext(ctx.UserContext())
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Message)
-
 		logger.ErrorContext(
 			ctx.UserContext(),
 			"fiber error",
@@ -76,11 +72,12 @@ func stackTraceHandler(logger *slog.Logger) func(*fiber.Ctx, any) {
 }
 
 type Config struct {
-	Otel   core.OtelService
-	Logger *slog.Logger
-	Core   core.Config
-
-	Redis *redis.Client
+	Logger     *slog.Logger
+	Redis      *redis.Client
+	Core       core.Config
+	DB         *sql.DB
+	Encryption encryption.Service
+	Reporter   reporting.Reporter
 }
 
 func New(cfg *Config) (*fiber.App, error) {
@@ -91,7 +88,7 @@ func New(cfg *Config) (*fiber.App, error) {
 	logger := cfg.Logger.With(slog.String("component", "api"))
 
 	fiberConfig := fiber.Config{
-		ErrorHandler: errorHandler(cfg.Logger, cfg.Otel),
+		ErrorHandler: errorHandler(cfg.Logger),
 	}
 
 	app := fiber.New(fiberConfig)
@@ -118,10 +115,20 @@ func New(cfg *Config) (*fiber.App, error) {
 		AllowMethods: "*",
 	}))
 
-	app.Use(otelfiber.Middleware())
+	app.Use(middleware.SubjectMiddleware(cfg.Logger))
 
+	routes.StatusRouter(app, cfg.Redis, logger)
 
-	routes.StatusRouter(app, cfg.Core, cfg.Redis, logger)
+	params := routes.RouterParams{
+		CFG:        &cfg.Core,
+		RDB:        cfg.Redis,
+		DB:         cfg.DB,
+		Encryption: cfg.Encryption,
+		Reporter:   cfg.Reporter,
+		Logger:     logger,
+	}
+
+	routes.RegisterRoutes(app, params)
 
 	if cfg.Core.SkipAuth {
 		app.Use(middleware.SkipAuthMiddleware())

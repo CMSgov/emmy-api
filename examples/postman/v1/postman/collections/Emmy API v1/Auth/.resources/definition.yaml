@@ -1,7 +1,0 @@
-$kind: collection
-name: Auth
-auth:
-  - id: 8a23772d-3359-4799-a887-8cd13e0bd2a9
-    type: noauth
-    name: No Auth
-order: 459702033922327

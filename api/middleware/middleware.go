@@ -2,11 +2,13 @@ package middleware
 
 import (
 	"errors"
+	"log/slog"
 	"strings"
 	"sync"
 
 	"github.com/cmsgov/emmy-api/pkg/circuitbreaker"
 	"github.com/gofiber/fiber/v2"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 const (
@@ -61,6 +63,46 @@ func SkipAuthMiddleware() fiber.Handler {
 	}
 }
 
+// SubjectMiddleware extracts the 'sub' claim from the request and injects it into locals.
+// It prioritizes the 'X-Sub' header, then looks for a 'sub' claim in a Bearer JWT,
+// and finally falls back to 'unknown-subject' if none are found.
+func SubjectMiddleware(logger *slog.Logger) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// If SkipAuthMiddleware already set sub, we don't want to overwrite it with "unknown-subject"
+		if existing := c.Locals("sub"); existing != nil {
+			if s, ok := existing.(string); ok && s != "" {
+				return c.Next()
+			}
+		}
+
+		sub := c.Get("X-Sub")
+		if sub == "" {
+			// Try extracting from Authorization header
+			auth := c.Get(fiber.HeaderAuthorization)
+			if strings.HasPrefix(auth, "Bearer ") {
+				tokenString := strings.TrimPrefix(auth, "Bearer ")
+				// In a real scenario, we'd verify the signature with a JWKS.
+				// For now, we parse the token without verification to extract the 'sub' claim.
+				token, err := jwt.ParseString(tokenString, jwt.WithVerify(false), jwt.WithValidate(false))
+				if err != nil {
+					if logger != nil {
+						logger.Error("failed to parse bearer token", "error", err, "token", tokenString)
+					}
+					return fiber.ErrUnauthorized
+				}
+				sub = token.Subject()
+			}
+		}
+
+		if sub == "" {
+			sub = "unknown-subject"
+		}
+
+		c.Locals("sub", sub)
+		return c.Next()
+	}
+}
+
 func parseGroups(value string) []string {
 	parts := strings.Split(value, ",")
 	groups := make([]string, 0, len(parts))
@@ -80,14 +122,14 @@ func parseGroups(value string) []string {
 // It can block the entire request
 // figures out what breaker to use since we're intentionally reusing one breaker per endpoint
 // calls breaker.Allow() to either block the request of let it continue
-func WithCircuitBreaker(newBreaker func(name string) *circuitbreaker.RedisBreaker) func(fiber.Handler) fiber.Handler {
+func WithCircuitBreaker(newBreaker func(name string) circuitbreaker.Breaker) func(fiber.Handler) fiber.Handler {
 	var mu sync.RWMutex
 
 	// the lookup table is usable by multiple requests
 	// We want multiple requests to be able to hit this middleware without failing or creating inconsistent state such as multiple requests creating multiple breakers for the same endpoint
-	breakers := make(map[string]*circuitbreaker.RedisBreaker)
+	breakers := make(map[string]circuitbreaker.Breaker)
 
-	getBreaker := func(name string) *circuitbreaker.RedisBreaker {
+	getBreaker := func(name string) circuitbreaker.Breaker {
 		// allows concurrent read requests but not write requests
 		mu.RLock()
 		// read breaker in map and assign to variable
@@ -133,9 +175,28 @@ func WithCircuitBreaker(newBreaker func(name string) *circuitbreaker.RedisBreake
 				return c.SendStatus(fiber.StatusServiceUnavailable)
 			}
 
-			return next(c)
+			err = next(c)
+			if breakerShouldCountFailure(c, err) {
+				breaker.OnFailure(c.Context())
+			} else {
+				breaker.OnSuccess(c.Context())
+			}
+
+			return err
 		}
 	}
+}
+
+func breakerShouldCountFailure(c *fiber.Ctx, err error) bool {
+	if err != nil {
+		var fiberErr *fiber.Error
+		if errors.As(err, &fiberErr) {
+			return fiberErr.Code >= fiber.StatusInternalServerError
+		}
+		return true
+	}
+
+	return c.Response().StatusCode() >= fiber.StatusInternalServerError
 }
 
 func breakerName(c *fiber.Ctx) string {
@@ -148,5 +209,4 @@ func breakerName(c *fiber.Ctx) string {
 	}
 
 	return c.Method() + " " + path
-
 }

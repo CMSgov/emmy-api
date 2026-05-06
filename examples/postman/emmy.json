@@ -1,0 +1,182 @@
+{
+  "info": {
+    "name": "Enrollment API Workflow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "api_base",
+      "value": ""
+    },
+    {
+      "key": "auth_base",
+      "value": ""
+    },
+    {
+      "key": "client_id",
+      "value": ""
+    },
+    {
+      "key": "client_secret",
+      "value": ""
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "token_expiry",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Obtain Token with Client Credentials",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "{{client_id}}"
+            },
+            {
+              "key": "password",
+              "value": "{{client_secret}}"
+            }
+          ]
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "client_credentials"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{auth_base}}",
+          "host": [
+            "{{auth_base}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {\n    const body = pm.response.json();\n\n    if (!body.access_token) {\n        throw new Error(\"Token response missing access_token\");\n    }\n\n    pm.collectionVariables.set(\"access_token\", body.access_token);\n\n    if (body.expires_in) {\n        pm.collectionVariables.set(\n            \"token_expiry\",\n            String(Date.now() + (body.expires_in * 1000))\n        );\n    }\n\n    if (body.refresh_token) {\n        pm.collectionVariables.set(\"refresh_token\", body.refresh_token);\n    }\n\n    console.log(\"Token acquired successfully\");\n} else {\n    throw new Error(\n        `Token request failed: ${pm.response.code} ${pm.response.text()}`\n    );\n}\n"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Enrollment Data",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{api_base}}/api/v0/education-enrollments",
+          "host": [
+            "{{api_base}}"
+          ],
+          "path": [
+            "api",
+            "v0",
+            "education-enrollments"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Lynette\",\n  \"lastName\": \"Oyola\",\n  \"dateOfBirth\": \"1988-10-24\"\n}\n"
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const token = pm.collectionVariables.get(\"access_token\");\n\nif (!token) {\n    throw new Error(\"Missing access_token. Token request likely failed.\");\n}\n"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Response is JSON\", function () {\n    pm.expect(\n        pm.response.headers.get(\"Content-Type\")\n    ).to.include(\"application/json\");\n});\n\npm.test(\"Response body is not empty\", function () {\n    const body = pm.response.json();\n    pm.expect(body).to.exist;\n});\n"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Veteran Disability Ratings",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{api_base}}/api/v0/veteran-disability-ratings",
+          "host": [
+            "{{api_base}}"
+          ],
+          "path": [
+            "api",
+            "v0",
+            "veteran-disability-ratings"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Alfredo\",\n  \"lastName\": \"Armstrong\",\n  \"dateOfBirth\": \"1993-06-08\",\n  \"ssn\": \"796-01-2476\"\n}\n"
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const token = pm.collectionVariables.get(\"access_token\");\n\nif (!token) {\n    throw new Error(\"Missing access_token. Token request likely failed.\");\n}\n"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Response is JSON\", function () {\n    pm.expect(\n        pm.response.headers.get(\"Content-Type\")\n    ).to.include(\"application/json\");\n});\n\npm.test(\"Response body is not empty\", function () {\n    const body = pm.response.json();\n    pm.expect(body).to.exist;\n});\n"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

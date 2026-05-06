@@ -2,22 +2,24 @@ package core
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
-
-	slogmulti "github.com/samber/slog-multi"
-	"go.opentelemetry.io/contrib/bridges/otelslog"
 )
 
 type contextHandler struct {
 	slog.Handler
 }
 
+//nolint:gocritic // slog.Handler requires slog.Record by value.
 func (h *contextHandler) Handle(ctx context.Context, r slog.Record) error {
 	if rid, ok := ctx.Value(RequestContextKey).(string); ok {
 		r.AddAttrs(slog.String("request_id", rid))
 	}
-	return h.Handler.Handle(ctx, r)
+	if err := h.Handler.Handle(ctx, r); err != nil {
+		return fmt.Errorf("handle slog record: %w", err)
+	}
+	return nil
 }
 
 func (h *contextHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
@@ -41,19 +43,4 @@ func newStdoutHandler(cfg *Config) slog.Handler {
 func NewLogger(cfg *Config) *slog.Logger {
 	stdoutHandler := newStdoutHandler(cfg)
 	return slog.New(stdoutHandler)
-}
-
-func NewLoggerWithOtel(cfg *Config, otel OtelService) *slog.Logger {
-	stdoutHandler := newStdoutHandler(cfg)
-	otelHandler := otelslog.NewHandler(
-		"emmy-api",
-		otelslog.WithLoggerProvider(otel.LoggerProvider()),
-	)
-
-	return slog.New(
-		slogmulti.Fanout(
-			stdoutHandler,
-			otelHandler,
-		),
-	)
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	redisLocal "github.com/cmsgov/emmy-api/pkg/redis"
+	redispkg "github.com/cmsgov/emmy-api/pkg/redis"
 	"github.com/gofiber/fiber/v2"
 	goredis "github.com/redis/go-redis/v9"
 )
@@ -18,7 +18,7 @@ func GetRDBStatus(rdb *goredis.Client) fiber.Handler {
 		ctx, cancel := context.WithTimeout(c.Context(), contextTimeout*time.Second)
 		defer cancel()
 
-		err := redisLocal.Ping(ctx, rdb)
+		err := redispkg.Ping(ctx, rdb)
 		if err != nil {
 			return err
 		}

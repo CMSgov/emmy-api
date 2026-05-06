@@ -34,7 +34,7 @@ permissions:
 jobs:
   cspell:
     name: cspell
-    runs-on: self-hosted
+    runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     steps:
       - uses: actions/checkout@v6
 

@@ -1,20 +1,24 @@
-# Verification Service API
+# Eligibility Made Easy (Emmy) API Verification Service
 
-An API that provides a unified, standard interface to the data sources needed to verify community engagement for the purpose of evaluating Medicaid eligibility.
+The Emmy API is a backend data service that connects to federal and commercial data sources to facilitate eligibility determination for state agencies.
 
-### Using the API
+## Quick Links
 
-[Click here for the steps](docs/guides/01-getting-started.md) to begin using the data sources available through the API and see the specification of what kind of data is available.
+- **[About Emmy Software](https://cms.gov/eligibility-made-easy)**
+  - [Emmy API Overview](https://cms.gov/eligibility-made-easy)
+  - [Emmy Application Github](https://github.com/DSACMS/iv-cbv-payroll/blob/main/README.md)
+
+- **[Technical Guide to Getting Started](docs/guides/01-getting-started.md)**
+  - [Usage Examples](docs/guides/03-usage-examples.md)
+  - [Emmy API Specifications (Swagger)](https://cmsgov.github.io/emmy-api/swagger-ui/)
+
+- [Developer and Repo Information](#local-development)
 
 ## About the Project
 
-This project evolved out of the [IVaaS](https://github.com/DSACMS/iv-cbv-payroll "IVaaS repository") tool for consent based verification. As the need for more complex forms of validation developed, it became clear that providing a way for agencies to integrate directly with an API was becoming increasingly useful, particularly for ex parte renewals. The ultimate goals of this and related projects is to remove as much friction as possible between the applicant and receiving their benefits by reducing the burden placed on them to manually provide evidence of eligibility.
+The Emmy API is a part of a suite of open-source tools developed by the Centers for Medicare & Medicaid Services (CMS). Emmy supports states in implementing the new Medicaid eligibility and renewal community engagement requirements under the Working Families Tax Cut legislation.
 
-Current repository-focused documentation starts with:
-
-- [docs/overview.md](docs/overview.md) for runtime shape and system context
-- [docs/setup.md](docs/setup.md) for local setup, testing, and tooling
-- [api-spec/README.md](api-spec/README.md) for the contract-first API workflow
+Emmy's suite of tools does not replace a state's existing eligibility system — rather, it offers streamlined, efficient ways to help states implement the new community engagement requirements.
 
 ## Core Team
 
@@ -71,6 +75,36 @@ You can also run each step individually with `mise run bundle-api-spec`,
 `mise run lint-yaml-files`, `mise run check-format-contract-files`,
 `mise run check-json-schemas`, and `mise run check-openapi-breaking`.
 
+### Database Migrations
+
+This project uses [`golang-migrate`](https://github.com/golang-migrate/migrate) to manage database schema changes.
+
+Migration files are located in the `migrations/` directory.
+
+To manage migrations, you can use the following `make` commands:
+
+```sh
+# Apply all pending migrations
+make migrate-up
+
+# Revert the last applied migration
+make migrate-down
+
+# Check the current migration version
+make migrate-version
+```
+
+Migrations are also supported in environments requiring IAM authentication (e.g., AWS RDS), using the same configuration as the main application.
+
+To run migrations in AWS (e.g., in the `dev` environment):
+
+```sh
+# This runs a one-off ECS task with the migration command
+make migrate-remote ENV=dev
+```
+
+See [docs/architecture/04-database-migrations.md](docs/architecture/04-database-migrations.md) for more details on AWS deployment and Terraform configuration.
+
 ## Policies
 
 ### Open Source Policy
@@ -89,7 +123,7 @@ For more information about our Security, Vulnerability, and Responsible Disclosu
 
 A Software Bill of Materials (SBOM) is a formal record containing the details and supply chain relationships of various components used in building software.
 
-In the spirit of [Executive Order 14028 - Improving the Nation’s Cyber Security](https://www.gsa.gov/technology/it-contract-vehicles-and-purchasing-programs/information-technology-category/it-security/executive-order-14028), the current dependency graph for this repository is available at:
+In the spirit of [Executive Order 14028 - Improving the Nation's Cyber Security](https://www.gsa.gov/technology/it-contract-vehicles-and-purchasing-programs/information-technology-category/it-security/executive-order-14028), the current dependency graph for this repository is available at:
 [https://github.com/CMSgov/emmy-api/network/dependencies](https://github.com/CMSgov/emmy-api/network/dependencies)
 
 For more information and resources about SBOMs, visit: [https://www.cisa.gov/sbom](https://www.cisa.gov/sbom).

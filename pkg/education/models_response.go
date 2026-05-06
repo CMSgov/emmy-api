@@ -1,16 +1,72 @@
 package education
 
+import (
+	"time"
+
+	"github.com/cmsgov/emmy-api/pkg/core"
+)
+
 type EnrollmentStatus string
 
 const (
-	EnrollmentStatusFullTime         EnrollmentStatus = "FULL_TIME"
-	EnrollmentStatusPartTime         EnrollmentStatus = "PART_TIME"
-	EnrollmentStatusLessThanPartTime EnrollmentStatus = "LESS_THAN_PART_TIME"
-	EnrollmentStatusEnrolled         EnrollmentStatus = "ENROLLED"
+	EnrollmentStatusFullTime          EnrollmentStatus = "FULL_TIME"
+	EnrollmentStatusThreeQuartersTime EnrollmentStatus = "THREE_QUARTERS_TIME"
+	EnrollmentStatusHalfTime          EnrollmentStatus = "HALF_TIME"
+	EnrollmentStatusLessThanHalfTime  EnrollmentStatus = "LESS_THAN_HALF_TIME"
+	EnrollmentStatusUnknown           EnrollmentStatus = "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"
 )
 
 type Response struct {
+	EnrollmentStatus  EnrollmentStatus   `json:"enrollmentStatus"`
+	EnrollmentDetails []EnrollmentDetail `json:"enrollmentDetails"`
+	RawData           any                `json:"rawData"`
+	DataSource        core.DataSource    `json:"dataSource"`
+	Metadata          Metadata           `json:"metadata"`
+}
+
+type EnrollmentDetail struct {
+	SchoolName       string           `json:"schoolName"`
+	TermBeginDate    string           `json:"termBeginDate"`
+	TermEndDate      string           `json:"termEndDate"`
 	EnrollmentStatus EnrollmentStatus `json:"enrollmentStatus"`
+}
+
+type Metadata struct {
+	APIVersion               string `json:"apiVersion"`
+	Environment              string `json:"environment"`
+	RequestTimestamp         string `json:"requestTimestamp"`
+	ResponseTimestamp        string `json:"responseTimestamp"`
+	TransactionID            string `json:"transaction-id"` //nolint:tagliatelle // kebab-case is required for transaction-id for compatibility
+	DatasourceDurationMillis int64  `json:"datasourceDurationMillis"`
+}
+
+type BatchJobStatusResponse struct {
+	SubmittedAt             *time.Time `json:"submittedAt"`
+	UpdatedAt               *time.Time `json:"updatedAt"`
+	EstimatedCompletionTime *time.Time `json:"estimatedCompletionTime,omitempty"`
+	BatchJobID              string     `json:"batchJobID"` //nolint:tagliatelle // kebab-case is required for batch-job-id for compatibility
+	Status                  string     `json:"status"`
+	TotalRecords            int        `json:"totalRecords"`
+	ProcessedRecords        int        `json:"processedRecords"`
+	SuccessCount            int        `json:"successCount"`
+	FailureCount            int        `json:"failureCount"`
+}
+
+type BatchJobDetailsResponse struct {
+	BatchJobID string               `json:"batchJobId"`
+	Results    []BatchStudentResult `json:"results"`
+}
+
+type BatchStudentResult struct {
+	Results         *StudentResults `json:"results,omitempty"`
+	RecordID        string          `json:"recordId"`
+	Status          string          `json:"status"`
+	FoundEnrollment bool            `json:"foundEnrollment"`
+}
+
+type StudentResults struct {
+	EnrollmentStatus  EnrollmentStatus   `json:"enrollmentStatus"`
+	EnrollmentDetails []EnrollmentDetail `json:"enrollmentDetails"`
 }
 
 type nscResponse struct {
@@ -23,7 +79,7 @@ type nscResponse struct {
 }
 
 type nscClientData struct {
-	AccountID        string `json:"zaccountID"`
+	AccountID        string `json:"zaccountID"` //nolint:tagliatelle // NSC payload uses this exact casing.
 	CaseReferenceID  string `json:"caseReferenceId"`
 	ContactEmail     string `json:"contactEmail"`
 	OrganizationName string `json:"organizationName"`
@@ -63,11 +119,11 @@ type nscTransactionDetails struct {
 }
 
 type nscEnrollmentDetails struct {
+	StudentAddress          *nscStudentAddress  `json:"studentAddress"`
 	OfficialSchoolName      string              `json:"officialSchoolName"`
 	EnrollmentSinceDate     string              `json:"enrollmentSinceDate"`
 	CurrentEnrollmentStatus string              `json:"currentEnrollmentStatus"`
 	EnrollmentData          []nscEnrollmentData `json:"enrollmentData"`
-	StudentAddress          *nscStudentAddress  `json:"studentAddress"`
 }
 
 type nscEnrollmentData struct {

@@ -50,8 +50,6 @@ flowchart LR
 - `pkg/education/service.go`
   - `type EducationService interface { Submit(ctx context.Context, req Request) (Response, error) }`
   - `type HTTPTransport interface { Do(req *http.Request) (*http.Response, error) }`
-- `pkg/core/otel.go`
-  - `type OtelService interface { SpanFromContext; LoggerProvider; Shutdown }`
 - `pkg/circuitbreaker/circuitbreaker.go`
   - `type Breaker interface { Allow; OnSuccess; OnFailure }`
 
@@ -84,16 +82,15 @@ Ordered middleware in `api.New`:
 
 1. Recover
 2. CORS (`*` origin/headers/methods)
-3. OpenTelemetry Fiber middleware
-4. Structured request logging (trace/span/request IDs)
-5. Conditional Cognito auth middleware
+3. Structured request logging (trace/span/request IDs)
+4. Conditional Cognito auth middleware
 
 ## Dependency Injection Pattern
 
 Observed constructor and options-based DI:
 
 - `education.New(cfg, education.Options{HTTPClient, Logger, Timeout})`
-- Current `main` call: `api.New(&api.Config{Core, Logger, Otel, Redis})`
+- Current `main` call: `api.New(&api.Config{Core, Logger, Redis})`
 - Circuit breaker injection via higher-order middleware factory:
   - `WithCircuitBreaker(func(name string) *RedisBreaker { ... })`
 

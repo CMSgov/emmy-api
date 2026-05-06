@@ -24,6 +24,7 @@ func OpenAPISpecHandlerForPath(path string) fiber.Handler {
 			)
 		}
 
+		//nolint:gosec // Path is resolved from repository-controlled locations.
 		body, err := os.ReadFile(resolvedPath)
 		if err != nil {
 			return fiber.NewError(
@@ -40,14 +41,14 @@ func OpenAPISpecHandlerForPath(path string) fiber.Handler {
 func resolveOpenAPISpecPath(path string) (string, error) {
 	if filepath.IsAbs(path) {
 		if _, err := os.Stat(path); err != nil {
-			return "", err
+			return "", fmt.Errorf("stat openapi path: %w", err)
 		}
 		return path, nil
 	}
 
 	wd, err := os.Getwd()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("get working directory: %w", err)
 	}
 
 	for dir := wd; ; dir = filepath.Dir(dir) {

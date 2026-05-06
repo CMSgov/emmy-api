@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"database/sql"
 	"log/slog"
 
 	"github.com/cmsgov/emmy-api/api/handlers"
@@ -8,14 +9,25 @@ import (
 	"github.com/cmsgov/emmy-api/pkg/circuitbreaker"
 	"github.com/cmsgov/emmy-api/pkg/core"
 	"github.com/cmsgov/emmy-api/pkg/education"
+	"github.com/cmsgov/emmy-api/pkg/encryption"
+	"github.com/cmsgov/emmy-api/pkg/reporting"
 	"github.com/cmsgov/emmy-api/pkg/veteran"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 )
 
-func RegisterRoutes(app fiber.Router, cfg *core.Config, rdb *redis.Client, logger *slog.Logger) {
-	if logger == nil {
-		logger = slog.Default()
+type RouterParams struct {
+	CFG        *core.Config
+	RDB        *redis.Client
+	Reporter   reporting.Reporter
+	Logger     *slog.Logger
+	Encryption encryption.Service
+	DB         *sql.DB
+}
+
+func RegisterRoutes(app fiber.Router, params RouterParams) {
+	if params.Logger == nil {
+		params.Logger = slog.Default()
 	}
 
 	app.Get("/", func(c *fiber.Ctx) error {
@@ -25,23 +37,27 @@ func RegisterRoutes(app fiber.Router, cfg *core.Config, rdb *redis.Client, logge
 
 	api := app.Group("/api")
 
-	edu := education.New(&cfg.NSC, education.Options{
-		Logger: logger,
+	edu := education.New(&params.CFG.NSC, education.Options{
+		Logger:     params.Logger,
+		DB:         params.DB,
+		Encryption: params.Encryption,
 	})
-	veteranService := veteran.New(&cfg.VA, veteran.Options{
-		Logger: logger,
+	veteranService := veteran.New(&params.CFG.VA, veteran.Options{
+		Logger: params.Logger,
 	})
 
 	// One breaker per endpoint
-	withCB := middleware.WithCircuitBreaker(func(name string) *circuitbreaker.RedisBreaker {
+	withCB := middleware.WithCircuitBreaker(func(name string) circuitbreaker.Breaker {
 		return circuitbreaker.NewRedisBreaker(
-			rdb,
+			params.RDB,
 			name,
 			circuitbreaker.DefaultOptions(),
-			logger,
+			params.Logger,
 		)
 	})
-
-	api.Post("/v0/education-enrollments", withCB(handlers.EducationHandler(edu, logger)))
-	api.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(veteranService, logger)))
+	api.Post("/v0/education-enrollments", withCB(handlers.EducationHandler(params.CFG, edu, params.Reporter, params.Logger)))
+	api.Post("/v0/batch-education-enrollments", withCB(handlers.BatchEducationHandler(params.CFG, edu, params.Reporter, params.Logger)))
+	api.Get("/v0/batch-education-enrollments/:batchJobId", handlers.GetBatchStatusHandler(edu, params.Reporter, params.Logger))
+	api.Get("/v0/batch-education-enrollments/:batchJobId/details", handlers.GetBatchDetailsHandler(edu, params.Reporter, params.Logger))
+	api.Post("/v0/veteran-disability-ratings", withCB(handlers.VeteranDisabilityHandler(params.CFG, veteranService, params.Reporter, params.Logger)))
 }

@@ -1,4 +1,5 @@
 .env
+secrets
 .env.local
 tmp/
 vendor/
@@ -7,3 +8,13 @@ dump.rdb
 .postman
 .envrc
 node_modules
+bin
+.idea
+examples/java/target/
+examples/csharp/bin/
+examples/csharp/obj/
+
+swagger-site/*
+!swagger-site/index.html
+!swagger-site/swagger-initializer.js
+!swagger-site/README.md
