@@ -1,6 +1,8 @@
 {
   "name": "emmy-api",
+  "version": "",
   "description": "An API that provides a unified, standard interface to the data sources needed to verify community engagement for the purpose of evaluating Medicaid eligibility.",
+  "longDescription": "",
   "status": "Development",
   "permissions": {
     "licenses": [
@@ -9,24 +11,46 @@
         "URL": "https://github.com/CMSgov/emmy-api/blob/main/LICENSE"
       }
     ],
-    "usageType": ["openSource"]
+    "usageType": [
+      "openSource"
+    ]
   },
   "organization": "Centers for Medicare & Medicaid Services",
   "repositoryURL": "https://github.com/CMSgov/emmy-api",
   "repositoryVisibility": "public",
+  "homepageURL": "",
+  "downloadURL": "",
+  "disclaimerURL": "",
+  "disclaimerText": "",
   "vcs": "git",
-  "laborHours": 7278,
+  "laborHours": 7443,
   "reuseFrequency": {
-    "forks": 3
+    "forks": 3,
+    "clones": 0
   },
-  "languages": ["Go", "Shell", "Makefile", "JavaScript", "HTML", "Dockerfile", "CSS"],
+  "platforms": [],
+  "categories": [],
+  "languages": [
+    "Go",
+    "Shell",
+    "Makefile",
+    "JavaScript",
+    "HTML",
+    "Dockerfile",
+    "CSS"
+  ],
   "maintenance": "internal",
-  "contractNumber": ["47QTCA18D008M:75FCMC23F0124:"],
+  "contractNumber": [
+    "47QTCA18D008M:75FCMC23F0124:"
+  ],
   "SBOM": "https://github.com/CMSgov/emmy-api/network/dependencies",
+  "relatedCode": [],
+  "reusedCode": [],
+  "partners": [],
   "date": {
     "created": "2026-01-22T19:15:23Z",
-    "lastModified": "2026-04-29T14:08:37Z",
-    "metadataLastUpdated": "2026-04-29T15:01:38.552Z"
+    "lastModified": "2026-05-04T20:09:43Z",
+    "metadataLastUpdated": "2026-05-04T20:11:37.192Z"
   },
   "tags": [
     "Income Verification",
@@ -48,5 +72,13 @@
     "email": "emmy@cms.hhs.gov"
   },
   "feedbackMechanism": "https://github.com/CMSgov/emmy-api/issues",
-  "AIUseCaseID": "0"
+  "AIUseCaseID": "0",
+  "localisation": false,
+  "userInput": false,
+  "group": "",
+  "projects": [],
+  "systems": [],
+  "subsetInHealthcare": [],
+  "userType": [],
+  "maturityModelTier": 0
 }
