@@ -2,16 +2,19 @@ FROM --platform=$BUILDPLATFORM artifactory.cloud.cms.gov/docker-remote/library/g
 
 ARG TARGETOS
 ARG TARGETARCH
+ARG ORCHESTRION_VERSION=v1.9.0
 
 WORKDIR /build
 
+RUN apk add --no-cache ca-certificates git
+
 COPY go.mod go.sum ./
-RUN go mod download && go install github.com/DataDog/orchestrion@latest
+RUN go mod download && GOSUMDB=off go install github.com/DataDog/orchestrion@"${ORCHESTRION_VERSION}"
 
 COPY . .
 
 ENV CGO_ENABLED=0
-RUN GOOS="${TARGETOS:-linux}" GOARCH="$TARGETARCH" orchestrion go build -ldflags="-s -w" -a -o apiserver . && \
+RUN GOSUMDB=off GOOS="${TARGETOS:-linux}" GOARCH="$TARGETARCH" orchestrion go build -ldflags="-s -w" -a -o apiserver . && \
     GOOS="${TARGETOS:-linux}" GOARCH="$TARGETARCH" go build -ldflags="-s -w" -a -o migrate ./cmd/migrate
 
 FROM artifactory.cloud.cms.gov/docker-remote/library/alpine:3.23
