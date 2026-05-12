@@ -1,0 +1,12 @@
+#!/bin/bash -e
+
+export TMPDIR="/rails/tmp"
+export GNUPGHOME="/rails/tmp"
+export PIDFILE="/rails/tmp/pids/server.pid"
+
+# If running the rails server then create or migrate existing database
+if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+  ./bin/rails db:prepare
+fi
+
+exec "${@}"
