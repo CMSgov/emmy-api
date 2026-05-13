@@ -3,12 +3,16 @@ module Veteran
     attr_accessor :first_name, :middle_name, :last_name, :date_of_birth, :ssn, :address
 
     def initialize(params = {})
-      @first_name = params[:first_name]
-      @middle_name = params[:middle_name]
-      @last_name = params[:last_name]
-      @date_of_birth = params[:date_of_birth]
+      @first_name = params[:firstName]
+      @middle_name = params[:middleName]
+      @last_name = params[:lastName]
+      @date_of_birth = params[:dateOfBirth]
       @ssn = params[:ssn]
       @address = params[:address]
+    end
+
+    def can_use_restricted_endpoint?
+      ssn.present?
     end
 
     def to_va_payload

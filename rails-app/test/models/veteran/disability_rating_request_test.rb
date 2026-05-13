@@ -4,10 +4,10 @@ module Veteran
   class DisabilityRatingRequestTest < ActiveSupport::TestCase
     test 'to_va_payload maps fields correctly' do
       params = {
-        first_name: 'John',
-        middle_name: 'M',
-        last_name: 'Doe',
-        date_of_birth: '1990-01-01',
+        firstName: 'John',
+        middleName: 'M',
+        lastName: 'Doe',
+        dateOfBirth: '1990-01-01',
         ssn: '999999999',
         address: {
           street1: '123 Main St',
@@ -34,9 +34,9 @@ module Veteran
 
     test 'to_va_payload omits optional fields' do
       params = {
-        first_name: 'John',
-        last_name: 'Doe',
-        date_of_birth: '1990-01-01'
+        firstName: 'John',
+        lastName: 'Doe',
+        dateOfBirth: '1990-01-01'
       }
       req = DisabilityRatingRequest.new(params)
       payload = req.to_va_payload
@@ -47,6 +47,21 @@ module Veteran
       assert_nil payload[:middle_name]
       assert_nil payload[:ssn]
       assert_nil payload[:street_address_line1]
+    end
+
+    test 'can_use_restricted_endpoint? returns true when ssn is present' do
+      req = DisabilityRatingRequest.new(ssn: '999999999')
+      assert req.can_use_restricted_endpoint?
+    end
+
+    test 'can_use_restricted_endpoint? returns false when ssn is absent' do
+      req = DisabilityRatingRequest.new
+      assert_not req.can_use_restricted_endpoint?
+    end
+
+    test 'can_use_restricted_endpoint? returns false when ssn is empty' do
+      req = DisabilityRatingRequest.new(ssn: '')
+      assert_not req.can_use_restricted_endpoint?
     end
   end
 end
