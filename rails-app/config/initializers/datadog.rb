@@ -1,7 +1,9 @@
 require 'datadog'
 
 Datadog.configure do |c|
-  c.tracing.enabled = ENV.fetch('DD_TRACE_ENABLED', 'true').to_s.downcase == 'true'
+  # Default tracing to disabled in development unless explicitly enabled via environment variable
+  default_enabled = Rails.env.production? ? 'true' : 'false'
+  c.tracing.enabled = ENV.fetch('DD_TRACE_ENABLED', default_enabled).to_s.downcase == 'true'
 
   # This will trace HTTP requests, Database queries, Redis, etc. automatically
   c.tracing.instrument :rails, service_name: ENV.fetch('DD_SERVICE', 'emmy-rails-app')
