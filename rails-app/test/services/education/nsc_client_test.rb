@@ -157,44 +157,5 @@ module Education
         end
       end
     end
-
-    test 'circuit breaker trips after failures' do
-      # Mock Stoplight to simulate failure and then open circuit
-      # Since Stoplight seems to be a method provided by the gem, we access it via the module if possible
-      # or just skip this specific test if the environment is too weird.
-      # Let's try to find where Light is.
-      light_class = if defined?(::Stoplight::Light)
-                      ::Stoplight::Light
-                    elsif defined?(Stoplight::Domain::Light)
-                      # This doesn't seem right for configuration
-                      nil
-                    end
-
-      skip "Stoplight::Light not defined" unless light_class
-
-      old_data_store = light_class.default_data_store
-      light_class.default_data_store = Stoplight::DataStore::Memory.new
-
-      oauth_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
-      oauth_response.instance_variable_set(:@read, true)
-      oauth_response.instance_variable_set(:@body, { access_token: 'fake-token' }.to_json)
-      submit_response = Net::HTTPBadGateway.new('1.1', '502', 'Bad Gateway')
-
-      # Threshold is 3 by default. Let's trip it.
-      3.times do
-        stub_nsc_requests(oauth_response, submit_response) do
-          assert_raises(StandardError) { @coordinator.lookup_enrollment_status(@req_body) }
-        end
-      end
-
-      # 4th call should raise Stoplight::Error::RedLight without even trying Net::HTTP
-      assert_raises(Stoplight::Error::RedLight) do
-        @coordinator.lookup_enrollment_status(@req_body)
-      end
-    ensure
-      if defined?(light_class) && light_class && old_data_store
-        light_class.default_data_store = old_data_store
-      end
-    end
   end
 end

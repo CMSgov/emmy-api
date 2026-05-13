@@ -1,21 +1,13 @@
 module Veteran
   class DisabilityRatingMapper
-    def self.map_response(va_resp, datasource_duration, start_time)
-      attributes = va_resp.dig('data', 'attributes') || {}
-
-      individual_ratings = attributes['individual_ratings'] || []
-      earliest_end_date = individual_ratings.map { |r| r['rating_end_date'] }
-                                            .reject { |d| d.blank? }
-                                            .min
-
+    def self.map_response(total_disability_response, datasource_duration, start_time)
       response_timestamp = Time.now
 
+      total_disabilty_data = total_disability_response.dig("data")
       Veteran::DisabilityRatingResponse.new(
-        combinedDisabilityRating: attributes['combined_disability_rating'],
-        combinedEffectiveDate: attributes['combined_effective_date'],
-        legalEffectiveDate: attributes['legal_effective_date'],
-        earliestRatingEndDate: earliest_end_date,
-        rawData: va_resp,
+        totalDisabilityStatus: total_disabilty_data["total_disability"]["status"],
+        totalDisabilityStatusEffectiveDate: total_disabilty_data["total_disability"]["effective_date"],
+        rawData: total_disability_response,
         dataSource: "VA",
         metadata: {
           apiVersion: ENV['SERVICE_VERSION'] || '1.3.0',
@@ -23,7 +15,7 @@ module Veteran
           requestTimestamp: start_time.utc.iso8601(3),
           responseTimestamp: response_timestamp.utc.iso8601(3),
           datasourceDurationMillis: datasource_duration.to_i,
-          transactionId: SecureRandom.uuid
+          transactionId: Current.request_id || SecureRandom.uuid
         }
       )
     end
