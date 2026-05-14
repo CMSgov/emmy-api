@@ -2,7 +2,6 @@ module Api
   module V0
     class EducationEnrollmentsController < ApplicationController
       def create
-        Rails.logger.info "MEOW WOLF #{params.to_unsafe_h}"
         reporter = Reporting::Reporter.new
         client_id = request.headers['Authorization'] # Simplified placeholder if no better option exists
 
