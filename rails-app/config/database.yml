@@ -17,6 +17,7 @@ development:
 test:
   <<: *default
   database: <%= ENV.fetch("DB_NAME") { "postgres" } %>_test
+  iam_auth: false
 
 production:
   <<: *default

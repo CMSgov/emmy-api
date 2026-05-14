@@ -36,7 +36,9 @@ gem "thruster", require: false
 # gem "rack-cors"
 
 group :development, :test do
-  gem "minitest", "~> 5.0"
+  gem "rspec-rails", "~> 7.0"
+  gem "rspec-openapi", group: :test
+  gem "climate_control"
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 
@@ -56,3 +58,5 @@ gem "shoryuken"
 gem "datadog", "~> 2.0"
 
 gem "pg-aws_rds_iam", "~> 0.8.0"
+
+gem "rswag", "~> 2.17"

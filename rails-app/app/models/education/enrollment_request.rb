@@ -11,6 +11,38 @@ module Education
       @address = params[:address]
     end
 
+    def missing_required_field?
+      to_swagger_spec.any? { |field| field[:required] && field[:name].to_s.downcase.to_sym == :firstName && self.send(field[:name].to_s.downcase.to_sym).blank? }
+    end
+
+    def self.to_swagger_schema
+      {
+        type: :object,
+        required: %i[firstName dateOfBirth lastName],
+        properties: {
+          firstName: { type: :string, description: "First name of the student.", example: "John" },
+          middleName: { type: :string, description: "Middle name of the student.", example: "Quincy" },
+          lastName: { type: :string, description: "Last name of the student.", example: "Doe" },
+          dateOfBirth: { type: :string, description: "Date of birth of the student (YYYY-MM-DD).", example: "1990-01-01" },
+          ssn: { type: :string, description: "Social Security Number of the student.", example: "000-00-0000" },
+          address: {
+            type: :object,
+            description: "Postal address when a lookup requires demographic matching instead of SSN matching.",
+            properties: {
+              street1: { type: :string, description: "Primary street address line.", example: "123 Main St" },
+              street2: { type: :string, description: "Secondary street address line when available.", example: "Apt 4B" },
+              street3: { type: :string, description: "Additional street address line when available." },
+              city: { type: :string, description: "City or locality.", example: "Arlington" },
+              state: { type: :string, description: "State, province, or region code.", example: "VA" },
+              postalCode: { type: :string, description: "Postal or ZIP code.", example: "22202" },
+              country: { type: :string, description: "Country name or code.", example: "USA" }
+            },
+            required: %i[street1 city state postalCode country]
+          }
+        }
+      }
+    end
+
     def to_nsc_payload(account_id)
       out = {
         accountId: account_id,

@@ -1,0 +1,161 @@
+---
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1
+paths:
+  "/api/v0/education-enrollments":
+    post:
+      summary: create education-enrollment
+      security:
+      - oauth2: []
+      parameters: []
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              examples:
+                successful_enrollment_lookup:
+                  value:
+                    enrollmentStatus: FULL_TIME
+                    enrollmentDetails:
+                    - schoolName: University of Excellence
+                      termBeginDate: '2023-01-15'
+                      termEndDate: '2023-05-20'
+                      enrollmentStatus: FULL_TIME
+                    dataSource: NSC
+                    metadata:
+                      durationMs: 125
+              schema:
+                type: object
+                properties:
+                  enrollmentStatus:
+                    type: string
+                    description: Aggregated enrollment status across all schools.
+                    enum:
+                    - FULL_TIME
+                    - THREE_QUARTERS_TIME
+                    - HALF_TIME
+                    - LESS_THAN_HALF_TIME
+                    - ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
+                    example: FULL_TIME
+                  enrollmentDetails:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        schoolName:
+                          type: string
+                          description: Official name of the educational institution.
+                          example: University of Excellence
+                        termBeginDate:
+                          type: string
+                          description: Start date of the academic term (YYYY-MM-DD).
+                          example: '2023-01-15'
+                        termEndDate:
+                          type: string
+                          description: End date of the academic term (YYYY-MM-DD).
+                          example: '2023-05-20'
+                        enrollmentStatus:
+                          type: string
+                          description: Enrollment status for this specific term.
+                          enum:
+                          - FULL_TIME
+                          - THREE_QUARTERS_TIME
+                          - HALF_TIME
+                          - LESS_THAN_HALF_TIME
+                          - ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
+                          example: FULL_TIME
+                  dataSource:
+                    type: string
+                    description: The source of the enrollment data (e.g., NSC).
+                    example: NSC
+                  metadata:
+                    type: object
+                    properties:
+                      durationMs:
+                        type: integer
+                        description: Time taken to fetch data from the source in milliseconds.
+                        example: 125
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - firstName
+              - dateOfBirth
+              - lastName
+              properties:
+                firstName:
+                  type: string
+                  description: First name of the student.
+                  example: John
+                middleName:
+                  type: string
+                  description: Middle name of the student.
+                  example: Quincy
+                lastName:
+                  type: string
+                  description: Last name of the student.
+                  example: Doe
+                dateOfBirth:
+                  type: string
+                  description: Date of birth of the student (YYYY-MM-DD).
+                  example: '1990-01-01'
+                ssn:
+                  type: string
+                  description: Social Security Number of the student.
+                  example: 000-00-0000
+                address:
+                  type: object
+                  description: Postal address when a lookup requires demographic matching
+                    instead of SSN matching.
+                  properties:
+                    street1:
+                      type: string
+                      description: Primary street address line.
+                      example: 123 Main St
+                    street2:
+                      type: string
+                      description: Secondary street address line when available.
+                      example: Apt 4B
+                    street3:
+                      type: string
+                      description: Additional street address line when available.
+                    city:
+                      type: string
+                      description: City or locality.
+                      example: Arlington
+                    state:
+                      type: string
+                      description: State, province, or region code.
+                      example: VA
+                    postalCode:
+                      type: string
+                      description: Postal or ZIP code.
+                      example: '22202'
+                    country:
+                      type: string
+                      description: Country name or code.
+                      example: USA
+                  required:
+                  - street1
+                  - city
+                  - state
+                  - postalCode
+                  - country
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "/oauth/token"
+          scopes: {}
+servers:
+- url: https://{defaultHost}
+  variables:
+    defaultHost:
+      default: api.uat.emmy.cms.gov
