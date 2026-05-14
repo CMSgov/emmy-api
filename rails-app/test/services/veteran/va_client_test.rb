@@ -31,6 +31,7 @@ module Veteran
         dateOfBirth: '1988-10-24',
         ssn: '123456789'
       }
+      Current.request_id = 'test-request-id'
     end
 
     teardown do
@@ -40,14 +41,22 @@ module Veteran
 
     private
 
-    def stub_va_requests(oauth_resp, va_resp)
+    def stub_va_requests(oauth_resp, va_total_disability_resp = nil, rating_path: nil, total_disability_path: nil)
       http_mock_oauth = Minitest::Mock.new
       http_mock_oauth.expect :use_ssl=, true, [true]
       http_mock_oauth.expect :request, oauth_resp, [Net::HTTP::Post]
 
       http_mock_va = Minitest::Mock.new
       http_mock_va.expect :use_ssl=, true, [true]
-      http_mock_va.expect :request, va_resp, [Net::HTTP::Post]
+
+      if va_total_disability_resp
+        total_disability_matcher = ->(req) {
+          req.is_a?(Net::HTTP::Post) && (total_disability_path.nil? || req.path == total_disability_path)
+        }
+        http_mock_va.expect :request, va_total_disability_resp do |req|
+          total_disability_matcher.call(req)
+        end
+      end
 
       calls = 0
       Net::HTTP.stub :new, proc { |host, port|
@@ -63,14 +72,14 @@ module Veteran
 
     public
 
-    test 'lookup_disability_rating success' do
+    test 'lookup_disability_rating success uses restricted endpoint when SSN is present' do
       oauth_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
       oauth_response.instance_variable_set(:@read, true)
       oauth_response.instance_variable_set(:@body, { access_token: 'fake-token' }.to_json)
 
-      va_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
-      va_response.instance_variable_set(:@read, true)
-      va_response.instance_variable_set(:@body, {
+      va_rating_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
+      va_rating_response.instance_variable_set(:@read, true)
+      va_rating_response.instance_variable_set(:@body, {
         data: {
           attributes: {
             combined_disability_rating: 100,
@@ -84,14 +93,71 @@ module Veteran
         }
       }.to_json)
 
-      stub_va_requests(oauth_response, va_response) do
-        result = @client.lookup_disability_rating(@req_params)
+      va_total_disability_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
+      va_total_disability_response.instance_variable_set(:@read, true)
+      va_total_disability_response.instance_variable_set(:@body, {
+        data: {
+          total_disability: {
+            status: true,
+            effective_date: "2023-01-01"
+          },
+          permanent_and_total: {
+            service_connected_status: false,
+            pension_award_status: false
+          }
+        }
+      }.to_json)
 
-        assert_equal 100, result.combined_disability_rating
-        assert_equal '2023-01-01', result.combined_effective_date
-        assert_equal '2023-12-01', result.earliest_rating_end_date
-        assert_equal 'VA', result.data_source
-        assert_not_nil result.metadata
+      stub_va_requests(oauth_response, va_total_disability_response,
+                       rating_path: '/va/restricted/disability_rating',
+                       total_disability_path: '/va/restricted/permanent_and_total_disability') do
+        response = @client.lookup_disability_rating(@req_params)
+        assert_equal true, response.total_disability_status
+        assert_equal true, response.total_disability_status_effective_date.present?
+        assert_equal 'test-request-id', response.metadata[:transactionId]
+      end
+    end
+
+    test 'lookup_disability_rating success uses standard endpoint when SSN is absent' do
+      params_without_ssn = @req_params.except(:ssn)
+
+      oauth_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
+      oauth_response.instance_variable_set(:@read, true)
+      oauth_response.instance_variable_set(:@body, { access_token: 'fake-token' }.to_json)
+
+      va_rating_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
+      va_rating_response.instance_variable_set(:@read, true)
+      va_rating_response.instance_variable_set(:@body, {
+        data: {
+          attributes: {
+            combined_disability_rating: 70,
+            combined_effective_date: '2023-01-01',
+            legal_effective_date: '2023-01-01'
+          }
+        }
+      }.to_json)
+
+      va_total_disability_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
+      va_total_disability_response.instance_variable_set(:@read, true)
+      va_total_disability_response.instance_variable_set(:@body, {
+        data: {
+          total_disability: {
+            status: true,
+            effective_date: "2023-01-01"
+          },
+          permanent_and_total: {
+            service_connected_status: true,
+            pension_award_status: true
+          }
+        }
+      }.to_json)
+
+      stub_va_requests(oauth_response, va_total_disability_response,
+                       rating_path: '/va/disability_rating',
+                       total_disability_path: '/va/permanent_and_total_disability') do
+        response = @client.lookup_disability_rating(params_without_ssn)
+        assert_equal true, response.total_disability_status
+        assert_equal true, response.total_disability_status_effective_date.present?
       end
     end
 
@@ -107,16 +173,6 @@ module Veteran
           @client.lookup_disability_rating(@req_params)
         end
       end
-    end
-
-    test 'circuit breaker trips after failures' do
-      # In Stoplight 5.x, it's harder to mock the data store globally for just one test
-      # without affecting others or needing complex setup.
-      # Since the previous implementation skipped this if Stoplight::Light wasn't defined,
-      # and Stoplight 5.x doesn't define it at the top level, we'll keep the skip pattern
-      # but updated for the current version's reality if needed.
-
-      skip "Stoplight 5.x circuit breaker testing not implemented"
     end
   end
 end

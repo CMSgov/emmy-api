@@ -6,49 +6,59 @@ module Veteran
   class NotFoundError < StandardError; end
 
   class VaClient
-    DISABILITY_RATING_PATH = "/restricted/disability_rating".freeze
-    DISABILITY_RATING_SCOPE = "disability_rating_restricted.read".freeze
+    DISABILITY_RATING_PATH = "/disability_rating".freeze
+    RESTRICTED_DISABILITY_RATING_PATH = "/restricted/disability_rating".freeze
+    DISABILITY_RATING_SCOPE = "disability_rating_restricted.read disability_rating.read permanent_and_total_disability.read permanent_and_total_disability_restricted.read".freeze
     CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer".freeze
+    TOTAL_DISABILITY_PATH = "/permanent_and_total_disability"
+    TOTAL_DISABILITY_RESTRICTED_PATH = "/restricted/permanent_and_total_disability"
 
     def initialize
     end
 
+
     def lookup_disability_rating(req_params)
       start_time = Time.now
-
-      rating_req = Veteran::DisabilityRatingRequest.new(req_params)
       token = fetch_oauth_token
+      rating_req = Veteran::DisabilityRatingRequest.new(req_params)
+
+      total_disability_response = get_total_disability_response(rating_req, token)
+      datasource_duration = (Time.now - start_time) * 1000
+
+      Veteran::DisabilityRatingMapper.map_response(JSON.parse(total_disability_response.body), datasource_duration, start_time)
+    end
+
+    private
+    def get_total_disability_response(rating_req, token)
       va_payload = rating_req.to_va_payload
+      if rating_req.can_use_restricted_endpoint?
+        total_disability_uri = URI(File.join(ENV['VA_BASE_URL'], TOTAL_DISABILITY_RESTRICTED_PATH))
+      else
+        total_disability_uri = URI(File.join(ENV['VA_BASE_URL'], TOTAL_DISABILITY_PATH))
+      end
+      http = Net::HTTP.new(total_disability_uri.host, total_disability_uri.port)
+      http.use_ssl = (total_disability_uri.scheme == 'https')
 
-      uri = URI(File.join(ENV['VA_BASE_URL'], DISABILITY_RATING_PATH))
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = (uri.scheme == 'https')
-
-      request = Net::HTTP::Post.new(uri.path, {
+      total_disability_request = Net::HTTP::Post.new(total_disability_uri.path, {
         'Content-Type' => 'application/json',
         'Accept' => 'application/json',
         'Authorization' => "Bearer #{token}"
       })
-      request.body = va_payload.to_json
 
-      datasource_start_time = Time.now
-      response = http.request(request)
-      datasource_duration = (Time.now - datasource_start_time) * 1000
+      total_disability_request.body = va_payload.to_json
 
-      if response.code.to_i == 404
+      total_disability_response = http.request(total_disability_request)
+      if total_disability_response.code.to_i == 404
         raise NotFoundError, "veteran not found"
       end
 
-      if response.code.to_i < 200 || response.code.to_i >= 300
-        Rails.logger.error("VA disability rating failed: status=#{response.code} body=#{response.body.to_s[0..800]}")
-        raise "VA disability rating failed: status=#{response.code}"
+      if total_disability_response.code.to_i < 200 || total_disability_response.code.to_i >= 300
+        Rails.logger.error("VA disability rating failed: status=#{total_disability_response.code} body=#{total_disability_response.body.to_s[0..800]}")
+        raise "VA disability rating failed: status=#{total_disability_response.code}"
       end
 
-      va_resp = JSON.parse(response.body)
-      Veteran::DisabilityRatingMapper.map_response(va_resp, datasource_duration, start_time)
+      return total_disability_response
     end
-
-    private
 
     def fetch_oauth_token
       assertion = signed_client_assertion
