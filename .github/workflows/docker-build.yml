@@ -4,11 +4,8 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - "**/*.go"
-      - ".dockerignore"
-      - "Dockerfile"
-      - "go.mod"
-      - "go.sum"
+      - "rails-app/**"
+      - ".github/workflows/docker-build.yml"
       - "public.jwk"
 
 permissions:
@@ -23,4 +20,4 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Docker Build
-        run: docker build .
+        run: docker build rails-app
