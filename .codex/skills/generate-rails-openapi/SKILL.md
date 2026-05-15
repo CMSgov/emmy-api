@@ -42,8 +42,8 @@ Use this skill to automatically generate an OpenAPI specification by running the
 - **Gem**: `rswag` is used to capture request/response data and generate the UI.
 - **Helper**: `spec/swagger_helper.rb` configures the output path and global metadata (title, version, servers).
 - **Test Inclusion**: Ensure request specs use `type: :request` and follow the Rswag DSL.
-  ```ruby``
 
+  ```ruby
   # spec/requests/api/v0/my_spec.rb
 
   require 'swagger_helper'
