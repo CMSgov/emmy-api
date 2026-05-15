@@ -39,29 +39,17 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-    container:
-      image: ruby:3.4.9-slim
-      env:
-        RAILS_ENV: test
-        DB_HOST: postgres
-        DB_USER: emmy
-        DB_PASSWORD: emmy
-        REDIS_ADDR: redis:6379
-
     steps:
       - name: Fetch Repository
         uses: actions/checkout@v6
 
-      - name: Install system dependencies
+      - name: Build Test Image
         run: |
-          apt-get update -qq
-          apt-get install --no-install-recommends -y build-essential git libpq-dev curl
-
-      - name: Install gems
-        working-directory: rails-app
-        run: |
-          gem install bundler
-          bundle install
+          docker build \
+            --build-arg RAILS_ENV=test \
+            --build-arg BUNDLE_WITHOUT="" \
+            -t emmy-rails-test \
+            rails-app
 
       - name: Wait for Database
         run: |
@@ -71,37 +59,35 @@ jobs:
           done
         continue-on-error: true
 
-      - name: Setup Database
-        working-directory: rails-app
-        run: |
-          bin/rails db:prepare
-
       - name: Run RSpec
-        working-directory: rails-app
         run: |
-          bundle exec rspec
+          docker run --rm \
+            --network host \
+            -e RAILS_ENV=test \
+            -e DB_HOST=localhost \
+            -e DB_USER=emmy \
+            -e DB_PASSWORD=emmy \
+            -e REDIS_ADDR=localhost:6379 \
+            emmy-rails-test \
+            bin/bundle exec rspec
 
   rubocop:
     name: rubocop
     runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
-    container:
-      image: ruby:3.4.9-slim
     steps:
       - name: Fetch Repository
         uses: actions/checkout@v6
 
-      - name: Install system dependencies
+      - name: Build Test Image
         run: |
-          apt-get update -qq
-          apt-get install --no-install-recommends -y build-essential git
-
-      - name: Install gems
-        working-directory: rails-app
-        run: |
-          gem install bundler
-          bundle install
+          docker build \
+            --build-arg RAILS_ENV=test \
+            --build-arg BUNDLE_WITHOUT="" \
+            -t emmy-rails-test \
+            rails-app
 
       - name: RuboCop
-        working-directory: rails-app
         run: |
-          bundle exec rubocop
+          docker run --rm \
+            emmy-rails-test \
+            bin/bundle exec rubocop
