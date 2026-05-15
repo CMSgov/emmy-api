@@ -60,3 +60,5 @@ gem "datadog", "~> 2.0"
 gem "pg-aws_rds_iam", "~> 0.8.0"
 
 gem "rswag", "~> 2.17"
+
+gem "annotaterb", "~> 4.22"

@@ -23,7 +23,7 @@ module Education
           batch_id: params[:batch_id],
           submitted_by: params[:submitted_by],
           callback_url: params[:callback_url],
-          status: "QUEUED"
+          status: :queued
         )
 
         params[:students].each do |student_params|
@@ -33,7 +33,7 @@ module Education
             last_name: student_params[:last_name],
             date_of_birth: student_params[:date_of_birth],
             ssn: student_params[:ssn],
-            status: "QUEUED"
+            status: :queued
           )
         end
         batch
@@ -46,13 +46,13 @@ module Education
       # Using a manual count approach similar to the Go implementation
       students = batch.education_batch_students
       total_records = students.count
-      processed_records = students.where(status: [ "SUCCESS", "FAILED", "NO_HIT" ]).count
-      success_count = students.where(status: "SUCCESS").count
-      failure_count = students.where(status: "FAILED").count
+      processed_records = students.where(status: [:success, :failed, :no_hit]).count
+      success_count = students.where(status: :success).count
+      failure_count = students.where(status: :failed).count
 
       {
         batch_job_id: batch.batch_id,
-        status: batch.status,
+        status: batch.status.upcase,
         submitted_at: batch.created_at,
         updated_at: Time.current,
         total_records: total_records,
@@ -69,7 +69,7 @@ module Education
         result = student.education_batch_student_result
         {
           record_id: student.record_id,
-          status: student.status,
+          status: student.status.upcase,
           found_enrollment: result&.found_enrollment || false,
           results: result&.results
         }
