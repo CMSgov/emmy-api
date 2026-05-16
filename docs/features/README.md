@@ -23,7 +23,7 @@ controls, and resilience patterns without scanning a single flat list.
 
 | Component | Purpose | Functionality |
 |---|---|---|
-| [Cognito Auth](security/cognito-auth.md) | Document Cognito access-token validation middleware. | Covers token header/claims checks, local context propagation, and auth-related edge cases. |
+| [Request Subject Context](security/cognito-auth.md) | Document how the runtime derives request identity today. | Covers `X-Sub`, bearer-token `sub` parsing, skip-auth locals, and the gap between runtime behavior and the checked-in OAuth contract. |
 
 ## Resilience
 

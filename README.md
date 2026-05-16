@@ -6,7 +6,7 @@ The Emmy API is a backend data service that connects to federal and commercial d
 
 - **[About Emmy Software](https://cms.gov/eligibility-made-easy)**
   - [Emmy API Overview](https://cms.gov/eligibility-made-easy)
-  - [Emmy Application Github](https://github.com/DSACMS/iv-cbv-payroll/blob/main/README.md)
+  - [Emmy Application GitHub](https://github.com/DSACMS/iv-cbv-payroll/blob/main/README.md)
 
 - **[Technical Guide to Getting Started](docs/guides/01-getting-started.md)**
   - [Usage Examples](docs/guides/03-usage-examples.md)
@@ -33,30 +33,12 @@ This project uses [pre-commit](https://pre-commit.com/ "pre-commit Docs") to reg
 pre-commit install
 ```
 
-For OpenAPI spec maintenance, the repo also includes utility scripts under
-`scripts/`:
+For OpenAPI spec maintenance, the supported local workflow is exposed through
+`mise` tasks:
 
 ```sh
-# 1. Rebuild the bundled YAML and JSON artifacts from the design-time source spec
-./scripts/bundle-api-spec
-
-# 2. Validate the bundled YAML artifact
-./scripts/validate-api-spec
-
-# 3. Lint the bundled YAML artifact with the repo Spectral ruleset
-./scripts/lint-api-spec
-
-# 4. Lint hand-authored YAML files
-./scripts/lint-yaml-files
-
-# 5. Check formatting for contract YAML and JSON files
-./scripts/check-format-contract-files
-
-# 6. Compile standalone JSON Schemas
-./scripts/check-json-schemas
-
-# 7. Check for breaking OpenAPI changes against a base ref
-./scripts/check-openapi-breaking [base-ref]
+# Run the full local contract/spec workflow
+mise run check-contract-files
 ```
 
 If you use [mise](https://mise.jdx.dev/), install the pinned runtimes from
@@ -74,6 +56,9 @@ You can also run each step individually with `mise run bundle-api-spec`,
 `mise run validate-api-spec`, `mise run lint-api-spec`,
 `mise run lint-yaml-files`, `mise run check-format-contract-files`,
 `mise run check-json-schemas`, and `mise run check-openapi-breaking`.
+The direct helper scripts currently present in `scripts/` are
+`./scripts/lint-yaml-files`, `./scripts/check-format-contract-files`,
+`./scripts/check-json-schemas`, and `./scripts/check-openapi-breaking`.
 
 ### Database Migrations
 
