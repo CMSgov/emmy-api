@@ -2,8 +2,7 @@ module Reporting
   class ReportJob
     include Shoryuken::Worker
 
-    # The queue name should ideally be configured via environment variable
-    shoryuken_options queue: ENV["SQS_QUEUE_NAME"] || "reporting-events", auto_delete: true
+    shoryuken_options queue: ENV['SQS_QUEUE_URL'], auto_delete: true
 
     def perform(_sqs_msg, body)
       data = JSON.parse(body)
