@@ -59,6 +59,18 @@ jobs:
           done
         continue-on-error: true
 
+      - name: Setup Database
+        run: |
+          docker run --rm \
+            --network host \
+            -e RAILS_ENV=test \
+            -e DB_HOST=localhost \
+            -e DB_USER=emmy \
+            -e DB_PASSWORD=emmy \
+            -e REDIS_ADDR=localhost:6379 \
+            emmy-rails-test \
+            bin/rails db:prepare
+
       - name: Run RSpec
         run: |
           docker run --rm \
