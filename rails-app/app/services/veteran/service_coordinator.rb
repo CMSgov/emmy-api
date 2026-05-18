@@ -11,7 +11,7 @@ module Veteran
       # but it's part of the configuration.
       # The previous implementation used with_allowed_errors if it responded to it.
       if light.respond_to?(:with_allowed_errors)
-        light = light.with_allowed_errors([Veteran::NotFoundError])
+        light = light.with_allowed_errors([ Veteran::NotFoundError ])
       end
 
       light.run do

@@ -3,7 +3,7 @@ module Api
     class BatchEducationEnrollmentsController < ApplicationController
       def create
         reporter = Reporting::Reporter.new
-        client_id = request.headers['Authorization']
+        client_id = request.headers["Authorization"]
 
         # Validate request
         if params[:batchId].blank? || params[:submittedBy].blank? || params[:students].blank?
@@ -55,7 +55,7 @@ module Api
 
       def show
         reporter = Reporting::Reporter.new
-        client_id = request.headers['Authorization']
+        client_id = request.headers["Authorization"]
         coordinator = Education::ServiceCoordinator.new
         begin
           status = coordinator.get_batch_status(params[:id])
@@ -86,7 +86,7 @@ module Api
 
       def details
         reporter = Reporting::Reporter.new
-        client_id = request.headers['Authorization']
+        client_id = request.headers["Authorization"]
         coordinator = Education::ServiceCoordinator.new
         begin
           details = coordinator.get_batch_details(params[:batchJobId])

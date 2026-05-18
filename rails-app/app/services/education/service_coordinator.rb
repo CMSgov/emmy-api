@@ -9,7 +9,7 @@ module Education
 
       # We don't want to trip the circuit for NotFoundError
       if light.respond_to?(:with_allowed_errors)
-        light = light.with_allowed_errors([Education::NotFoundError])
+        light = light.with_allowed_errors([ Education::NotFoundError ])
       end
 
       light.run do
@@ -23,7 +23,7 @@ module Education
           batch_id: params[:batch_id],
           submitted_by: params[:submitted_by],
           callback_url: params[:callback_url],
-          status: 'QUEUED'
+          status: "QUEUED"
         )
 
         params[:students].each do |student_params|
@@ -33,7 +33,7 @@ module Education
             last_name: student_params[:last_name],
             date_of_birth: student_params[:date_of_birth],
             ssn: student_params[:ssn],
-            status: 'QUEUED'
+            status: "QUEUED"
           )
         end
         batch
@@ -46,9 +46,9 @@ module Education
       # Using a manual count approach similar to the Go implementation
       students = batch.education_batch_students
       total_records = students.count
-      processed_records = students.where(status: ['SUCCESS', 'FAILED', 'NO_HIT']).count
-      success_count = students.where(status: 'SUCCESS').count
-      failure_count = students.where(status: 'FAILED').count
+      processed_records = students.where(status: [ "SUCCESS", "FAILED", "NO_HIT" ]).count
+      success_count = students.where(status: "SUCCESS").count
+      failure_count = students.where(status: "FAILED").count
 
       {
         batch_job_id: batch.batch_id,

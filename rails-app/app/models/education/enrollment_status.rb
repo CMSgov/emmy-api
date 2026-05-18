@@ -21,7 +21,7 @@ module Education
     def self.normalize(value)
       return nil if value.blank?
 
-      normalized = value.to_s.upcase.strip.gsub(/[- ]/, '_')
+      normalized = value.to_s.upcase.strip.gsub(/[- ]/, "_")
 
       case normalized
       when "FULL_TIME", "F" then FULL_TIME
@@ -42,7 +42,7 @@ module Education
     end
 
     def self.all
-      [FULL_TIME, THREE_QUARTERS_TIME, HALF_TIME, LESS_THAN_HALF_TIME, UNKNOWN_CREDIT_TIMING]
+      [ FULL_TIME, THREE_QUARTERS_TIME, HALF_TIME, LESS_THAN_HALF_TIME, UNKNOWN_CREDIT_TIMING ]
     end
   end
 end

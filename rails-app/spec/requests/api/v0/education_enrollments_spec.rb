@@ -1,9 +1,7 @@
 require 'swagger_helper'
 
 RSpec.describe 'api/v0/education_enrollments', type: :request do
-
   path '/api/v0/education-enrollments' do
-
     before do
       fake_result = {
         enrollmentStatus: "FULL_TIME",
@@ -27,7 +25,7 @@ RSpec.describe 'api/v0/education_enrollments', type: :request do
     end
 
     post('create education-enrollment') do
-      security [oauth2: []]
+      security [ oauth2: [] ]
       let(:Authorization) { 'Bearer <token>' }
       consumes 'application/json'
       produces 'application/json'

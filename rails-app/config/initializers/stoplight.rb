@@ -1,4 +1,4 @@
-require 'stoplight'
+require "stoplight"
 
 # Custom configuration for Stoplight can be added here
 # By default Stoplight uses an in-memory data store.
