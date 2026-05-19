@@ -6,11 +6,7 @@ on:
       - main
     paths:
       - ".github/workflows/publish-image.yml"
-      - "**/*.go"
-      - ".dockerignore"
-      - "Dockerfile"
-      - "go.mod"
-      - "go.sum"
+      - "rails-app/**"
       - "public.jwk"
   workflow_dispatch:
 
@@ -135,7 +131,7 @@ jobs:
             -t "$IMAGE_URI" \
             -t "$LATEST_IMAGE_URI" \
             --platform "$PLATFORMS" \
-            --push .
+            --push rails-app
 
   deploy:
     name: deploy ${{ matrix.env_name }}

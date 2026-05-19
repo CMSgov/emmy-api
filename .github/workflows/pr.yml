@@ -7,60 +7,99 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - "**/*.go"
-      - ".golangci.yml"
-      - "go.mod"
-      - "go.sum"
+      - "rails-app/**"
+      - ".github/workflows/pr.yml"
 
 jobs:
-  unit:
-    name: test
+  rspec:
+    name: rspec
+    runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: emmy
+          POSTGRES_PASSWORD: emmy
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Fetch Repository
+        uses: actions/checkout@v6
+
+      - name: Build Test Image
+        run: |
+          docker build \
+            --build-arg RAILS_ENV=test \
+            --build-arg BUNDLE_WITHOUT="" \
+            -t emmy-rails-test \
+            rails-app
+
+      - name: Wait for Database
+        run: |
+          until docker run --rm --network host postgres:16-alpine pg_isready -h localhost -U emmy; do
+            echo "Waiting for postgres..."
+            sleep 1
+          done
+        continue-on-error: true
+
+      - name: Setup Database
+        run: |
+          docker run --rm \
+            --network host \
+            -e RAILS_ENV=test \
+            -e DB_HOST=localhost \
+            -e DB_USER=emmy \
+            -e DB_PASSWORD=emmy \
+            -e REDIS_ADDR=localhost:6379 \
+            emmy-rails-test \
+            bin/rails db:prepare
+
+      - name: Run RSpec
+        run: |
+          docker run --rm \
+            --network host \
+            -e RAILS_ENV=test \
+            -e DB_HOST=localhost \
+            -e DB_USER=emmy \
+            -e DB_PASSWORD=emmy \
+            -e REDIS_ADDR=localhost:6379 \
+            emmy-rails-test \
+            bundle exec rspec
+
+  rubocop:
+    name: rubocop
     runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
     steps:
       - name: Fetch Repository
         uses: actions/checkout@v6
 
-      - name: Start Redis
-        run: |
-          docker network create emmy-net
-          docker run -d --name redis --network emmy-net redis:7-alpine
-
-          # Wait for redis to be ready
-          for i in {1..10}; do
-            if docker exec redis redis-cli ping | grep -q PONG; then
-              echo "Redis is ready"
-              exit 0
-            fi
-            echo "Waiting for Redis..."
-            sleep 2
-          done
-          echo "Redis failed to start"
-          exit 1
-
       - name: Build Test Image
-        run: docker build -t emmy-test -f Dockerfile.test .
+        run: |
+          docker build \
+            --build-arg RAILS_ENV=test \
+            --build-arg BUNDLE_WITHOUT="" \
+            -t emmy-rails-test \
+            rails-app
 
-      - name: Test
+      - name: RuboCop
         run: |
           docker run --rm \
-            --network emmy-net \
-            -e REDIS_ADDR=redis:6379 \
-            emmy-test
-
-  golangci:
-    name: lint
-    runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-go@v6
-        with:
-          go-version: "1.25.x"
-          cache: false
-
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v9
-        with:
-          version: v2.5.0
-          install-mode: goinstall
-          only-new-issues: true
+            emmy-rails-test \
+            bin/rubocop
