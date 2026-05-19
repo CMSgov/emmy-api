@@ -17,6 +17,32 @@ module Veteran
       @earliest_rating_end_date = params[:earliestRatingEndDate]
     end
 
+    def self.to_swagger_schema
+      {
+        type: :object,
+        properties: {
+          totalDisabilityStatus: { type: :boolean, description: "Whether the veteran is totally disabled.", example: true },
+          totalDisabilityStatusEffectiveDate: { type: :string, description: "Effective date of total disability status (YYYY-MM-DD).", example: "2023-01-01" },
+          combinedDisabilityRating: { type: :integer, description: "Combined disability rating percentage.", example: 100 },
+          combinedEffectiveDate: { type: :string, description: "Effective date of combined disability rating (YYYY-MM-DD).", example: "2023-01-01" },
+          legalEffectiveDate: { type: :string, description: "Legal effective date of disability rating (YYYY-MM-DD).", example: "2023-01-01" },
+          earliestRatingEndDate: { type: :string, description: "Earliest end date for any individual disability rating (YYYY-MM-DD).", example: "2024-06-01" },
+          dataSource: { type: :string, description: "The source of the disability rating data (e.g., VA).", example: "VA" },
+          metadata: {
+            type: :object,
+            properties: {
+              apiVersion: { type: :string, example: "1.3.0" },
+              environment: { type: :string, example: "development" },
+              requestTimestamp: { type: :string, example: "2023-11-01T12:00:00.000Z" },
+              responseTimestamp: { type: :string, example: "2023-11-01T12:00:00.100Z" },
+              datasourceDurationMillis: { type: :integer, example: 100 },
+              transactionId: { type: :string, example: "uuid" }
+            }
+          }
+        }
+      }
+    end
+
     def as_json(options = {})
       {
         totalDisabilityStatus: total_disability_status,

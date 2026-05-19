@@ -11,6 +11,33 @@ module Veteran
       @address = params[:address]
     end
 
+    def self.to_swagger_schema
+      {
+        type: :object,
+        required: %i[firstName dateOfBirth lastName],
+        properties: {
+          firstName: { type: :string, description: "First name of the veteran.", example: "John" },
+          middleName: { type: :string, description: "Middle name of the veteran.", example: "Quincy" },
+          lastName: { type: :string, description: "Last name of the veteran.", example: "Doe" },
+          dateOfBirth: { type: :string, description: "Date of birth of the veteran (YYYY-MM-DD).", example: "1990-01-01" },
+          ssn: { type: :string, description: "Social Security Number of the veteran.", example: "000-00-0000" },
+          address: {
+            type: :object,
+            description: "Postal address when a lookup requires demographic matching instead of SSN matching.",
+            properties: {
+              street1: { type: :string, description: "Primary street address line.", example: "123 Main St" },
+              street2: { type: :string, description: "Secondary street address line when available.", example: "Apt 4B" },
+              street3: { type: :string, description: "Additional street address line when available." },
+              city: { type: :string, description: "City or locality.", example: "Arlington" },
+              state: { type: :string, description: "State, province, or region code.", example: "VA" },
+              postalCode: { type: :string, description: "Postal or ZIP code.", example: "22202" },
+              country: { type: :string, description: "Country name or code.", example: "USA" }
+            }
+          }
+        }
+      }
+    end
+
     def can_use_restricted_endpoint?
       ssn.present?
     end

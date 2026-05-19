@@ -526,10 +526,22 @@ components:
       additionalProperties: false
       required:
         - combinedDisabilityRating
+        - totalDisabilityStatus
+        - totalDisabilityStatusEffectiveDate
         - rawData
         - dataSource
         - metadata
       properties:
+        totalDisabilityStatus:
+          type: boolean
+          description: Whether the veteran is totally disabled.
+          example: true
+        totalDisabilityStatusEffectiveDate:
+          type: string
+          format: date
+          nullable: true
+          description: Effective date of total disability status (YYYY-MM-DD).
+          example: "2023-01-01"
         combinedDisabilityRating:
           $ref: ../../schema/v0/combined_disability_rating.schema.json
           description: VA combined disability rating for the identified person.
@@ -739,6 +751,8 @@ components:
           country: USA
     VeteranDisabilityStatusResponseExample:
       value:
+        totalDisabilityStatus: true
+        totalDisabilityStatusEffectiveDate: "2023-01-01"
         combinedDisabilityRating: 40
         legalEffectiveDate: "2012-07-01"
         combinedEffectiveDate: "2012-08-01"
