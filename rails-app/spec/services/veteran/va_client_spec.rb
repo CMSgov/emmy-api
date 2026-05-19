@@ -42,7 +42,7 @@ module Veteran
       Current.request_id = 'test-request-id'
     end
 
-    def stub_va_requests(oauth_resp, va_total_disability_resp = nil, total_disability_path: nil)
+    def stub_va_requests(oauth_resp, va_total_disability_resp = nil, va_rating_resp = nil, total_disability_path: nil, rating_path: nil)
       http_mock_oauth = instance_double(Net::HTTP)
       allow(http_mock_oauth).to receive(:use_ssl=).with(true)
       allow(http_mock_oauth).to receive(:request).with(instance_of(Net::HTTP::Post)).and_return(oauth_resp)
@@ -50,18 +50,22 @@ module Veteran
       http_mock_va = instance_double(Net::HTTP)
       allow(http_mock_va).to receive(:use_ssl=).with(true)
 
-      if va_total_disability_resp
+      if va_total_disability_resp || va_rating_resp
         allow(http_mock_va).to receive(:request) do |req|
-          if total_disability_path.nil? || req.path == total_disability_path
+          if total_disability_path && req.path == total_disability_path
+            va_total_disability_resp
+          elsif rating_path && req.path == rating_path
+            va_rating_resp
+          elsif total_disability_path.nil? && rating_path.nil?
+            # legacy behavior if paths not specified
             va_total_disability_resp
           else
-            # Fallback for rating request if needed, though the client calls it in order
             nil
           end
         end
       end
 
-      expect(Net::HTTP).to receive(:new).and_return(http_mock_oauth, http_mock_va)
+      allow(Net::HTTP).to receive(:new).and_return(http_mock_oauth, http_mock_va, http_mock_va)
     end
 
     describe '#lookup_disability_rating' do
@@ -83,12 +87,26 @@ module Veteran
           }
         }.to_json)
 
-        stub_va_requests(oauth_response, va_total_disability_response,
-                         total_disability_path: '/va/restricted/permanent_and_total_disability')
+        va_rating_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
+        allow(va_rating_response).to receive(:body).and_return({
+          data: {
+            attributes: {
+              combined_disability_rating: 100,
+              combined_effective_date: "2023-01-01",
+              legal_effective_date: "2023-01-01",
+              individual_ratings: []
+            }
+          }
+        }.to_json)
+
+        stub_va_requests(oauth_response, va_total_disability_response, va_rating_response,
+                         total_disability_path: '/va/restricted/permanent_and_total_disability',
+                         rating_path: '/va/restricted/disability_rating')
 
         response = client.lookup_disability_rating(req_params)
         expect(response.total_disability_status).to be true
         expect(response.total_disability_status_effective_date).to be_present
+        expect(response.combined_disability_rating).to eq(100)
         expect(response.metadata[:transactionId]).to eq('test-request-id')
       end
 
@@ -112,12 +130,26 @@ module Veteran
           }
         }.to_json)
 
-        stub_va_requests(oauth_response, va_total_disability_response,
-                         total_disability_path: '/va/permanent_and_total_disability')
+        va_rating_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
+        allow(va_rating_response).to receive(:body).and_return({
+          data: {
+            attributes: {
+              combined_disability_rating: 100,
+              combined_effective_date: "2023-01-01",
+              legal_effective_date: "2023-01-01",
+              individual_ratings: []
+            }
+          }
+        }.to_json)
+
+        stub_va_requests(oauth_response, va_total_disability_response, va_rating_response,
+                         total_disability_path: '/va/permanent_and_total_disability',
+                         rating_path: '/va/disability_rating')
 
         response = client.lookup_disability_rating(params_without_ssn)
         expect(response.total_disability_status).to be true
         expect(response.total_disability_status_effective_date).to be_present
+        expect(response.combined_disability_rating).to eq(100)
       end
 
       it 'raises NotFoundError on 404' do

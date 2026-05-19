@@ -23,18 +23,20 @@ module Veteran
       rating_req = Veteran::DisabilityRatingRequest.new(req_params)
 
       total_disability_response = get_total_disability_response(rating_req, token)
+
+      disability_score_response = get_total_disability_response(rating_req, token, restricted_endpoint: RESTRICTED_DISABILITY_RATING_PATH, unrestricted_endpoint: DISABILITY_RATING_PATH)
       datasource_duration = (Time.now - start_time) * 1000
 
-      Veteran::DisabilityRatingMapper.map_response(JSON.parse(total_disability_response.body), datasource_duration, start_time)
+      Veteran::DisabilityRatingMapper.map_response(JSON.parse(total_disability_response.body), JSON.parse(disability_score_response.body), datasource_duration, start_time)
     end
 
     private
-    def get_total_disability_response(rating_req, token)
+    def get_total_disability_response(rating_req, token, restricted_endpoint: TOTAL_DISABILITY_RESTRICTED_PATH, unrestricted_endpoint: TOTAL_DISABILITY_PATH)
       va_payload = rating_req.to_va_payload
       if rating_req.can_use_restricted_endpoint?
-        total_disability_uri = URI(File.join(ENV["VA_BASE_URL"], TOTAL_DISABILITY_RESTRICTED_PATH))
+        total_disability_uri = URI(File.join(ENV["VA_BASE_URL"], restricted_endpoint))
       else
-        total_disability_uri = URI(File.join(ENV["VA_BASE_URL"], TOTAL_DISABILITY_PATH))
+        total_disability_uri = URI(File.join(ENV["VA_BASE_URL"], unrestricted_endpoint))
       end
       http = Net::HTTP.new(total_disability_uri.host, total_disability_uri.port)
       http.use_ssl = (total_disability_uri.scheme == "https")
