@@ -9,9 +9,9 @@ body:
   type: text
   content: |
     {
-      "firstName": "Lynette",
-      "lastName": "Oyola",
-      "dateOfBirth": "1988-10-24"
+      "firstName": "Johnson",
+      "lastName": "White",
+      "dateOfBirth": "1982-04-21"
     }
 auth:
   type: bearer

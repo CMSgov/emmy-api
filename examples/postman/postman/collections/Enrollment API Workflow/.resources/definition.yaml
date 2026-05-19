@@ -8,4 +8,4 @@ variables:
   access_token: ""
   token_expiry: ""
   base_url: ""
-  api_version: ""
+  api_version: api/v0
