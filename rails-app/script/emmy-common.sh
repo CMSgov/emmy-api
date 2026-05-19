@@ -50,9 +50,19 @@ emmy_task_family() {
   printf 'emmy-%s-api\n' "$env"
 }
 
+emmy_shoryuken_task_family() {
+  local env="$1"
+  printf 'emmy-%s-shoryuken\n' "$env"
+}
+
 emmy_service_name() {
   local env="$1"
   printf 'emmy-%s-api\n' "$env"
+}
+
+emmy_shoryuken_service_name() {
+  local env="$1"
+  printf 'emmy-%s-shoryuken\n' "$env"
 }
 
 emmy_cluster_name() {
