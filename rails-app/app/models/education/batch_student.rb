@@ -32,10 +32,10 @@ class Education::BatchStudent < ApplicationRecord
   validates :last_name, presence: true
   validates :date_of_birth, presence: true
   enum :status, {
-    queued: 'QUEUED',
-    processing: 'PROCESSING',
-    success: 'SUCCESS',
-    no_hit: 'NO_HIT',
-    failed: 'FAILED'
-  }, default: 'QUEUED', prefix: true
+    queued: "QUEUED",
+    processing: "PROCESSING",
+    success: "SUCCESS",
+    no_hit: "NO_HIT",
+    failed: "FAILED"
+  }, default: "QUEUED", prefix: true
 end

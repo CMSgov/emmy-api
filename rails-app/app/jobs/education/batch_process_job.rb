@@ -3,13 +3,13 @@ module Education
     include Shoryuken::Worker
 
     # Ensure NotFoundError is loaded if it's defined in NscClient
-    require_dependency 'education/nsc_client'
+    require_dependency "education/nsc_client"
 
-    shoryuken_options queue: ENV['SQS_EDUCATION_BATCH_QUEUE'] || 'education-batch-processing', auto_delete: true
+    shoryuken_options queue: ENV["SQS_EDUCATION_BATCH_QUEUE"] || "education-batch-processing", auto_delete: true
 
     def perform(_sqs_msg, body)
       data = JSON.parse(body)
-      batch_id = data['enrollment_batch_id']
+      batch_id = data["enrollment_batch_id"]
 
       batch = Education::EnrollmentBatch.find_by(id: batch_id)
       return unless batch
@@ -18,7 +18,7 @@ module Education
 
       coordinator = Education::ServiceCoordinator.new
 
-      batch.education_batch_students.where(status: [:queued, :failed]).find_each do |student|
+      batch.education_batch_students.where(status: [ :queued, :failed ]).find_each do |student|
         process_student(coordinator, student)
       end
 
@@ -44,18 +44,20 @@ module Education
       begin
         response = coordinator.lookup_enrollment_status(params)
 
-        Education::BatchStudentResult.create!(
-          education_batch_student_id: student.id,
+        Education::BatchStudentResult.create_or_find_by!(
+          education_batch_student_id: student.id
+        ).update!(
           found_enrollment: true,
           results: response.as_json
         )
 
         student.status_success!
       rescue ::Education::NotFoundError
-        Education::BatchStudentResult.create!(
-          education_batch_student_id: student.id,
+        Education::BatchStudentResult.create_or_find_by!(
+          education_batch_student_id: student.id
+        ).update!(
           found_enrollment: false,
-          results: { message: 'No enrollment found' }
+          results: { message: "No enrollment found" }
         )
         student.status_no_hit!
       rescue => e

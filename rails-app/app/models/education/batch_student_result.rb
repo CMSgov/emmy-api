@@ -11,7 +11,7 @@
 #
 # Indexes
 #
-#  idx_on_education_batch_student_id_662efa214a  (education_batch_student_id)
+#  idx_on_education_batch_student_id_662efa214a  (education_batch_student_id) UNIQUE
 #
 # Foreign Keys
 #
@@ -19,4 +19,6 @@
 #
 class Education::BatchStudentResult < ApplicationRecord
   belongs_to :education_batch_student, class_name: "Education::BatchStudent"
+
+  validates :education_batch_student_id, uniqueness: true
 end

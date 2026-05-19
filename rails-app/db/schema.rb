@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_06_140858) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_18_171008) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -54,7 +54,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_06_140858) do
     t.boolean "found_enrollment"
     t.jsonb "results"
     t.datetime "updated_at", null: false
-    t.index ["education_batch_student_id"], name: "idx_on_education_batch_student_id_662efa214a"
+    t.index ["education_batch_student_id"], name: "idx_on_education_batch_student_id_662efa214a", unique: true
   end
 
   create_table "education_batch_students", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

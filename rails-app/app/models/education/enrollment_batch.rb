@@ -21,9 +21,9 @@ class Education::EnrollmentBatch < ApplicationRecord
   validates :submitted_by, presence: true
   validates :callback_url, presence: true
   enum :status, {
-    queued: 'QUEUED',
-    processing: 'PROCESSING',
-    completed: 'COMPLETED',
-    failed: 'FAILED'
-  }, default: 'QUEUED', prefix: true
+    queued: "QUEUED",
+    processing: "PROCESSING",
+    completed: "COMPLETED",
+    failed: "FAILED"
+  }, default: "QUEUED", prefix: true
 end

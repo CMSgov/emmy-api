@@ -46,7 +46,7 @@ module Education
       # Using a manual count approach similar to the Go implementation
       students = batch.education_batch_students
       total_records = students.count
-      processed_records = students.where(status: [:success, :failed, :no_hit]).count
+      processed_records = students.where(status: [ :success, :failed, :no_hit ]).count
       success_count = students.where(status: :success).count
       failure_count = students.where(status: :failed).count
 
