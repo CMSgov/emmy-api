@@ -38,7 +38,6 @@ aws ecs describe-task-definition \
   --task-definition "$task_family" \
   --output json > "$task_definition_json"
 
-echo "MEOW? $task_definition_json"
 
 container_name="${CONTAINER_NAME:-shoryuken}"
 if [[ -z "$container_name" ]]; then
