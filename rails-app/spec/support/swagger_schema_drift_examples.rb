@@ -17,7 +17,7 @@ RSpec.shared_examples 'swagger_schema_drift_detection' do |model_class, options 
     # Create a hash with all properties from the schema
     params = properties.each_with_object({}) do |prop, hash|
       if prop == :enrollmentDetails
-         hash[prop] = [{ schoolName: "Test School" }]
+         hash[prop] = [ { schoolName: "Test School" } ]
       elsif prop == :metadata
          hash[prop] = { durationMs: 100 }
       elsif prop == :address

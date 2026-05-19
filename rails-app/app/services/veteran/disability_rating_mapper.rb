@@ -10,8 +10,8 @@ module Veteran
         rawData: total_disability_response,
         dataSource: "VA",
         metadata: {
-          apiVersion: ENV['SERVICE_VERSION'] || '1.3.0',
-          environment: ENV['ENVIRONMENT'] || 'development',
+          apiVersion: ENV["SERVICE_VERSION"] || "1.3.0",
+          environment: ENV["ENVIRONMENT"] || "development",
           requestTimestamp: start_time.utc.iso8601(3),
           responseTimestamp: response_timestamp.utc.iso8601(3),
           datasourceDurationMillis: datasource_duration.to_i,

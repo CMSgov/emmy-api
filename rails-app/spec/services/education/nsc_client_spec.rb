@@ -49,7 +49,7 @@ module Education
         allow(submit_response).to receive(:body).and_return({
           status: { code: '0', message: 'Successful', severity: 'Info' },
           transactionDetails: { nscHit: 'Y', transactionStatus: 'CNF' },
-          enrollmentDetails: [{ currentEnrollmentStatus: 'CC' }]
+          enrollmentDetails: [ { currentEnrollmentStatus: 'CC' } ]
         }.to_json)
 
         stub_nsc_requests(oauth_response, submit_response)
@@ -68,11 +68,11 @@ module Education
         submit_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
         allow(submit_response).to receive(:body).and_return({
           transactionDetails: { nscHit: 'Y' },
-          enrollmentDetails: [{
+          enrollmentDetails: [ {
             currentEnrollmentStatus: 'CC',
             officialSchoolName: 'University A',
-            enrollmentData: [{ enrollmentStatus: 'H', termBeginDate: '2023-01-01', termEndDate: '2023-05-01' }]
-          }]
+            enrollmentData: [ { enrollmentStatus: 'H', termBeginDate: '2023-01-01', termEndDate: '2023-05-01' } ]
+          } ]
         }.to_json)
 
         stub_nsc_requests(oauth_response, submit_response)
@@ -92,7 +92,7 @@ module Education
         submit_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
         allow(submit_response).to receive(:body).and_return({
           transactionDetails: { nscHit: 'N' },
-          enrollmentDetails: [{ currentEnrollmentStatus: 'CN' }]
+          enrollmentDetails: [ { currentEnrollmentStatus: 'CN' } ]
         }.to_json)
 
         stub_nsc_requests(oauth_response, submit_response)
@@ -109,7 +109,7 @@ module Education
         submit_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
         allow(submit_response).to receive(:body).and_return({
           transactionDetails: { nscHit: 'Y' },
-          enrollmentDetails: [{ currentEnrollmentStatus: 'CN' }]
+          enrollmentDetails: [ { currentEnrollmentStatus: 'CN' } ]
         }.to_json)
 
         stub_nsc_requests(oauth_response, submit_response)

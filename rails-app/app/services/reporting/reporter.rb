@@ -1,9 +1,9 @@
-require 'aws-sdk-sqs'
+require "aws-sdk-sqs"
 
 module Reporting
   class Reporter
     def initialize
-      @queue_url = ENV['SQS_QUEUE_URL']
+      @queue_url = ENV["SQS_QUEUE_URL"]
 
       if @queue_url.present?
         @sqs_client = Aws::SQS::Client.new

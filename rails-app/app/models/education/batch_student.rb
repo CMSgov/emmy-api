@@ -1,6 +1,6 @@
 class Education::BatchStudent < ApplicationRecord
-  belongs_to :education_enrollment_batch, class_name: 'Education::EnrollmentBatch'
-  has_one :education_batch_student_result, class_name: 'Education::BatchStudentResult', foreign_key: :education_batch_student_id, dependent: :destroy
+  belongs_to :education_enrollment_batch, class_name: "Education::EnrollmentBatch"
+  has_one :education_batch_student_result, class_name: "Education::BatchStudentResult", foreign_key: :education_batch_student_id, dependent: :destroy
 
   encrypts :ssn
 

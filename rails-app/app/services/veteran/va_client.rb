@@ -1,6 +1,6 @@
-require 'net/http'
-require 'openssl'
-require 'securerandom'
+require "net/http"
+require "openssl"
+require "securerandom"
 
 module Veteran
   class NotFoundError < StandardError; end
@@ -32,17 +32,17 @@ module Veteran
     def get_total_disability_response(rating_req, token)
       va_payload = rating_req.to_va_payload
       if rating_req.can_use_restricted_endpoint?
-        total_disability_uri = URI(File.join(ENV['VA_BASE_URL'], TOTAL_DISABILITY_RESTRICTED_PATH))
+        total_disability_uri = URI(File.join(ENV["VA_BASE_URL"], TOTAL_DISABILITY_RESTRICTED_PATH))
       else
-        total_disability_uri = URI(File.join(ENV['VA_BASE_URL'], TOTAL_DISABILITY_PATH))
+        total_disability_uri = URI(File.join(ENV["VA_BASE_URL"], TOTAL_DISABILITY_PATH))
       end
       http = Net::HTTP.new(total_disability_uri.host, total_disability_uri.port)
-      http.use_ssl = (total_disability_uri.scheme == 'https')
+      http.use_ssl = (total_disability_uri.scheme == "https")
 
       total_disability_request = Net::HTTP::Post.new(total_disability_uri.path, {
-        'Content-Type' => 'application/json',
-        'Accept' => 'application/json',
-        'Authorization' => "Bearer #{token}"
+        "Content-Type" => "application/json",
+        "Accept" => "application/json",
+        "Authorization" => "Bearer #{token}"
       })
 
       total_disability_request.body = va_payload.to_json
@@ -57,19 +57,19 @@ module Veteran
         raise "VA disability rating failed: status=#{total_disability_response.code}"
       end
 
-      return total_disability_response
+      total_disability_response
     end
 
     def fetch_oauth_token
       assertion = signed_client_assertion
 
-      uri = URI(ENV['VA_TOKEN_URL'])
+      uri = URI(ENV["VA_TOKEN_URL"])
       http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = (uri.scheme == 'https')
+      http.use_ssl = (uri.scheme == "https")
 
       request = Net::HTTP::Post.new(uri.path)
       request.set_form_data({
-        grant_type: 'client_credentials',
+        grant_type: "client_credentials",
         client_assertion_type: CLIENT_ASSERTION_TYPE,
         client_assertion: assertion,
         scope: DISABILITY_RATING_SCOPE
@@ -82,24 +82,23 @@ module Veteran
         raise "VA OAuth failed: status=#{response.code}"
       end
 
-      JSON.parse(response.body)['access_token']
+      JSON.parse(response.body)["access_token"]
     end
 
     def signed_client_assertion
-      private_key = OpenSSL::PKey::RSA.new(File.read(ENV['VA_PRIVATE_KEY_PATH']))
+      private_key = OpenSSL::PKey::RSA.new(File.read(ENV["VA_PRIVATE_KEY_PATH"]))
 
       now = Time.now.to_i
       payload = {
-        iss: ENV['VA_CLIENT_ID'],
-        sub: ENV['VA_CLIENT_ID'],
-        aud: ENV['VA_AUD'],
+        iss: ENV["VA_CLIENT_ID"],
+        sub: ENV["VA_CLIENT_ID"],
+        aud: ENV["VA_AUD"],
         jti: SecureRandom.uuid,
         iat: now,
         exp: now + 60
       }
 
-      JWT.encode(payload, private_key, 'RS256')
+      JWT.encode(payload, private_key, "RS256")
     end
-
   end
 end

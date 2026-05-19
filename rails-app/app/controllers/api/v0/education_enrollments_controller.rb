@@ -3,7 +3,7 @@ module Api
     class EducationEnrollmentsController < ApplicationController
       def create
         reporter = Reporting::Reporter.new
-        client_id = request.headers['Authorization'] # Simplified placeholder if no better option exists
+        client_id = request.headers["Authorization"] # Simplified placeholder if no better option exists
 
         if missing_field = missing_education_identity_field
           reporter.report(Reporting::ReportData.new(
@@ -19,7 +19,7 @@ module Api
 
         req_params = params.permit(
           :firstName, :lastName, :dateOfBirth, :ssn, :middleName,
-          address: [:street1, :street2, :street3, :city, :state, :postalCode, :country]
+          address: [ :street1, :street2, :street3, :city, :state, :postalCode, :country ]
         ).to_h.deep_symbolize_keys
 
         coordinator = Education::ServiceCoordinator.new
