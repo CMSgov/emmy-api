@@ -27,3 +27,9 @@ These collections complement the [Getting Started Guide](../../docs/guides/01-ge
 ## Environment Variables
 
 Populate the variable values in your local Postman environment using the values shared with you during onboarding.
+
+## Testing Data and Scenarios
+
+For the `education-enrollments` endpoint, the [National Student Clearinghouse integration testing data](https://docs.studentclearinghouse.org/vs/insights-json/integration-testing) can be used.
+
+Using hte `veteran-disability-ratings` endpoint test data is located at the [VA Developer Test Data page](https://developer.va.gov/explore/api/veteran-service-history-and-eligibility/test-users).
