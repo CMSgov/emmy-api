@@ -109,6 +109,16 @@ After a moment, the Emmy API will provide a verification response for the applic
 
 (Note that if you are testing an endpoint which might have a self-signed certificate, you can use the `-k` option on the `curl` command to accept the certificate and proceed.)
 
+## Rate limiting responsiblities
+
+The APIs have internal rate limits of roughly 5000 requests every 5 minutes.
+
+We recommend for ex parte processes (processing batches of individuals more than 1000 at a time), you do the following:
+
+1) Use your own internal throttling mechanisms if you want to keep it real-time-ish
+2) Use the batch APIs to process batches of individuals at a time.
+   3) The batch APIs will support either polling or rate limiting mechanisms (see the swagger documentation).
+
 ## Next Steps
 
 Now that you have completed an end-to-end test of using the Emmy API, you can use these lessons learned to connect to and use the API in your own application.
