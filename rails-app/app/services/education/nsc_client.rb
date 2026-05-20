@@ -27,6 +27,7 @@ module Education
       response = http.request(request)
       duration = (Time.now - start_time) * 1000
 
+
       if response.code.to_i < 200 || response.code.to_i >= 300
         raise "NSC submit failed: status=#{response.code}"
       end

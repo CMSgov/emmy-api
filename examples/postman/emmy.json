@@ -107,7 +107,7 @@
         },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"firstName\": \"Lynette\",\n  \"lastName\": \"Oyola\",\n  \"dateOfBirth\": \"1988-10-24\"\n}\n"
+          "raw": "{\n  \"firstName\": \"Stacey\",\n  \"lastName\": \"Peacock\",\n  \"dateOfBirth\": \"1996-05-24\"\n}\n"
         }
       },
       "event": [

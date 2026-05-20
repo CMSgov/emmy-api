@@ -3,7 +3,6 @@ module Api
     class EducationEnrollmentsController < ApplicationController
       def create
         reporter = Reporting::Reporter.new
-        client_id = request.headers["Authorization"] # Simplified placeholder if no better option exists
 
         if missing_field = missing_education_identity_field
           reporter.report(Reporting::ReportData.new(

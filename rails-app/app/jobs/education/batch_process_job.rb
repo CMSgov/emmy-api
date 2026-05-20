@@ -5,7 +5,7 @@ module Education
     # Ensure NotFoundError is loaded if it's defined in NscClient
     require_dependency "education/nsc_client"
 
-    shoryuken_options queue: ENV["SQS_EDUCATION_BATCH_QUEUE"] || "education-batch-processing", auto_delete: true
+    shoryuken_options queue: ENV["BATCH_SQS_QUEUE_URL"] || "education-batch-processing", auto_delete: true
 
     def perform(_sqs_msg, body)
       data = JSON.parse(body)
