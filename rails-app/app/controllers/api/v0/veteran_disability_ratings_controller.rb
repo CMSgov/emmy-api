@@ -3,7 +3,6 @@ module Api
     class VeteranDisabilityRatingsController < ApplicationController
       def create
         reporter = Reporting::Reporter.new
-        client_id = request.headers["Authorization"] # Simplified placeholder
 
         if missing_field = missing_veteran_identity_field
           reporter.report(Reporting::ReportData.new(
