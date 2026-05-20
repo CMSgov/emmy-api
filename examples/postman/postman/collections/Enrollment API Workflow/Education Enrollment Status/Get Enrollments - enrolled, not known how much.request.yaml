@@ -1,17 +1,17 @@
 $kind: http-request
-name: Get Enrollment Data
+name: Get Enrollments - enrolled, not known how much
 url: "{{api_base}}/education-enrollments"
 method: POST
 headers:
   Authorization: Bearer {{access_token}}
   Content-Type: application/json
 body:
-  type: text
+  type: json
   content: |
     {
-      "firstName": "Johnson",
-      "lastName": "White",
-      "dateOfBirth": "1982-04-21"
+      "firstName": "Kwame",
+      "lastName": "Okiro",
+      "dateOfBirth": "2003-10-16"
     }
 auth:
   type: bearer
@@ -43,4 +43,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 2000
+order: 4411963731139224
