@@ -1,19 +1,22 @@
 $kind: http-request
-name: Get Veteran Disability Ratings
-url: "{{api_base}}/veteran-disability-ratings"
+name: Get Enrollments - not found
+url: "{{api_base}}/education-enrollments"
 method: POST
 headers:
   Authorization: Bearer {{access_token}}
   Content-Type: application/json
 body:
-  type: text
+  type: json
   content: |
     {
-      "firstName": "Alfredo",
-      "lastName": "Armstrong",
-      "dateOfBirth": "1993-06-08",
-      "ssn": "796-01-2476"
+      "firstName": "John",
+      "lastName": "Doe",
+      "dateOfBirth": "1999-01-02"
     }
+auth:
+  type: bearer
+  credentials:
+    token: "{{access_token}}"
 scripts:
   - type: beforeRequest
     code: |
@@ -40,4 +43,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 3000
+order: 4500439382581810
