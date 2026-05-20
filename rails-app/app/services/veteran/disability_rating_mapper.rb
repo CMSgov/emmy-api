@@ -2,10 +2,10 @@ module Veteran
   class DisabilityRatingMapper
     def self.map_response(total_disability_response, disability_score_response, datasource_duration, start_time)
       response_timestamp = Time.now
-      combined_data = disability_score_response.dig('data', 'attributes') || {}
+      combined_data = disability_score_response.dig("data", "attributes") || {}
 
-      individual_ratings = combined_data['individual_ratings'] || []
-      earliest_end_date = individual_ratings.map { |r| r['rating_end_date'] }
+      individual_ratings = combined_data["individual_ratings"] || []
+      earliest_end_date = individual_ratings.map { |r| r["rating_end_date"] }
                                             .reject { |d| d.blank? }
                                             .min
 
@@ -13,10 +13,10 @@ module Veteran
       Veteran::DisabilityRatingResponse.new(
         totalDisabilityStatus: total_disability_data["total_disability"]["status"],
         totalDisabilityStatusEffectiveDate: total_disability_data["total_disability"]["effective_date"],
-        combinedDisabilityRating: combined_data['combined_disability_rating'],
-        combinedEffectiveDate: combined_data['combined_effective_date'],
-        legalEffectiveDate: combined_data['legal_effective_date'],
-        rawData: { total_disability_response:total_disability_response, disability_score_response: disability_score_response },
+        combinedDisabilityRating: combined_data["combined_disability_rating"],
+        combinedEffectiveDate: combined_data["combined_effective_date"],
+        legalEffectiveDate: combined_data["legal_effective_date"],
+        rawData: { total_disability_response: total_disability_response, disability_score_response: disability_score_response },
         earliestRatingEndDate: earliest_end_date,
         dataSource: "VA",
         metadata: {
