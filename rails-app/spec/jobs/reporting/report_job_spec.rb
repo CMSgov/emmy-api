@@ -23,6 +23,25 @@ module Reporting
         expect(event.client_id).to eq('test-client')
         expect(event.status_code).to eq(200)
         expect(event.success).to be true
+        expect(event.agency_name).to be_nil
+      end
+
+      it 'adds the mapped agency name when a client mapping exists' do
+        ClientAgency.create!(client_id: 'test-client', agency_name: 'CMS/DSAC')
+
+        body = {
+          timestamp: Time.now.iso8601,
+          endpoint: '/api/v0/test',
+          data_source: 'test-source',
+          client_id: 'test-client',
+          status_code: 200,
+          success: true
+        }.to_json
+
+        ReportJob.new.perform(nil, body)
+
+        event = ApiEvent.last
+        expect(event.agency_name).to eq('CMS/DSAC')
       end
 
       it 'logs error and raises if JSON is invalid' do

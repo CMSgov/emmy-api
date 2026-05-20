@@ -15,6 +15,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_171008) do
   enable_extension "pg_catalog.plpgsql"
 
   create_table "api_events", id: :serial, force: :cascade do |t|
+    t.text "agency_name"
     t.text "client_id", null: false
     t.timestamptz "created_at", default: -> { "now()" }, null: false
     t.text "data_source", null: false
@@ -22,6 +23,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_171008) do
     t.integer "status_code", null: false
     t.boolean "success", null: false
     t.timestamptz "timestamp", null: false
+    t.index ["agency_name"], name: "index_api_events_on_agency_name"
     t.index ["client_id"], name: "idx_api_events_client_id"
     t.index ["client_id"], name: "index_api_events_on_client_id"
     t.index ["timestamp"], name: "idx_api_events_timestamp"
@@ -46,6 +48,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_171008) do
     t.text "ssn", null: false
     t.text "status", null: false
     t.index ["batch_db_id"], name: "idx_batch_students_batch_db_id"
+  end
+
+  create_table "client_agencies", id: false, force: :cascade do |t|
+    t.string "agency_name", null: false
+    t.string "client_id", null: false
+    t.datetime "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.index ["client_id"], name: "index_client_agencies_on_client_id", unique: true
   end
 
   create_table "education_batch_student_results", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

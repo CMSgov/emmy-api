@@ -6,6 +6,7 @@ module Reporting
 
     def perform(_sqs_msg, body)
       data = JSON.parse(body)
+      agency_name = ClientAgency.find_by(client_id: data['client_id'])&.agency_name
 
       Rails.logger.info("received report data: endpoint=#{data['endpoint']} success=#{data['success']} " \
                          "data_source=#{data['data_source']} client_id=#{data['client_id']} " \
