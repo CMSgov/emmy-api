@@ -146,6 +146,144 @@ paths:
                   - state
                   - postalCode
                   - country
+  "/api/v0/veteran-disability-ratings":
+    post:
+      summary: create veteran-disability-rating
+      security:
+      - oauth2: []
+      parameters: []
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              examples:
+                successful_disability_rating_lookup:
+                  value:
+                    totalDisabilityStatus: true
+                    totalDisabilityStatusEffectiveDate: '2023-01-01'
+                    combinedDisabilityRating: 100
+                    combinedEffectiveDate: '2023-01-01'
+                    legalEffectiveDate: '2023-01-01'
+                    earliestRatingEndDate: '2024-06-01'
+                    dataSource: VA
+                    metadata:
+                      durationMs: 125
+              schema:
+                type: object
+                properties:
+                  totalDisabilityStatus:
+                    type: boolean
+                    description: Whether the veteran is totally disabled.
+                    example: true
+                  totalDisabilityStatusEffectiveDate:
+                    type: string
+                    description: Effective date of total disability status (YYYY-MM-DD).
+                    example: '2023-01-01'
+                  combinedDisabilityRating:
+                    type: integer
+                    description: Combined disability rating percentage.
+                    example: 100
+                  combinedEffectiveDate:
+                    type: string
+                    description: Effective date of combined disability rating (YYYY-MM-DD).
+                    example: '2023-01-01'
+                  legalEffectiveDate:
+                    type: string
+                    description: Legal effective date of disability rating (YYYY-MM-DD).
+                    example: '2023-01-01'
+                  earliestRatingEndDate:
+                    type: string
+                    description: Earliest end date for any individual disability rating
+                      (YYYY-MM-DD).
+                    example: '2024-06-01'
+                  dataSource:
+                    type: string
+                    description: The source of the disability rating data (e.g., VA).
+                    example: VA
+                  metadata:
+                    type: object
+                    properties:
+                      apiVersion:
+                        type: string
+                        example: 1.3.0
+                      environment:
+                        type: string
+                        example: development
+                      requestTimestamp:
+                        type: string
+                        example: '2023-11-01T12:00:00.000Z'
+                      responseTimestamp:
+                        type: string
+                        example: '2023-11-01T12:00:00.100Z'
+                      datasourceDurationMillis:
+                        type: integer
+                        example: 100
+                      transactionId:
+                        type: string
+                        example: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - firstName
+              - dateOfBirth
+              - lastName
+              properties:
+                firstName:
+                  type: string
+                  description: First name of the veteran.
+                  example: John
+                middleName:
+                  type: string
+                  description: Middle name of the veteran.
+                  example: Quincy
+                lastName:
+                  type: string
+                  description: Last name of the veteran.
+                  example: Doe
+                dateOfBirth:
+                  type: string
+                  description: Date of birth of the veteran (YYYY-MM-DD).
+                  example: '1990-01-01'
+                ssn:
+                  type: string
+                  description: Social Security Number of the veteran.
+                  example: 000-00-0000
+                address:
+                  type: object
+                  description: Postal address when a lookup requires demographic matching
+                    instead of SSN matching.
+                  properties:
+                    street1:
+                      type: string
+                      description: Primary street address line.
+                      example: 123 Main St
+                    street2:
+                      type: string
+                      description: Secondary street address line when available.
+                      example: Apt 4B
+                    street3:
+                      type: string
+                      description: Additional street address line when available.
+                    city:
+                      type: string
+                      description: City or locality.
+                      example: Arlington
+                    state:
+                      type: string
+                      description: State, province, or region code.
+                      example: VA
+                    postalCode:
+                      type: string
+                      description: Postal or ZIP code.
+                      example: '22202'
+                    country:
+                      type: string
+                      description: Country name or code.
+                      example: USA
 components:
   securitySchemes:
     oauth2:
