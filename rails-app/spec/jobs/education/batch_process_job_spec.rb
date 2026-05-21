@@ -57,8 +57,8 @@ module Education
       it 'processes all students and updates batch status' do
         resp1 = Education::EnrollmentResponse.new(enrollmentStatus: 'FULL_TIME', dataSource: 'NSC')
 
-        expect(coordinator).to receive(:lookup_enrollment_status).with(hash_including(first_name: 'John')).and_return(resp1)
-        expect(coordinator).to receive(:lookup_enrollment_status).with(hash_including(first_name: 'Jane')).and_raise(::Education::NotFoundError)
+        expect(coordinator).to receive(:lookup_enrollment_status).with(hash_including(firstName: 'John')).and_return(resp1)
+        expect(coordinator).to receive(:lookup_enrollment_status).with(hash_including(firstName: 'Jane')).and_raise(::Education::NotFoundError)
 
         BatchProcessJob.new.perform(nil, body)
 
@@ -101,7 +101,7 @@ module Education
 
         # Should only call for student2
         expect(coordinator).to receive(:lookup_enrollment_status).once.and_return(resp)
-        expect(coordinator).not_to receive(:lookup_enrollment_status).with(hash_including(first_name: 'John'))
+        expect(coordinator).not_to receive(:lookup_enrollment_status).with(hash_including(firstName: 'John'))
 
         BatchProcessJob.new.perform(nil, body)
 

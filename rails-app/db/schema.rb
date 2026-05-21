@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_18_171008) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_20_155500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -43,7 +43,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_171008) do
     t.text "first_name", null: false
     t.text "last_name", null: false
     t.text "record_id", null: false
-    t.text "ssn", null: false
+    t.text "ssn"
     t.text "status", null: false
     t.index ["batch_db_id"], name: "idx_batch_students_batch_db_id"
   end
@@ -64,7 +64,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_171008) do
     t.string "first_name", null: false
     t.string "last_name", null: false
     t.string "record_id", null: false
-    t.string "ssn", null: false
+    t.string "ssn"
     t.string "status", null: false
     t.datetime "updated_at", null: false
     t.index ["education_enrollment_batch_id"], name: "idx_on_education_enrollment_batch_id_787e79cd79"

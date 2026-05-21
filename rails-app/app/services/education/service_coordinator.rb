@@ -2,6 +2,7 @@ module Education
   class ServiceCoordinator
     def initialize
       @client = Education::NscClient.new
+      @sqs_client = Aws::SQS::Client.new if ENV["BATCH_SQS_QUEUE_URL"].present?
     end
 
     def lookup_enrollment_status(req_params)
@@ -18,8 +19,8 @@ module Education
     end
 
     def register_batch(params)
-      ActiveRecord::Base.transaction do
-        batch = Education::EnrollmentBatch.create!(
+      batch = ActiveRecord::Base.transaction do
+        b = Education::EnrollmentBatch.create!(
           batch_id: params[:batch_id],
           submitted_by: params[:submitted_by],
           callback_url: params[:callback_url],
@@ -27,7 +28,7 @@ module Education
         )
 
         params[:students].each do |student_params|
-          batch.education_batch_students.create!(
+          b.education_batch_students.create!(
             record_id: student_params[:record_id],
             first_name: student_params[:first_name],
             last_name: student_params[:last_name],
@@ -36,8 +37,25 @@ module Education
             status: :queued
           )
         end
-        batch
+        b
       end
+
+      enqueue_batch_job(batch.id) if batch
+      batch
+    end
+
+    private
+
+    def enqueue_batch_job(enrollment_batch_id)
+      queue_url = ENV["BATCH_SQS_QUEUE_URL"]
+      return unless queue_url.present? && @sqs_client
+
+      @sqs_client.send_message(
+        queue_url: queue_url,
+        message_body: { enrollment_batch_id: enrollment_batch_id }.to_json
+      )
+    rescue StandardError => e
+      Rails.logger.error("Failed to enqueue batch job to SQS: #{e.message}")
     end
 
     def get_batch_status(batch_id)
