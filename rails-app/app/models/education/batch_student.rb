@@ -6,7 +6,7 @@
 #  date_of_birth                 :string           not null
 #  first_name                    :string           not null
 #  last_name                     :string           not null
-#  ssn                           :string           not null
+#  ssn                           :string
 #  status                        :string           not null
 #  created_at                    :datetime         not null
 #  updated_at                    :datetime         not null

@@ -2,3 +2,4 @@ concurrency: 25
 delay: 25
 queues:
   - ["<%= ENV['SQS_QUEUE_URL'] %>", 1]
+  - ["<%= ENV['BATCH_SQS_QUEUE_URL'] %>", 2]

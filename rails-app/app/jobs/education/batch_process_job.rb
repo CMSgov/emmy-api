@@ -35,9 +35,9 @@ module Education
       student.status_processing!
 
       params = {
-        first_name: student.first_name,
-        last_name: student.last_name,
-        date_of_birth: student.date_of_birth.to_s,
+        firstName: student.first_name,
+        lastName: student.last_name,
+        dateOfBirth: student.date_of_birth.to_s,
         ssn: student.ssn
       }
 
