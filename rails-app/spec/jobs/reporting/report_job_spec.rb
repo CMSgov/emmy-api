@@ -27,7 +27,7 @@ module Reporting
       end
 
       it 'adds the mapped agency name when a client mapping exists' do
-        ClientAgency.create!(client_id: 'test-client', agency_name: 'CMS/DSAC')
+        ClientAgency.create!(client_id: 'test-client', agency_name: 'Dummy Agency')
 
         body = {
           timestamp: Time.now.iso8601,
@@ -41,7 +41,7 @@ module Reporting
         ReportJob.new.perform(nil, body)
 
         event = ApiEvent.last
-        expect(event.agency_name).to eq('CMS/DSAC')
+        expect(event.agency_name).to eq('Dummy Agency')
       end
 
       it 'logs error and raises if JSON is invalid' do

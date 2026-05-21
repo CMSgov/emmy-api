@@ -22,6 +22,7 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "bootsnap", require: false
 
 gem "jwt"
+gem "csv"
 
 # Deploy this application anywhere as a Docker container [https://kamal-deploy.org]
 gem "kamal", require: false
@@ -54,6 +55,7 @@ end
 
 gem "stoplight", "~> 5.8"
 gem "aws-sdk-sqs"
+gem "aws-sdk-cognitoidentityprovider"
 gem "shoryuken"
 gem "datadog", "~> 2.0"
 
