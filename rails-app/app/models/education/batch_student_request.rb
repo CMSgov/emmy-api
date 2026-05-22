@@ -22,20 +22,20 @@ module Education
         type: :object,
         required: %i[batchId submittedBy students],
         properties: {
-          batchId: { type: :string, example: 'test-batch-123' },
-          submittedBy: { type: :string, example: 'user@example.com' },
-          callbackUrl: { type: :string, example: 'https://example.com/callback' },
+          batchId: { type: :string, example: 'batch-2023-05-22-001' },
+          submittedBy: { type: :string, example: 'admin@university.edu' },
+          callbackUrl: { type: :string, example: 'https://university.edu/api/callbacks/enrollment' },
           students: {
             type: :array,
             items: {
               type: :object,
               required: %i[recordId firstName lastName dateOfBirth],
               properties: {
-                recordId: { type: :string, example: 'rec1' },
-                firstName: { type: :string, example: 'John' },
-                lastName: { type: :string, example: 'Doe' },
-                dateOfBirth: { type: :string, example: '1990-01-01' },
-                ssn: { type: :string, example: '000-00-0000' }
+                recordId: { type: :string, example: 'STUDENT-1001' },
+                firstName: { type: :string, example: 'Jane' },
+                lastName: { type: :string, example: 'Smith' },
+                dateOfBirth: { type: :string, example: '1995-03-15' },
+                ssn: { type: :string, example: '000-00-1111' }
               }
             }
           }

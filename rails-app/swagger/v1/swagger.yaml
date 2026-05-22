@@ -25,7 +25,7 @@ paths:
                     example: Batch registration successful
                   batchJobId:
                     type: string
-                    example: test-batch-123
+                    example: batch-2023-05-22-001
         '400':
           description: missing required fields
       requestBody:
@@ -40,13 +40,13 @@ paths:
               properties:
                 batchId:
                   type: string
-                  example: test-batch-123
+                  example: batch-2023-05-22-001
                 submittedBy:
                   type: string
-                  example: user@example.com
+                  example: admin@university.edu
                 callbackUrl:
                   type: string
-                  example: https://example.com/callback
+                  example: https://university.edu/api/callbacks/enrollment
                 students:
                   type: array
                   items:
@@ -59,19 +59,19 @@ paths:
                     properties:
                       recordId:
                         type: string
-                        example: rec1
+                        example: STUDENT-1001
                       firstName:
                         type: string
-                        example: John
+                        example: Jane
                       lastName:
                         type: string
-                        example: Doe
+                        example: Smith
                       dateOfBirth:
                         type: string
-                        example: '1990-01-01'
+                        example: '1995-03-15'
                       ssn:
                         type: string
-                        example: 000-00-0000
+                        example: 000-00-1111
   "/api/v0/batch-education-enrollments/{id}":
     parameters:
     - name: id
@@ -95,22 +95,30 @@ paths:
                 properties:
                   batch_job_id:
                     type: string
+                    example: batch-2023-05-22-001
                   status:
                     type: string
+                    example: PROCESSING
                   submitted_at:
                     type: string
                     format: date-time
+                    example: '2023-05-22T08:53:00Z'
                   updated_at:
                     type: string
                     format: date-time
+                    example: '2023-05-22T08:55:00Z'
                   total_records:
                     type: integer
+                    example: 100
                   processed_records:
                     type: integer
+                    example: 45
                   success_count:
                     type: integer
+                    example: 40
                   failure_count:
                     type: integer
+                    example: 5
         '404':
           description: batch not found
   "/api/v0/batch-education-enrollments/{batchJobId}/details":
@@ -136,6 +144,7 @@ paths:
                 properties:
                   batch_job_id:
                     type: string
+                    example: batch-2023-05-22-001
                   results:
                     type: array
                     items:
@@ -143,14 +152,30 @@ paths:
                       properties:
                         record_id:
                           type: string
+                          example: STUDENT-1001
                         status:
                           type: string
+                          example: SUCCESS
                         found_enrollment:
                           type: boolean
+                          example: true
                         results:
                           type: array
                           items:
                             type: object
+                            properties:
+                              schoolName:
+                                type: string
+                                example: University of Excellence
+                              termBeginDate:
+                                type: string
+                                example: '2023-01-15'
+                              termEndDate:
+                                type: string
+                                example: '2023-05-20'
+                              enrollmentStatus:
+                                type: string
+                                example: FULL_TIME
         '404':
           description: batch not found
   "/api/v0/education-enrollments":

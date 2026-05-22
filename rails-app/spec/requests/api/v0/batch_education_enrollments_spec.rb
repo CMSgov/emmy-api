@@ -42,6 +42,13 @@ RSpec.describe "Api::V0::BatchEducationEnrollments", type: :request do
           expect(coordinator_mock).to receive(:register_batch).and_return(double(id: 'uuid-123'))
         end
 
+        after do |example|
+          example.metadata[:response][:content] = {
+            'application/json' => {
+              example: JSON.parse(response.body, symbolize_names: true)
+            }
+          }
+        end
         run_test!
       end
 
@@ -64,14 +71,14 @@ RSpec.describe "Api::V0::BatchEducationEnrollments", type: :request do
       response '200', 'successful' do
         schema type: :object,
                properties: {
-                 batch_job_id: { type: :string },
-                 status: { type: :string },
-                 submitted_at: { type: :string, format: 'date-time' },
-                 updated_at: { type: :string, format: 'date-time' },
-                 total_records: { type: :integer },
-                 processed_records: { type: :integer },
-                 success_count: { type: :integer },
-                 failure_count: { type: :integer }
+                 batch_job_id: { type: :string, example: 'batch-2023-05-22-001' },
+                 status: { type: :string, example: 'PROCESSING' },
+                 submitted_at: { type: :string, format: 'date-time', example: '2023-05-22T08:53:00Z' },
+                 updated_at: { type: :string, format: 'date-time', example: '2023-05-22T08:55:00Z' },
+                 total_records: { type: :integer, example: 100 },
+                 processed_records: { type: :integer, example: 45 },
+                 success_count: { type: :integer, example: 40 },
+                 failure_count: { type: :integer, example: 5 }
                }
 
         let(:id) { batch_id }
@@ -90,6 +97,13 @@ RSpec.describe "Api::V0::BatchEducationEnrollments", type: :request do
           expect(coordinator_mock).to receive(:get_batch_status).with(batch_id).and_return(status_data)
         end
 
+        after do |example|
+          example.metadata[:response][:content] = {
+            'application/json' => {
+              example: JSON.parse(response.body, symbolize_names: true)
+            }
+          }
+        end
         run_test!
       end
 
@@ -115,16 +129,27 @@ RSpec.describe "Api::V0::BatchEducationEnrollments", type: :request do
       response '200', 'successful' do
         schema type: :object,
                properties: {
-                 batch_job_id: { type: :string },
+                 batch_job_id: { type: :string, example: 'batch-2023-05-22-001' },
                  results: {
                    type: :array,
                    items: {
                      type: :object,
                      properties: {
-                       record_id: { type: :string },
-                       status: { type: :string },
-                       found_enrollment: { type: :boolean },
-                       results: { type: :array, items: { type: :object } }
+                       record_id: { type: :string, example: 'STUDENT-1001' },
+                       status: { type: :string, example: 'SUCCESS' },
+                       found_enrollment: { type: :boolean, example: true },
+                       results: {
+                         type: :array,
+                         items: {
+                           type: :object,
+                           properties: {
+                             schoolName: { type: :string, example: 'University of Excellence' },
+                             termBeginDate: { type: :string, example: '2023-01-15' },
+                             termEndDate: { type: :string, example: '2023-05-20' },
+                             enrollmentStatus: { type: :string, example: 'FULL_TIME' }
+                           }
+                         }
+                       }
                      }
                    }
                  }
@@ -147,6 +172,13 @@ RSpec.describe "Api::V0::BatchEducationEnrollments", type: :request do
           expect(coordinator_mock).to receive(:get_batch_details).with(batch_id).and_return(details_data)
         end
 
+        after do |example|
+          example.metadata[:response][:content] = {
+            'application/json' => {
+              example: JSON.parse(response.body, symbolize_names: true)
+            }
+          }
+        end
         run_test!
       end
 

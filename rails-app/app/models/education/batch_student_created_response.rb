@@ -19,7 +19,7 @@ module Education
         type: :object,
         properties: {
           message: { type: :string, example: 'Batch registration successful' },
-          batchJobId: { type: :string, example: 'test-batch-123' }
+          batchJobId: { type: :string, example: 'batch-2023-05-22-001' }
         }
       }
     end
