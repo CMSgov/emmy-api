@@ -65,5 +65,37 @@ module Education
         }.not_to raise_error
       end
     end
+
+    describe '#get_batch_status' do
+      let!(:batch) { Education::EnrollmentBatch.create!(batch_id: batch_id, submitted_by: 'test-user', callback_url: 'http://example.com', status: :processing) }
+      let!(:student) { Education::BatchStudent.create!(education_enrollment_batch: batch, record_id: 'rec1', status: :success, first_name: 'J', last_name: 'D', date_of_birth: '1990-01-01', ssn: '123') }
+
+      it 'returns the status of a batch' do
+        status = coordinator.get_batch_status(batch_id)
+        expect(status[:batch_job_id]).to eq(batch_id)
+        expect(status[:status]).to eq('PROCESSING')
+        expect(status[:total_records]).to eq(1)
+        expect(status[:success_count]).to eq(1)
+      end
+
+      it 'raises RecordNotFound if batch does not exist' do
+        expect {
+          coordinator.get_batch_status('non-existent')
+        }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+
+    describe '#get_batch_details' do
+      let!(:batch) { Education::EnrollmentBatch.create!(batch_id: batch_id, submitted_by: 'test-user', callback_url: 'http://example.com', status: :completed) }
+      let!(:student) { Education::BatchStudent.create!(education_enrollment_batch: batch, record_id: 'rec1', status: :success, first_name: 'J', last_name: 'D', date_of_birth: '1990-01-01', ssn: '123') }
+      let!(:result) { Education::BatchStudentResult.create!(education_batch_student: student, found_enrollment: true, results: [{ school: 'Test' }]) }
+
+      it 'returns the details of a batch' do
+        details = coordinator.get_batch_details(batch_id)
+        expect(details[:batch_job_id]).to eq(batch_id)
+        expect(details[:results].first[:record_id]).to eq('rec1')
+        expect(details[:results].first[:found_enrollment]).to be(true)
+      end
+    end
   end
 end
