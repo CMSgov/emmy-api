@@ -4,25 +4,12 @@ module Api
       def create
         reporter = Reporting::Reporter.new
 
+        batch_params = Education::BatchStudentRequest.new(params)
+
         # Validate request
-        if params[:batchId].blank? || params[:submittedBy].blank? || params[:students].blank?
+        if batch_params.batch_id.blank? || batch_params.submitted_by.blank? || batch_params.students.blank?
           return render json: { error: "missing required fields: batchId, submittedBy, and students are required" }, status: :bad_request
         end
-
-        batch_params = {
-          batch_id: params[:batchId],
-          submitted_by: params[:submittedBy],
-          callback_url: params[:callbackUrl],
-          students: params[:students].map do |s|
-            {
-              record_id: s[:recordId],
-              first_name: s[:firstName],
-              last_name: s[:lastName],
-              date_of_birth: s[:dateOfBirth],
-              ssn: s[:ssn]
-            }
-          end
-        }
 
         coordinator = Education::ServiceCoordinator.new
         begin
@@ -37,7 +24,11 @@ module Api
             success: true
           ))
 
-          render json: { message: "Batch registration successful", batchJobId: params[:batchId] }, status: :created
+          response_data = Education::BatchStudentCreatedResponse.new(
+            message: "Batch registration successful",
+            batch_job_id: batch_params.batch_id
+          )
+          render json: response_data, status: :created
         rescue StandardError => e
           Rails.logger.error("Batch education registration failed: #{e.message} #{e.backtrace.join("\n")}")
           reporter.report(Reporting::ReportData.new(
@@ -55,8 +46,9 @@ module Api
       def show
         reporter = Reporting::Reporter.new
         coordinator = Education::ServiceCoordinator.new
+        batch_request = Education::BatchStatusRequest.new(params)
         begin
-          status = coordinator.get_batch_status(params[:id])
+          status_data = coordinator.get_batch_status(batch_request.id)
           reporter.report(Reporting::ReportData.new(
             timestamp: Time.now,
             endpoint: request.path,
@@ -65,7 +57,8 @@ module Api
             status_code: 200,
             success: true
           ))
-          render json: status, status: :ok
+          response_data = Education::BatchStatusResponse.new(status_data)
+          render json: response_data, status: :ok
         rescue ActiveRecord::RecordNotFound
           render json: { error: "Batch not found" }, status: :not_found
         rescue StandardError => e
@@ -85,8 +78,9 @@ module Api
       def details
         reporter = Reporting::Reporter.new
         coordinator = Education::ServiceCoordinator.new
+        batch_request = Education::BatchDetailsRequest.new(params)
         begin
-          details = coordinator.get_batch_details(params[:batchJobId])
+          details_data = coordinator.get_batch_details(batch_request.batch_job_id)
           reporter.report(Reporting::ReportData.new(
             timestamp: Time.now,
             endpoint: request.path,
@@ -95,7 +89,8 @@ module Api
             status_code: 200,
             success: true
           ))
-          render json: details, status: :ok
+          response_data = Education::BatchDetailsResponse.new(details_data)
+          render json: response_data, status: :ok
         rescue ActiveRecord::RecordNotFound
           render json: { error: "Batch not found" }, status: :not_found
         rescue StandardError => e

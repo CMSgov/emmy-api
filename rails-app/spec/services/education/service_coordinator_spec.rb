@@ -6,20 +6,22 @@ module Education
     let(:batch_id) { 'test-batch-123' }
     let(:params) do
       {
-        batch_id: batch_id,
-        submitted_by: 'test-user',
-        callback_url: 'http://example.com/callback',
+        batchId: batch_id,
+        submittedBy: 'test-user',
+        callbackUrl: 'http://example.com/callback',
         students: [
           {
-            record_id: 'rec1',
-            first_name: 'John',
-            last_name: 'Doe',
-            date_of_birth: '1990-01-01',
+            recordId: 'rec1',
+            firstName: 'John',
+            lastName: 'Doe',
+            dateOfBirth: '1990-01-01',
             ssn: '123456789'
           }
         ]
       }
     end
+
+    let(:batch_student_request) { Education::BatchStudentRequest.new(params) }
 
     let(:sqs_client) { instance_double(Aws::SQS::Client) }
     let(:queue_url) { 'http://sqs.test/batch-queue' }
@@ -40,7 +42,7 @@ module Education
         expect(sqs_client).to receive(:send_message).with(hash_including(queue_url: queue_url))
 
         expect {
-          coordinator.register_batch(params)
+          coordinator.register_batch(batch_student_request)
         }.to change(Education::EnrollmentBatch, :count).by(1)
          .and change(Education::BatchStudent, :count).by(1)
       end
@@ -53,7 +55,7 @@ module Education
           expect(body['enrollment_batch_id']).to eq(batch.id)
         end
 
-        batch = coordinator.register_batch(params)
+        batch = coordinator.register_batch(batch_student_request)
       end
 
       it 'handles SQS errors gracefully' do
@@ -61,7 +63,7 @@ module Education
         expect(Rails.logger).to receive(:error).with(/Failed to enqueue batch job to SQS: SQS failure/)
 
         expect {
-          coordinator.register_batch(params)
+          coordinator.register_batch(batch_student_request)
         }.not_to raise_error
       end
     end
@@ -88,7 +90,7 @@ module Education
     describe '#get_batch_details' do
       let!(:batch) { Education::EnrollmentBatch.create!(batch_id: batch_id, submitted_by: 'test-user', callback_url: 'http://example.com', status: :completed) }
       let!(:student) { Education::BatchStudent.create!(education_enrollment_batch: batch, record_id: 'rec1', status: :success, first_name: 'J', last_name: 'D', date_of_birth: '1990-01-01', ssn: '123') }
-      let!(:result) { Education::BatchStudentResult.create!(education_batch_student: student, found_enrollment: true, results: [{ school: 'Test' }]) }
+      let!(:result) { Education::BatchStudentResult.create!(education_batch_student: student, found_enrollment: true, results: [ { school: 'Test' } ]) }
 
       it 'returns the details of a batch' do
         details = coordinator.get_batch_details(batch_id)

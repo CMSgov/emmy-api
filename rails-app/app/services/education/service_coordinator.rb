@@ -18,16 +18,16 @@ module Education
       end
     end
 
-    def register_batch(params)
+    def register_batch(batch_student_request)
       batch = ActiveRecord::Base.transaction do
         b = Education::EnrollmentBatch.create!(
-          batch_id: params[:batch_id],
-          submitted_by: params[:submitted_by],
-          callback_url: params[:callback_url],
+          batch_id: batch_student_request.batch_id,
+          submitted_by: batch_student_request.submitted_by,
+          callback_url: batch_student_request.callback_url,
           status: :queued
         )
 
-        params[:students].each do |student_params|
+        batch_student_request.students.each do |student_params|
           b.education_batch_students.create!(
             record_id: student_params[:record_id],
             first_name: student_params[:first_name],

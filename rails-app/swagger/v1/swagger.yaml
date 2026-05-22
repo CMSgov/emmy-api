@@ -4,6 +4,195 @@ info:
   title: API V1
   version: v1
 paths:
+  "/api/v0/batch-education-enrollments":
+    post:
+      summary: Register a new batch of education enrollments
+      tags:
+      - Batch Education Enrollments
+      security:
+      - oauth2: []
+      parameters: []
+      responses:
+        '201':
+          description: batch registration successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Batch registration successful
+                  batchJobId:
+                    type: string
+                    example: batch-2023-05-22-001
+        '400':
+          description: missing required fields
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - batchId
+              - submittedBy
+              - students
+              properties:
+                batchId:
+                  type: string
+                  description: A unique identifier for the batch. This must be unique
+                    to any previous batch requested by this client.
+                  example: batch-2023-05-22-001
+                submittedBy:
+                  type: string
+                  example: admin@university.edu
+                callbackUrl:
+                  type: string
+                  example: https://university.edu/api/callbacks/enrollment
+                students:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                    - recordId
+                    - firstName
+                    - lastName
+                    - dateOfBirth
+                    properties:
+                      recordId:
+                        type: string
+                        description: A unique identifier for this record within the
+                          batch.
+                        example: STUDENT-1001
+                      firstName:
+                        type: string
+                        example: Jane
+                      lastName:
+                        type: string
+                        example: Smith
+                      dateOfBirth:
+                        type: string
+                        example: '1995-03-15'
+                      ssn:
+                        type: string
+                        example: 000-00-1111
+  "/api/v0/batch-education-enrollments/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get the status of a batch
+      tags:
+      - Batch Education Enrollments
+      security:
+      - oauth2: []
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  batch_job_id:
+                    type: string
+                    example: batch-2023-05-22-001
+                  status:
+                    type: string
+                    enum:
+                    - QUEUED
+                    - PROCESSING
+                    - COMPLETED
+                    - FAILED
+                    example: PROCESSING
+                  submitted_at:
+                    type: string
+                    format: date-time
+                    example: '2023-05-22T08:53:00Z'
+                  updated_at:
+                    type: string
+                    format: date-time
+                    example: '2023-05-22T08:55:00Z'
+                  total_records:
+                    type: integer
+                    example: 100
+                  processed_records:
+                    type: integer
+                    example: 45
+                  success_count:
+                    type: integer
+                    example: 40
+                  failure_count:
+                    type: integer
+                    example: 5
+        '404':
+          description: batch not found
+  "/api/v0/batch-education-enrollments/{batchJobId}/details":
+    parameters:
+    - name: batchJobId
+      in: path
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get the details of a batch
+      tags:
+      - Batch Education Enrollments
+      security:
+      - oauth2: []
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  batch_job_id:
+                    type: string
+                    example: batch-2023-05-22-001
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        record_id:
+                          type: string
+                          example: STUDENT-1001
+                        status:
+                          type: string
+                          enum:
+                          - QUEUED
+                          - PROCESSING
+                          - SUCCESS
+                          - NO_HIT
+                          - FAILED
+                          example: SUCCESS
+                        found_enrollment:
+                          type: boolean
+                          example: true
+                        results:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              schoolName:
+                                type: string
+                                example: University of Excellence
+                              termBeginDate:
+                                type: string
+                                example: '2023-01-15'
+                              termEndDate:
+                                type: string
+                                example: '2023-05-20'
+                              enrollmentStatus:
+                                type: string
+                                example: FULL_TIME
+        '404':
+          description: batch not found
   "/api/v0/education-enrollments":
     post:
       summary: create education-enrollment
