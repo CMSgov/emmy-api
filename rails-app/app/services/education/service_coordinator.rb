@@ -44,20 +44,6 @@ module Education
       batch
     end
 
-    private
-
-    def enqueue_batch_job(enrollment_batch_id)
-      queue_url = ENV["BATCH_SQS_QUEUE_URL"]
-      return unless queue_url.present? && @sqs_client
-
-      @sqs_client.send_message(
-        queue_url: queue_url,
-        message_body: { enrollment_batch_id: enrollment_batch_id }.to_json
-      )
-    rescue StandardError => e
-      Rails.logger.error("Failed to enqueue batch job to SQS: #{e.message}")
-    end
-
     def get_batch_status(batch_id)
       batch = Education::EnrollmentBatch.find_by!(batch_id: batch_id)
 
@@ -97,6 +83,20 @@ module Education
         batch_job_id: batch.batch_id,
         results: results
       }
+    end
+
+    private
+
+    def enqueue_batch_job(enrollment_batch_id)
+      queue_url = ENV["BATCH_SQS_QUEUE_URL"]
+      return unless queue_url.present? && @sqs_client
+
+      @sqs_client.send_message(
+        queue_url: queue_url,
+        message_body: { enrollment_batch_id: enrollment_batch_id }.to_json
+      )
+    rescue StandardError => e
+      Rails.logger.error("Failed to enqueue batch job to SQS: #{e.message}")
     end
   end
 end
