@@ -40,6 +40,8 @@ paths:
               properties:
                 batchId:
                   type: string
+                  description: A unique identifier for the batch. This must be unique
+                    to any previous batch requested by this client.
                   example: batch-2023-05-22-001
                 submittedBy:
                   type: string
@@ -59,6 +61,8 @@ paths:
                     properties:
                       recordId:
                         type: string
+                        description: A unique identifier for this record within the
+                          batch.
                         example: STUDENT-1001
                       firstName:
                         type: string
@@ -98,6 +102,11 @@ paths:
                     example: batch-2023-05-22-001
                   status:
                     type: string
+                    enum:
+                    - QUEUED
+                    - PROCESSING
+                    - COMPLETED
+                    - FAILED
                     example: PROCESSING
                   submitted_at:
                     type: string
@@ -155,6 +164,12 @@ paths:
                           example: STUDENT-1001
                         status:
                           type: string
+                          enum:
+                          - QUEUED
+                          - PROCESSING
+                          - SUCCESS
+                          - NO_HIT
+                          - FAILED
                           example: SUCCESS
                         found_enrollment:
                           type: boolean

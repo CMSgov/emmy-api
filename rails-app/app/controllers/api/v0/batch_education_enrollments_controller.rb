@@ -46,8 +46,9 @@ module Api
       def show
         reporter = Reporting::Reporter.new
         coordinator = Education::ServiceCoordinator.new
+        batch_request = Education::BatchStatusRequest.new(params)
         begin
-          status = coordinator.get_batch_status(params[:id])
+          status_data = coordinator.get_batch_status(batch_request.id)
           reporter.report(Reporting::ReportData.new(
             timestamp: Time.now,
             endpoint: request.path,
@@ -56,7 +57,8 @@ module Api
             status_code: 200,
             success: true
           ))
-          render json: status, status: :ok
+          response_data = Education::BatchStatusResponse.new(status_data)
+          render json: response_data, status: :ok
         rescue ActiveRecord::RecordNotFound
           render json: { error: "Batch not found" }, status: :not_found
         rescue StandardError => e
@@ -76,8 +78,9 @@ module Api
       def details
         reporter = Reporting::Reporter.new
         coordinator = Education::ServiceCoordinator.new
+        batch_request = Education::BatchDetailsRequest.new(params)
         begin
-          details = coordinator.get_batch_details(params[:batchJobId])
+          details_data = coordinator.get_batch_details(batch_request.batch_job_id)
           reporter.report(Reporting::ReportData.new(
             timestamp: Time.now,
             endpoint: request.path,
@@ -86,7 +89,8 @@ module Api
             status_code: 200,
             success: true
           ))
-          render json: details, status: :ok
+          response_data = Education::BatchDetailsResponse.new(details_data)
+          render json: response_data, status: :ok
         rescue ActiveRecord::RecordNotFound
           render json: { error: "Batch not found" }, status: :not_found
         rescue StandardError => e

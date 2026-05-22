@@ -22,7 +22,11 @@ module Education
         type: :object,
         required: %i[batchId submittedBy students],
         properties: {
-          batchId: { type: :string, example: 'batch-2023-05-22-001' },
+          batchId: {
+            type: :string,
+            description: 'A unique identifier for the batch. This must be unique to any previous batch requested by this client.',
+            example: 'batch-2023-05-22-001'
+          },
           submittedBy: { type: :string, example: 'admin@university.edu' },
           callbackUrl: { type: :string, example: 'https://university.edu/api/callbacks/enrollment' },
           students: {
@@ -31,7 +35,11 @@ module Education
               type: :object,
               required: %i[recordId firstName lastName dateOfBirth],
               properties: {
-                recordId: { type: :string, example: 'STUDENT-1001' },
+                recordId: {
+                  type: :string,
+                  description: 'A unique identifier for this record within the batch.',
+                  example: 'STUDENT-1001'
+                },
                 firstName: { type: :string, example: 'Jane' },
                 lastName: { type: :string, example: 'Smith' },
                 dateOfBirth: { type: :string, example: '1995-03-15' },

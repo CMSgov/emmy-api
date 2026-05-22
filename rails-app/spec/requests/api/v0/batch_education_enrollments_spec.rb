@@ -69,17 +69,7 @@ RSpec.describe "Api::V0::BatchEducationEnrollments", type: :request do
       let(:Authorization) { 'Bearer <token>' }
 
       response '200', 'successful' do
-        schema type: :object,
-               properties: {
-                 batch_job_id: { type: :string, example: 'batch-2023-05-22-001' },
-                 status: { type: :string, example: 'PROCESSING' },
-                 submitted_at: { type: :string, format: 'date-time', example: '2023-05-22T08:53:00Z' },
-                 updated_at: { type: :string, format: 'date-time', example: '2023-05-22T08:55:00Z' },
-                 total_records: { type: :integer, example: 100 },
-                 processed_records: { type: :integer, example: 45 },
-                 success_count: { type: :integer, example: 40 },
-                 failure_count: { type: :integer, example: 5 }
-               }
+        schema Education::BatchStatusResponse.to_swagger_schema
 
         let(:id) { batch_id }
 
@@ -127,33 +117,7 @@ RSpec.describe "Api::V0::BatchEducationEnrollments", type: :request do
       let(:Authorization) { 'Bearer <token>' }
 
       response '200', 'successful' do
-        schema type: :object,
-               properties: {
-                 batch_job_id: { type: :string, example: 'batch-2023-05-22-001' },
-                 results: {
-                   type: :array,
-                   items: {
-                     type: :object,
-                     properties: {
-                       record_id: { type: :string, example: 'STUDENT-1001' },
-                       status: { type: :string, example: 'SUCCESS' },
-                       found_enrollment: { type: :boolean, example: true },
-                       results: {
-                         type: :array,
-                         items: {
-                           type: :object,
-                           properties: {
-                             schoolName: { type: :string, example: 'University of Excellence' },
-                             termBeginDate: { type: :string, example: '2023-01-15' },
-                             termEndDate: { type: :string, example: '2023-05-20' },
-                             enrollmentStatus: { type: :string, example: 'FULL_TIME' }
-                           }
-                         }
-                       }
-                     }
-                   }
-                 }
-               }
+        schema Education::BatchDetailsResponse.to_swagger_schema
 
         let(:batchJobId) { batch_id }
 
