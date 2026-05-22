@@ -22,8 +22,10 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: Batch registration successful
                   batchJobId:
                     type: string
+                    example: test-batch-123
         '400':
           description: missing required fields
       requestBody:

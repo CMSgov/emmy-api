@@ -17,36 +17,10 @@ RSpec.describe "Api::V0::BatchEducationEnrollments", type: :request do
       produces 'application/json'
       security [ oauth2: [] ]
       let(:Authorization) { 'Bearer <token>' }
-      parameter name: :batch_params, in: :body, schema: {
-        type: :object,
-        required: %i[batchId submittedBy students],
-        properties: {
-          batchId: { type: :string, example: 'test-batch-123' },
-          submittedBy: { type: :string, example: 'user@example.com' },
-          callbackUrl: { type: :string, example: 'https://example.com/callback' },
-          students: {
-            type: :array,
-            items: {
-              type: :object,
-              required: %i[recordId firstName lastName dateOfBirth],
-              properties: {
-                recordId: { type: :string, example: 'rec1' },
-                firstName: { type: :string, example: 'John' },
-                lastName: { type: :string, example: 'Doe' },
-                dateOfBirth: { type: :string, example: '1990-01-01' },
-                ssn: { type: :string, example: '000-00-0000' }
-              }
-            }
-          }
-        }
-      }
+      parameter name: :batch_params, in: :body, schema: Education::BatchStudentRequest.to_swagger_schema
 
       response '201', 'batch registration successful' do
-        schema type: :object,
-               properties: {
-                 message: { type: :string },
-                 batchJobId: { type: :string }
-               }
+        schema Education::BatchStudentCreatedResponse.to_swagger_schema
 
         let(:batch_params) do
           {
