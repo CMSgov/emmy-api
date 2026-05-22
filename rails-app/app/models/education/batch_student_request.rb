@@ -24,11 +24,11 @@ module Education
         properties: {
           batchId: {
             type: :string,
-            description: 'A unique identifier for the batch. This must be unique to any previous batch requested by this client.',
-            example: 'batch-2023-05-22-001'
+            description: "A unique identifier for the batch. This must be unique to any previous batch requested by this client.",
+            example: "batch-2023-05-22-001"
           },
-          submittedBy: { type: :string, example: 'admin@university.edu' },
-          callbackUrl: { type: :string, example: 'https://university.edu/api/callbacks/enrollment' },
+          submittedBy: { type: :string, example: "admin@university.edu" },
+          callbackUrl: { type: :string, example: "https://university.edu/api/callbacks/enrollment" },
           students: {
             type: :array,
             items: {
@@ -37,13 +37,13 @@ module Education
               properties: {
                 recordId: {
                   type: :string,
-                  description: 'A unique identifier for this record within the batch.',
-                  example: 'STUDENT-1001'
+                  description: "A unique identifier for this record within the batch.",
+                  example: "STUDENT-1001"
                 },
-                firstName: { type: :string, example: 'Jane' },
-                lastName: { type: :string, example: 'Smith' },
-                dateOfBirth: { type: :string, example: '1995-03-15' },
-                ssn: { type: :string, example: '000-00-1111' }
+                firstName: { type: :string, example: "Jane" },
+                lastName: { type: :string, example: "Smith" },
+                dateOfBirth: { type: :string, example: "1995-03-15" },
+                ssn: { type: :string, example: "000-00-1111" }
               }
             }
           }

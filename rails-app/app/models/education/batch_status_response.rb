@@ -30,14 +30,14 @@ module Education
       {
         type: :object,
         properties: {
-          batch_job_id: { type: :string, example: 'batch-2023-05-22-001' },
+          batch_job_id: { type: :string, example: "batch-2023-05-22-001" },
           status: {
             type: :string,
             enum: Education::EnrollmentBatch.statuses.values,
-            example: 'PROCESSING'
+            example: "PROCESSING"
           },
-          submitted_at: { type: :string, format: 'date-time', example: '2023-05-22T08:53:00Z' },
-          updated_at: { type: :string, format: 'date-time', example: '2023-05-22T08:55:00Z' },
+          submitted_at: { type: :string, format: "date-time", example: "2023-05-22T08:53:00Z" },
+          updated_at: { type: :string, format: "date-time", example: "2023-05-22T08:55:00Z" },
           total_records: { type: :integer, example: 100 },
           processed_records: { type: :integer, example: 45 },
           success_count: { type: :integer, example: 40 },
