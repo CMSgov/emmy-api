@@ -1,4 +1,4 @@
-require 'rails_helper'
+require 'swagger_helper'
 
 RSpec.describe "Api::V0::BatchEducationEnrollments", type: :request do
   let(:coordinator_mock) { instance_double(Education::ServiceCoordinator) }
@@ -10,65 +10,179 @@ RSpec.describe "Api::V0::BatchEducationEnrollments", type: :request do
     allow(Reporting::Reporter).to receive(:new).and_return(double(report: nil))
   end
 
-  describe "GET /api/v0/batch-education-enrollments/:id" do
-    it "returns the batch status" do
-      status_data = {
-        batch_job_id: batch_id,
-        status: "PROCESSING",
-        submitted_at: Time.now,
-        updated_at: Time.now,
-        total_records: 1,
-        processed_records: 0,
-        success_count: 0,
-        failure_count: 0
+  path '/api/v0/batch-education-enrollments' do
+    post 'Register a new batch of education enrollments' do
+      tags 'Batch Education Enrollments'
+      consumes 'application/json'
+      produces 'application/json'
+      security [ oauth2: [] ]
+      let(:Authorization) { 'Bearer <token>' }
+      parameter name: :batch_params, in: :body, schema: {
+        type: :object,
+        required: %i[batchId submittedBy students],
+        properties: {
+          batchId: { type: :string, example: 'test-batch-123' },
+          submittedBy: { type: :string, example: 'user@example.com' },
+          callbackUrl: { type: :string, example: 'https://example.com/callback' },
+          students: {
+            type: :array,
+            items: {
+              type: :object,
+              required: %i[recordId firstName lastName dateOfBirth],
+              properties: {
+                recordId: { type: :string, example: 'rec1' },
+                firstName: { type: :string, example: 'John' },
+                lastName: { type: :string, example: 'Doe' },
+                dateOfBirth: { type: :string, example: '1990-01-01' },
+                ssn: { type: :string, example: '000-00-0000' }
+              }
+            }
+          }
+        }
       }
-      expect(coordinator_mock).to receive(:get_batch_status).with(batch_id).and_return(status_data)
 
-      get "/api/v0/batch-education-enrollments/#{batch_id}"
+      response '201', 'batch registration successful' do
+        schema type: :object,
+               properties: {
+                 message: { type: :string },
+                 batchJobId: { type: :string }
+               }
 
-      expect(response).to have_http_status(:ok)
-      expect(JSON.parse(response.body)["batch_job_id"]).to eq(batch_id)
-    end
+        let(:batch_params) do
+          {
+            batchId: batch_id,
+            submittedBy: 'user@example.com',
+            callbackUrl: 'https://example.com/callback',
+            students: [
+              {
+                recordId: 'rec1',
+                firstName: 'John',
+                lastName: 'Doe',
+                dateOfBirth: '1990-01-01'
+              }
+            ]
+          }
+        end
 
-    it "returns 404 when batch is not found" do
-      expect(coordinator_mock).to receive(:get_batch_status).with("invalid").and_raise(ActiveRecord::RecordNotFound)
+        before do
+          expect(coordinator_mock).to receive(:register_batch).and_return(double(id: 'uuid-123'))
+        end
 
-      get "/api/v0/batch-education-enrollments/invalid"
+        run_test!
+      end
 
-      expect(response).to have_http_status(:not_found)
-      expect(JSON.parse(response.body)["error"]).to eq("Batch not found")
+      response '400', 'missing required fields' do
+        let(:batch_params) { { batchId: batch_id } }
+        run_test!
+      end
     end
   end
 
-  describe "GET /api/v0/batch-education-enrollments/:batchJobId/details" do
-    it "returns the batch details" do
-      details_data = {
-        batch_job_id: batch_id,
-        results: [
-          {
-            record_id: "rec1",
-            status: "SUCCESS",
-            found_enrollment: true,
-            results: []
+  path '/api/v0/batch-education-enrollments/{id}' do
+    parameter name: :id, in: :path, type: :string
+
+    get 'Get the status of a batch' do
+      tags 'Batch Education Enrollments'
+      produces 'application/json'
+      security [ oauth2: [] ]
+      let(:Authorization) { 'Bearer <token>' }
+
+      response '200', 'successful' do
+        schema type: :object,
+               properties: {
+                 batch_job_id: { type: :string },
+                 status: { type: :string },
+                 submitted_at: { type: :string, format: 'date-time' },
+                 updated_at: { type: :string, format: 'date-time' },
+                 total_records: { type: :integer },
+                 processed_records: { type: :integer },
+                 success_count: { type: :integer },
+                 failure_count: { type: :integer }
+               }
+
+        let(:id) { batch_id }
+
+        before do
+          status_data = {
+            batch_job_id: batch_id,
+            status: "PROCESSING",
+            submitted_at: Time.now,
+            updated_at: Time.now,
+            total_records: 1,
+            processed_records: 0,
+            success_count: 0,
+            failure_count: 0
           }
-        ]
-      }
-      expect(coordinator_mock).to receive(:get_batch_details).with(batch_id).and_return(details_data)
+          expect(coordinator_mock).to receive(:get_batch_status).with(batch_id).and_return(status_data)
+        end
 
-      get "/api/v0/batch-education-enrollments/#{batch_id}/details"
+        run_test!
+      end
 
-      expect(response).to have_http_status(:ok)
-      expect(JSON.parse(response.body)["batch_job_id"]).to eq(batch_id)
-      expect(JSON.parse(response.body)["results"]).to be_an(Array)
+      response '404', 'batch not found' do
+        let(:id) { 'invalid' }
+        before do
+          expect(coordinator_mock).to receive(:get_batch_status).with('invalid').and_raise(ActiveRecord::RecordNotFound)
+        end
+        run_test!
+      end
     end
+  end
 
-    it "returns 404 when batch is not found" do
-      expect(coordinator_mock).to receive(:get_batch_details).with("invalid").and_raise(ActiveRecord::RecordNotFound)
+  path '/api/v0/batch-education-enrollments/{batchJobId}/details' do
+    parameter name: :batchJobId, in: :path, type: :string
 
-      get "/api/v0/batch-education-enrollments/invalid/details"
+    get 'Get the details of a batch' do
+      tags 'Batch Education Enrollments'
+      produces 'application/json'
+      security [ oauth2: [] ]
+      let(:Authorization) { 'Bearer <token>' }
 
-      expect(response).to have_http_status(:not_found)
-      expect(JSON.parse(response.body)["error"]).to eq("Batch not found")
+      response '200', 'successful' do
+        schema type: :object,
+               properties: {
+                 batch_job_id: { type: :string },
+                 results: {
+                   type: :array,
+                   items: {
+                     type: :object,
+                     properties: {
+                       record_id: { type: :string },
+                       status: { type: :string },
+                       found_enrollment: { type: :boolean },
+                       results: { type: :array, items: { type: :object } }
+                     }
+                   }
+                 }
+               }
+
+        let(:batchJobId) { batch_id }
+
+        before do
+          details_data = {
+            batch_job_id: batch_id,
+            results: [
+              {
+                record_id: "rec1",
+                status: "SUCCESS",
+                found_enrollment: true,
+                results: []
+              }
+            ]
+          }
+          expect(coordinator_mock).to receive(:get_batch_details).with(batch_id).and_return(details_data)
+        end
+
+        run_test!
+      end
+
+      response '404', 'batch not found' do
+        let(:batchJobId) { 'invalid' }
+        before do
+          expect(coordinator_mock).to receive(:get_batch_details).with('invalid').and_raise(ActiveRecord::RecordNotFound)
+        end
+        run_test!
+      end
     end
   end
 end

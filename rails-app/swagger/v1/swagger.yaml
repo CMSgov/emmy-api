@@ -4,6 +4,153 @@ info:
   title: API V1
   version: v1
 paths:
+  "/api/v0/batch-education-enrollments":
+    post:
+      summary: Register a new batch of education enrollments
+      tags:
+      - Batch Education Enrollments
+      security:
+      - oauth2: []
+      parameters: []
+      responses:
+        '201':
+          description: batch registration successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  batchJobId:
+                    type: string
+        '400':
+          description: missing required fields
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - batchId
+              - submittedBy
+              - students
+              properties:
+                batchId:
+                  type: string
+                  example: test-batch-123
+                submittedBy:
+                  type: string
+                  example: user@example.com
+                callbackUrl:
+                  type: string
+                  example: https://example.com/callback
+                students:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                    - recordId
+                    - firstName
+                    - lastName
+                    - dateOfBirth
+                    properties:
+                      recordId:
+                        type: string
+                        example: rec1
+                      firstName:
+                        type: string
+                        example: John
+                      lastName:
+                        type: string
+                        example: Doe
+                      dateOfBirth:
+                        type: string
+                        example: '1990-01-01'
+                      ssn:
+                        type: string
+                        example: 000-00-0000
+  "/api/v0/batch-education-enrollments/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get the status of a batch
+      tags:
+      - Batch Education Enrollments
+      security:
+      - oauth2: []
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  batch_job_id:
+                    type: string
+                  status:
+                    type: string
+                  submitted_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  total_records:
+                    type: integer
+                  processed_records:
+                    type: integer
+                  success_count:
+                    type: integer
+                  failure_count:
+                    type: integer
+        '404':
+          description: batch not found
+  "/api/v0/batch-education-enrollments/{batchJobId}/details":
+    parameters:
+    - name: batchJobId
+      in: path
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get the details of a batch
+      tags:
+      - Batch Education Enrollments
+      security:
+      - oauth2: []
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  batch_job_id:
+                    type: string
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        record_id:
+                          type: string
+                        status:
+                          type: string
+                        found_enrollment:
+                          type: boolean
+                        results:
+                          type: array
+                          items:
+                            type: object
+        '404':
+          description: batch not found
   "/api/v0/education-enrollments":
     post:
       summary: create education-enrollment

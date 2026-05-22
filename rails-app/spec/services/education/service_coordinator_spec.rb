@@ -88,7 +88,7 @@ module Education
     describe '#get_batch_details' do
       let!(:batch) { Education::EnrollmentBatch.create!(batch_id: batch_id, submitted_by: 'test-user', callback_url: 'http://example.com', status: :completed) }
       let!(:student) { Education::BatchStudent.create!(education_enrollment_batch: batch, record_id: 'rec1', status: :success, first_name: 'J', last_name: 'D', date_of_birth: '1990-01-01', ssn: '123') }
-      let!(:result) { Education::BatchStudentResult.create!(education_batch_student: student, found_enrollment: true, results: [{ school: 'Test' }]) }
+      let!(:result) { Education::BatchStudentResult.create!(education_batch_student: student, found_enrollment: true, results: [ { school: 'Test' } ]) }
 
       it 'returns the details of a batch' do
         details = coordinator.get_batch_details(batch_id)
