@@ -29,7 +29,7 @@ module Education
 
 
       if response.code.to_i < 200 || response.code.to_i >= 300
-        raise "NSC submit failed: status=#{response.code}"
+        raise "NSC submit failed: status=#{response.code} body=#{response.body} correlationId=#{enrollment_req.correlation_id}"
       end
 
       nsc_resp = JSON.parse(response.body)

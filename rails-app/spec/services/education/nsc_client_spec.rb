@@ -124,6 +124,8 @@ module Education
         allow(oauth_response).to receive(:body).and_return({ access_token: 'fake-token' }.to_json)
 
         submit_response = Net::HTTPBadGateway.new('1.1', '502', 'Bad Gateway')
+        submit_response.instance_variable_set(:@read, true)
+        submit_response.body = '{"error":"upstream service unavailable"}'
 
         stub_nsc_requests(oauth_response, submit_response)
 
