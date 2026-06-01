@@ -43,6 +43,10 @@ module Education
       }
     end
 
+    def correlation_id
+      @correlation_id ||= SecureRandom.uuid
+    end
+
     def to_nsc_payload(account_id)
       out = {
         accountId: account_id,
@@ -52,7 +56,8 @@ module Education
         middleName: middle_name,
         ssn: ssn,
         endClient: "CMS",
-        terms: "y"
+        terms: "y",
+        correlationId: correlation_id
       }
 
       if address
