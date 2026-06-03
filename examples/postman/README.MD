@@ -32,4 +32,4 @@ Populate the variable values in your local Postman environment using the values 
 
 For the `education-enrollments` endpoint, the [National Student Clearinghouse integration testing data](https://docs.studentclearinghouse.org/vs/insights-json/integration-testing) can be used.
 
-Using hte `veteran-disability-ratings` endpoint test data is located at the [VA Developer Test Data page](https://developer.va.gov/explore/api/veteran-service-history-and-eligibility/test-users).
+Using the `veteran-disability-ratings` endpoint test data is located at the [VA Developer Test Data page](https://developer.va.gov/explore/api/veteran-service-history-and-eligibility/test-users).

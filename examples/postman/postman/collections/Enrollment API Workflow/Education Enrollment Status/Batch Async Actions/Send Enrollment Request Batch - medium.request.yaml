@@ -1,0 +1,177 @@
+$kind: http-request
+name: Send Enrollment Request Batch - medium
+url: "{{api_base}}/batch-education-enrollments"
+method: POST
+headers:
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "batchId": "{{batchId}}",
+      "submittedBy": "your-specified-submitterid",
+      "callbackUrl": "https://your-system.example.com/webhooks/enrollment",
+      "students": [
+        { "recordId": "your-recordid-001", "firstName": "Ashley", "lastName": "Borden", "dateOfBirth": "1980-12-22" },
+        { "recordId": "your-recordid-002", "firstName": "Maria", "lastName": "Chen", "dateOfBirth": "1998-11-22", "ssn": "123-45-6789" },
+        { "recordId": "your-recordid-003", "firstName": "Johnson", "middleName": "Lookalike", "lastName": "White", "dateOfBirth": "1982-04-21", "ssn": "172-32-1176" },
+        { "recordId": "your-recordid-004", "firstName": "James", "lastName": "Whitfield", "dateOfBirth": "1975-03-14" },
+        { "recordId": "your-recordid-005", "firstName": "Priya", "lastName": "Nair", "dateOfBirth": "2001-07-09", "ssn": "234-56-7890" },
+        { "recordId": "your-recordid-006", "firstName": "Ashley", "middleName": "Amaker", "lastName": "Borden", "dateOfBirth": "1980-12-22", "ssn": "514-14-8905" },
+        { "recordId": "your-recordid-007", "firstName": "Carlos", "middleName": "Eduardo", "lastName": "Mendoza", "dateOfBirth": "1993-05-21" },
+        { "recordId": "your-recordid-008", "firstName": "Tiffany", "lastName": "Brooks", "dateOfBirth": "1988-09-30", "ssn": "345-67-8901" },
+        { "recordId": "your-recordid-009", "firstName": "Alexa", "middleName": "Likeness", "lastName": "Pinson", "dateOfBirth": "1968-04-21", "ssn": "213-01-8915" },
+        { "recordId": "your-recordid-010", "firstName": "Ethan", "middleName": "Ray", "lastName": "Kowalski", "dateOfBirth": "2000-01-15" },
+        { "recordId": "your-recordid-011", "firstName": "Yuki", "lastName": "Tanaka", "dateOfBirth": "1995-06-28", "ssn": "456-78-9012" },
+        { "recordId": "your-recordid-012", "firstName": "Jerome", "middleName": "Feign", "lastName": "Munsch", "dateOfBirth": "1981-03-25", "ssn": "524-02-7657" },
+        { "recordId": "your-recordid-013", "firstName": "Dominique", "lastName": "Fontaine", "dateOfBirth": "1983-11-03" },
+        { "recordId": "your-recordid-014", "firstName": "Samuel", "middleName": "Lee", "lastName": "Okafor", "dateOfBirth": "1990-04-17", "ssn": "567-89-0123" },
+        { "recordId": "your-recordid-015", "firstName": "Roberto", "middleName": "Alter", "lastName": "Aragon", "dateOfBirth": "1964-09-06", "ssn": "489-36-8350" },
+        { "recordId": "your-recordid-016", "firstName": "Rachel", "lastName": "Goldstein", "dateOfBirth": "1979-08-25" },
+        { "recordId": "your-recordid-017", "firstName": "Amir", "lastName": "Hassan", "dateOfBirth": "2003-02-11", "ssn": "678-90-1234" },
+        { "recordId": "your-recordid-018", "firstName": "Brad", "middleName": "Shadow", "lastName": "Russell", "dateOfBirth": "1980-04-09", "ssn": "421-37-1396" },
+        { "recordId": "your-recordid-019", "firstName": "Brianna", "middleName": "Joy", "lastName": "Simmons", "dateOfBirth": "1997-10-05" },
+        { "recordId": "your-recordid-020", "firstName": "Liam", "lastName": "O'Brien", "dateOfBirth": "1985-07-19", "ssn": "789-01-2345" },
+        { "recordId": "your-recordid-021", "firstName": "Sunil", "middleName": "Linden", "lastName": "Davis", "dateOfBirth": "1982-01-20", "ssn": "559-81-1301" },
+        { "recordId": "your-recordid-022", "firstName": "Mei", "lastName": "Zhang", "dateOfBirth": "1992-03-08" },
+        { "recordId": "your-recordid-023", "firstName": "Trevor", "middleName": "Alan", "lastName": "Hutchins", "dateOfBirth": "1978-12-01", "ssn": "890-12-3456" },
+        { "recordId": "your-recordid-024", "firstName": "Danny", "middleName": "Reyes", "lastName": "Frazier", "dateOfBirth": "1980-01-16", "ssn": "624-84-9181" },
+        { "recordId": "your-recordid-025", "firstName": "Fatima", "lastName": "Al-Rashid", "dateOfBirth": "2002-09-14" },
+        { "recordId": "your-recordid-026", "firstName": "Derek", "lastName": "Nguyen", "dateOfBirth": "1996-05-27", "ssn": "901-23-4567" },
+        { "recordId": "your-recordid-027", "firstName": "Tim", "middleName": "Lowe", "lastName": "Simpson", "dateOfBirth": "1967-05-28", "ssn": "644-34-6954" },
+        { "recordId": "your-recordid-028", "firstName": "Sophia", "middleName": "Grace", "lastName": "Petrov", "dateOfBirth": "1987-01-30" },
+        { "recordId": "your-recordid-029", "firstName": "Marcus", "lastName": "Williams", "dateOfBirth": "1974-06-12", "ssn": "012-34-5678" },
+        { "recordId": "your-recordid-030", "firstName": "Lisa", "middleName": "Q.", "lastName": "Onwunli", "dateOfBirth": "1993-07-11", "ssn": "660-03-8360" },
+        { "recordId": "your-recordid-031", "firstName": "Ingrid", "lastName": "Larsson", "dateOfBirth": "1999-08-07" },
+        { "recordId": "your-recordid-032", "firstName": "Kwame", "middleName": "Asante", "lastName": "Boateng", "dateOfBirth": "1991-04-23", "ssn": "111-22-3333" },
+        { "recordId": "your-recordid-033", "firstName": "Jacquelyn", "middleName": "Fiddle", "lastName": "Russell", "dateOfBirth": "1991-05-27", "ssn": "514-01-2668" },
+        { "recordId": "your-recordid-034", "firstName": "Natalie", "lastName": "Russo", "dateOfBirth": "1984-11-16" },
+        { "recordId": "your-recordid-035", "firstName": "Elijah", "lastName": "Carter", "dateOfBirth": "2004-02-29", "ssn": "222-33-4444" },
+        { "recordId": "your-recordid-036", "firstName": "Ezra", "lastName": "Shoryuken", "dateOfBirth": "2004-02-29", "ssn": "866-25-1243" },
+        { "recordId": "your-recordid-037", "firstName": "Hana", "middleName": "Rin", "lastName": "Yoshida", "dateOfBirth": "1994-07-04" },
+        { "recordId": "your-recordid-038", "firstName": "Patrick", "lastName": "Flanagan", "dateOfBirth": "1981-10-18", "ssn": "333-44-5555" },
+        { "recordId": "your-recordid-039", "firstName": "Christopher", "middleName": "Pennebaker", "lastName": "Diaz", "dateOfBirth": "1955-09-20", "ssn": "458-02-6124" },
+        { "recordId": "your-recordid-040", "firstName": "Zara", "lastName": "Ahmed", "dateOfBirth": "2000-03-25" },
+        { "recordId": "your-recordid-041", "firstName": "Victor", "middleName": "Hugo", "lastName": "Delgado", "dateOfBirth": "1976-09-09", "ssn": "444-55-6666" },
+        { "recordId": "your-recordid-042", "firstName": "Lynette", "middleName": "Stephanie", "lastName": "Oyola", "dateOfBirth": "1988-10-24", "ssn": "587-03-2682" },
+        { "recordId": "your-recordid-043", "firstName": "Chloe", "lastName": "Dupont", "dateOfBirth": "1989-06-02" },
+        { "recordId": "your-recordid-044", "firstName": "Isaiah", "lastName": "Thompson", "dateOfBirth": "1997-12-14", "ssn": "555-66-7777" },
+        { "recordId": "your-recordid-045", "firstName": "Stacey", "middleName": "Robbins", "lastName": "Peacock", "dateOfBirth": "1996-05-24", "ssn": "687-05-8365" },
+        { "recordId": "your-recordid-046", "firstName": "Leila", "middleName": "Rose", "lastName": "Moradi", "dateOfBirth": "1986-04-07" },
+        { "recordId": "your-recordid-047", "firstName": "Nathan", "lastName": "Blackwood", "dateOfBirth": "2001-08-20", "ssn": "666-77-8888" },
+        { "recordId": "your-recordid-048", "firstName": "Agnes", "middleName": "Sanford", "lastName": "Nelson", "dateOfBirth": "1980-03-26", "ssn": "205-52-0027" },
+        { "recordId": "your-recordid-049", "firstName": "Amara", "lastName": "Diallo", "dateOfBirth": "1993-01-11" },
+        { "recordId": "your-recordid-050", "firstName": "Ryan", "middleName": "Scott", "lastName": "Callahan", "dateOfBirth": "1980-05-29", "ssn": "777-88-9999" },
+        { "recordId": "your-recordid-051", "firstName": "Lillie", "middleName": "Reid", "lastName": "Venson", "dateOfBirth": "2001-09-23", "ssn": "505-01-5714" },
+        { "recordId": "your-recordid-052", "firstName": "Yuna", "lastName": "Park", "dateOfBirth": "1998-10-03" },
+        { "recordId": "your-recordid-053", "firstName": "Gabriel", "lastName": "Ferreira", "dateOfBirth": "1972-07-16", "ssn": "888-99-0000" },
+        { "recordId": "your-recordid-054", "firstName": "Victoria", "middleName": "Porto", "lastName": "Faulkner", "dateOfBirth": "1985-02-10", "ssn": "300-62-3266" },
+        { "recordId": "your-recordid-055", "firstName": "Monique", "middleName": "Claire", "lastName": "Beaumont", "dateOfBirth": "1990-02-24" },
+        { "recordId": "your-recordid-056", "firstName": "Tobias", "lastName": "Richter", "dateOfBirth": "2002-11-08", "ssn": "100-20-3040" },
+        { "recordId": "your-recordid-057", "firstName": "Miley", "middleName": "Ginevra", "lastName": "Iorio", "dateOfBirth": "1977-08-19", "ssn": "322-84-2281" },
+        { "recordId": "your-recordid-058", "firstName": "Aaliyah", "lastName": "Jackson", "dateOfBirth": "1995-04-13" },
+        { "recordId": "your-recordid-059", "firstName": "Finn", "middleName": "Patrick", "lastName": "Gallagher", "dateOfBirth": "1983-09-27", "ssn": "200-30-4050" },
+        { "recordId": "your-recordid-060", "firstName": "Grace", "lastName": "Park", "dateOfBirth": "2004-02-29", "ssn": "799-01-5005" },
+        { "recordId": "your-recordid-061", "firstName": "Sana", "lastName": "Malik", "dateOfBirth": "1999-06-06" },
+        { "recordId": "your-recordid-062", "firstName": "Jerome", "lastName": "Washington", "dateOfBirth": "1977-01-19", "ssn": "300-40-5060" },
+        { "recordId": "your-recordid-063", "firstName": "Kwame", "middleName": "Kofi", "lastName": "Okiro", "dateOfBirth": "2003-10-16", "ssn": "393-94-6350" },
+        { "recordId": "your-recordid-064", "firstName": "Elena", "middleName": "Sofia", "lastName": "Volkov", "dateOfBirth": "1991-08-31" },
+        { "recordId": "your-recordid-065", "firstName": "Darius", "lastName": "Coleman", "dateOfBirth": "2003-03-17", "ssn": "400-50-6070" },
+        { "recordId": "your-recordid-066", "firstName": "Dominique", "middleName": "Audra", "lastName": "Ricardo", "dateOfBirth": "1978-01-12", "ssn": "646-44-9061" },
+        { "recordId": "your-recordid-067", "firstName": "Nadia", "lastName": "Petersen", "dateOfBirth": "1986-12-05" },
+        { "recordId": "your-recordid-068", "firstName": "Owen", "middleName": "James", "lastName": "Sullivan", "dateOfBirth": "1994-05-10", "ssn": "500-60-7080" },
+        { "recordId": "your-recordid-069", "firstName": "Teresa", "lastName": "Kaminsky", "dateOfBirth": "1994-06-20", "ssn": "465-73-5022" },
+        { "recordId": "your-recordid-070", "firstName": "Keiko", "lastName": "Watanabe", "dateOfBirth": "1982-10-22" },
+        { "recordId": "your-recordid-071", "firstName": "Andre", "lastName": "Moreau", "dateOfBirth": "1996-07-14", "ssn": "600-70-8090" },
+        { "recordId": "your-recordid-072", "firstName": "Rick", "middleName": "Edward", "lastName": "Banas", "dateOfBirth": "1979-08-18", "ssn": "612-20-6832" },
+        { "recordId": "your-recordid-073", "firstName": "Jasmine", "middleName": "Renee", "lastName": "Holloway", "dateOfBirth": "1989-02-28" },
+        { "recordId": "your-recordid-074", "firstName": "Caleb", "lastName": "Morrison", "dateOfBirth": "2001-11-01", "ssn": "700-80-9010" },
+        { "recordId": "your-recordid-075", "firstName": "Lakhshmi", "middleName": "Meera", "lastName": "Saxena", "dateOfBirth": "1968-02-16", "ssn": "751-10-2327" },
+        { "recordId": "your-recordid-076", "firstName": "Miriam", "lastName": "Goldberg", "dateOfBirth": "1975-06-18" },
+        { "recordId": "your-recordid-077", "firstName": "Tyrone", "middleName": "Deon", "lastName": "Hicks", "dateOfBirth": "1988-04-04", "ssn": "800-90-1020" },
+        { "recordId": "your-recordid-078", "firstName": "Kleine", "middleName": "Lowe", "lastName": "Simpson", "dateOfBirth": "1967-05-28", "ssn": "443-14-6954" },
+        { "recordId": "your-recordid-079", "firstName": "Astrid", "lastName": "Lindqvist", "dateOfBirth": "2000-09-15" },
+        { "recordId": "your-recordid-080", "firstName": "Marco", "lastName": "Esposito", "dateOfBirth": "1993-01-27", "ssn": "900-10-2030" },
+        { "recordId": "your-recordid-081", "firstName": "Suzanne", "middleName": "Madison", "lastName": "Davis", "dateOfBirth": "1999-04-09", "ssn": "123-45-6402" },
+        { "recordId": "your-recordid-082", "firstName": "Layla", "middleName": "Ann", "lastName": "Nasser", "dateOfBirth": "1984-07-09" },
+        { "recordId": "your-recordid-083", "firstName": "Brendan", "lastName": "Walsh", "dateOfBirth": "1997-03-21", "ssn": "110-21-3241" },
+        { "recordId": "your-recordid-084", "firstName": "Scott", "middleName": "M.", "lastName": "Tobin", "dateOfBirth": "1998-02-03", "ssn": "812-57-2349" },
+        { "recordId": "your-recordid-085", "firstName": "Yara", "lastName": "Ibrahim", "dateOfBirth": "1979-10-14" },
+        { "recordId": "your-recordid-086", "firstName": "Desmond", "middleName": "Earl", "lastName": "Payne", "dateOfBirth": "2002-05-06", "ssn": "220-32-4352" },
+        { "recordId": "your-recordid-087", "firstName": "Zara", "middleName": "Murphy", "lastName": "Sapphire", "dateOfBirth": "2002-08-14", "ssn": "999-77-5421" },
+        { "recordId": "your-recordid-088", "firstName": "Chiara", "lastName": "Ricci", "dateOfBirth": "1991-12-19" },
+        { "recordId": "your-recordid-089", "firstName": "Malcolm", "lastName": "Reid", "dateOfBirth": "1985-08-03", "ssn": "330-43-5463" },
+        { "recordId": "your-recordid-090", "firstName": "Soraya", "middleName": "Lena", "lastName": "Karimi", "dateOfBirth": "1998-04-25" },
+        { "recordId": "your-recordid-091", "firstName": "Elliot", "lastName": "Chambers", "dateOfBirth": "1973-11-07", "ssn": "440-54-6574" },
+        { "recordId": "your-recordid-092", "firstName": "Adaeze", "lastName": "Okonkwo", "dateOfBirth": "2004-01-30" },
+        { "recordId": "your-recordid-093", "firstName": "Hugo", "middleName": "Felix", "lastName": "Bauer", "dateOfBirth": "1987-06-12", "ssn": "550-65-7685" },
+        { "recordId": "your-recordid-094", "firstName": "Simone", "lastName": "Leclerc", "dateOfBirth": "1995-09-24" },
+        { "recordId": "your-recordid-095", "firstName": "Kofi", "lastName": "Mensah", "dateOfBirth": "1981-03-16", "ssn": "660-76-8796" },
+        { "recordId": "your-recordid-096", "firstName": "Valentina", "middleName": "Cruz", "lastName": "Reyes", "dateOfBirth": "1999-07-28" },
+        { "recordId": "your-recordid-097", "firstName": "Alec", "lastName": "Novak", "dateOfBirth": "1976-02-09", "ssn": "770-87-9807" },
+        { "recordId": "your-recordid-098", "firstName": "Nkechi", "lastName": "Eze", "dateOfBirth": "1992-10-21" },
+        { "recordId": "your-recordid-099", "firstName": "Stefan", "middleName": "Paul", "lastName": "Müller", "dateOfBirth": "2003-05-14", "ssn": "880-98-0918" },
+        { "recordId": "your-recordid-100", "firstName": "Roxanne", "lastName": "Dupuis", "dateOfBirth": "1986-01-06" },
+        { "recordId": "your-recordid-101", "firstName": "Idris", "lastName": "Kamara", "dateOfBirth": "1994-08-18", "ssn": "990-09-1029" },
+        { "recordId": "your-recordid-102", "firstName": "Penelope", "middleName": "Mae", "lastName": "Stafford", "dateOfBirth": "1980-04-30" },
+        { "recordId": "your-recordid-103", "firstName": "Ravi", "lastName": "Sharma", "dateOfBirth": "1997-12-12", "ssn": "121-31-4151" },
+        { "recordId": "your-recordid-104", "firstName": "Celeste", "lastName": "Fontaine", "dateOfBirth": "1983-06-25" },
+        { "recordId": "your-recordid-105", "firstName": "Jonah", "middleName": "David", "lastName": "Stern", "dateOfBirth": "2001-02-17", "ssn": "232-42-5262" },
+        { "recordId": "your-recordid-106", "firstName": "Amina", "lastName": "Traore", "dateOfBirth": "1990-09-08" },
+        { "recordId": "your-recordid-107", "firstName": "Declan", "lastName": "Murphy", "dateOfBirth": "1978-05-20", "ssn": "343-53-6373" },
+        { "recordId": "your-recordid-108", "firstName": "Xiomara", "middleName": "Isabel", "lastName": "Vega", "dateOfBirth": "1996-01-03" },
+        { "recordId": "your-recordid-109", "firstName": "Tobias", "lastName": "Engel", "dateOfBirth": "1985-10-15", "ssn": "454-64-7484" },
+        { "recordId": "your-recordid-110", "firstName": "Fatou", "lastName": "Diop", "dateOfBirth": "2002-07-27" },
+        { "recordId": "your-recordid-111", "firstName": "Brennan", "middleName": "Cole", "lastName": "Fitzgerald", "dateOfBirth": "1993-03-10", "ssn": "565-75-8595" },
+        { "recordId": "your-recordid-112", "firstName": "Yolanda", "lastName": "Castillo", "dateOfBirth": "1988-11-22" },
+        { "recordId": "your-recordid-113", "firstName": "Nico", "lastName": "Santini", "dateOfBirth": "1974-08-04", "ssn": "676-86-9606" },
+        { "recordId": "your-recordid-114", "firstName": "Blessing", "middleName": "Grace", "lastName": "Adeyemi", "dateOfBirth": "1999-04-16" },
+        { "recordId": "your-recordid-115", "firstName": "Fletcher", "lastName": "Harrington", "dateOfBirth": "1982-01-28", "ssn": "787-97-0717" },
+        { "recordId": "your-recordid-116", "firstName": "Sakura", "lastName": "Ito", "dateOfBirth": "1995-07-11" },
+        { "recordId": "your-recordid-117", "firstName": "Damien", "middleName": "Louis", "lastName": "Chevalier", "dateOfBirth": "2000-12-23", "ssn": "898-08-1828" },
+        { "recordId": "your-recordid-118", "firstName": "Imani", "lastName": "Osei", "dateOfBirth": "1987-05-05" },
+        { "recordId": "your-recordid-119", "firstName": "Rowan", "lastName": "MacLeod", "dateOfBirth": "1977-10-17", "ssn": "909-19-2939" },
+        { "recordId": "your-recordid-120", "firstName": "Thalia", "middleName": "Eleni", "lastName": "Papadopoulos", "dateOfBirth": "1991-06-29" },
+        { "recordId": "your-recordid-121", "firstName": "Emeka", "lastName": "Nwosu", "dateOfBirth": "2003-02-10", "ssn": "131-41-5161" },
+        { "recordId": "your-recordid-122", "firstName": "Ingrid", "lastName": "Hoffmann", "dateOfBirth": "1984-09-22" },
+        { "recordId": "your-recordid-123", "firstName": "Cyrus", "middleName": "Darius", "lastName": "Tehrani", "dateOfBirth": "1996-04-05", "ssn": "242-52-6272" },
+        { "recordId": "your-recordid-124", "firstName": "Lena", "lastName": "Bergström", "dateOfBirth": "1980-11-17" },
+        { "recordId": "your-recordid-125", "firstName": "Obinna", "lastName": "Chukwu", "dateOfBirth": "1993-07-30", "ssn": "353-63-7383" }
+      ]
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{access_token}}"
+scripts:
+  - type: beforeRequest
+    code: |
+      const batchId = `medium-batch-${pm.variables.replaceIn("{{$guid}}")}`;
+
+      pm.collectionVariables.set("batchId", batchId);
+
+      const token = pm.collectionVariables.get("access_token");
+
+      if (!token) {
+          throw new Error("Missing access_token. Token request likely failed.");
+      }
+    language: text/javascript
+  - type: afterResponse
+    code: |
+      pm.test("Status is 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Response is JSON", function () {
+          pm.expect(
+              pm.response.headers.get("Content-Type")
+          ).to.include("application/json");
+      });
+
+      pm.test("Response body is not empty", function () {
+          const body = pm.response.json();
+          pm.expect(body).to.exist;
+      });
+    language: text/javascript
+order: 650511734257790

@@ -1,6 +1,6 @@
 $kind: http-request
-name: Get Enrollments - enrolled, less than half time
-url: "{{api_base}}/education-enrollments"
+name: Send Enrollment Request Batch - small
+url: "{{api_base}}/batch-education-enrollments"
 method: POST
 headers:
   Authorization: Bearer {{access_token}}
@@ -9,9 +9,24 @@ body:
   type: json
   content: |
     {
-      "firstName": "Stacey",
-      "lastName": "Peacock",
-      "dateOfBirth": "1996-05-24"
+      "batchId": "{{batchId}}",
+      "submittedBy": "your-specified-submitterid",
+      "callbackUrl": "https://your-system.example.com/webhooks/enrollment",
+      "students": [
+        {
+          "recordId": "your-recordid-001",
+          "firstName": "Ashley",
+          "lastName": "Borden",
+          "dateOfBirth": "1980-12-22"
+        },
+        {
+          "recordId": "your-recordid-002",
+          "firstName": "Maria",
+          "lastName": "Chen",
+          "dateOfBirth": "1998-11-22",
+          "ssn": "123-45-6789"
+        }
+      ]
     }
 auth:
   type: bearer
@@ -20,6 +35,10 @@ auth:
 scripts:
   - type: beforeRequest
     code: |
+      const batchId = `small-batch-${pm.variables.replaceIn("{{$guid}}")}`;
+
+      pm.collectionVariables.set("batchId", batchId);
+
       const token = pm.collectionVariables.get("access_token");
 
       if (!token) {
@@ -43,4 +62,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 4489433018641956
+order: 1780494194792
