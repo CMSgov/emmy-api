@@ -1,6 +1,6 @@
 $kind: http-request
-name: Get Enrollments - degree found, not enrolled
-url: "{{api_base}}/education-enrollments"
+name: Send Enrollment Request Batch - small
+url: "{{api_base}}/batch-education-enrollments"
 method: POST
 headers:
   Authorization: Bearer {{access_token}}
@@ -9,9 +9,24 @@ body:
   type: json
   content: |
     {
-      "firstName": "Alexa",
-      "lastName": "Pinson",
-      "dateOfBirth": "1968-04-21"
+      "batchId": "your-unique-small-batchid-001",
+      "submittedBy": "your-specified-submitterid",
+      "callbackUrl": "https://your-system.example.com/webhooks/enrollment",
+      "students": [
+        {
+          "recordId": "your-recordid-001",
+          "firstName": "Ashley",
+          "lastName": "Borden",
+          "dateOfBirth": "1980-12-22"
+        },
+        {
+          "recordId": "your-recordid-002",
+          "firstName": "Maria",
+          "lastName": "Chen",
+          "dateOfBirth": "1998-11-22",
+          "ssn": "123-45-6789"
+        }
+      ]
     }
 auth:
   type: bearer
@@ -43,4 +58,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 4500279597581076
+order: 1780494194792

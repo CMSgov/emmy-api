@@ -1,5 +1,5 @@
 $kind: http-request
-name: Get Enrollments - enrolled, full time
+name: Get Enrollments - degree found, not enrolled
 url: "{{api_base}}/education-enrollments"
 method: POST
 headers:
@@ -9,9 +9,9 @@ body:
   type: json
   content: |
     {
-      "firstName": "Teresa",
-      "lastName": "Kaminsky",
-      "dateOfBirth": "1994-06-20"
+      "firstName": "Alexa",
+      "lastName": "Pinson",
+      "dateOfBirth": "1968-04-21"
     }
 auth:
   type: bearer
@@ -43,4 +43,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 4430820069146905
+order: 4501472158861135

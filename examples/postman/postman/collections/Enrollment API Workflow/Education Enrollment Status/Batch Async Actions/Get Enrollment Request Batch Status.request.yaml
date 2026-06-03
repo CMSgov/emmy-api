@@ -1,18 +1,10 @@
 $kind: http-request
-name: Get Enrollments - enrolled, half time
-url: "{{api_base}}/education-enrollments"
-method: POST
+name: Get Enrollment Request Batch Status
+url: "{{api_base}}/batch-education-enrollments/your-unique-medium-batchid-000001"
+method: GET
 headers:
   Authorization: Bearer {{access_token}}
   Content-Type: application/json
-body:
-  type: json
-  content: |
-    {
-      "firstName": "Rick",
-      "lastName": "Banas",
-      "dateOfBirth": "1979-08-18"
-    }
 auth:
   type: bearer
   credentials:
@@ -43,4 +35,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 4471937202308064
+order: 2704891415818328

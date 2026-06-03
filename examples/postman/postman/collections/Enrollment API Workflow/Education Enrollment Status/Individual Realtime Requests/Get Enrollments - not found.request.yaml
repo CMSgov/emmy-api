@@ -1,5 +1,5 @@
 $kind: http-request
-name: Get Enrollments - enrolled, less than half time
+name: Get Enrollments - not found
 url: "{{api_base}}/education-enrollments"
 method: POST
 headers:
@@ -9,9 +9,9 @@ body:
   type: json
   content: |
     {
-      "firstName": "Stacey",
-      "lastName": "Peacock",
-      "dateOfBirth": "1996-05-24"
+      "firstName": "John",
+      "lastName": "Doe",
+      "dateOfBirth": "1999-01-02"
     }
 auth:
   type: bearer
@@ -43,4 +43,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 4489433018641956
+order: 4503338578359152

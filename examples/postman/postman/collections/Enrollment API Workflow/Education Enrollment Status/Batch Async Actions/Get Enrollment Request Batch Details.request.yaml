@@ -1,18 +1,10 @@
 $kind: http-request
-name: Get Enrollments - enrolled, not known how much
-url: "{{api_base}}/education-enrollments"
-method: POST
+name: Get Enrollment Request Batch Details
+url: "{{api_base}}/batch-education-enrollments/your-unique-large-batchid-0000001/details"
+method: GET
 headers:
   Authorization: Bearer {{access_token}}
   Content-Type: application/json
-body:
-  type: json
-  content: |
-    {
-      "firstName": "Kwame",
-      "lastName": "Okiro",
-      "dateOfBirth": "2003-10-16"
-    }
 auth:
   type: bearer
   credentials:
@@ -43,4 +35,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 4411963731139224
+order: 3399110001445466
