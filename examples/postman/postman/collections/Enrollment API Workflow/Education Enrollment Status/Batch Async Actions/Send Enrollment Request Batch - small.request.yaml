@@ -9,7 +9,7 @@ body:
   type: json
   content: |
     {
-      "batchId": "your-unique-small-batchid-001",
+      "batchId": "{{batchId}}",
       "submittedBy": "your-specified-submitterid",
       "callbackUrl": "https://your-system.example.com/webhooks/enrollment",
       "students": [
@@ -35,6 +35,10 @@ auth:
 scripts:
   - type: beforeRequest
     code: |
+      const batchId = `small-batch-${pm.variables.replaceIn("{{$guid}}")}`;
+
+      pm.collectionVariables.set("batchId", batchId);
+
       const token = pm.collectionVariables.get("access_token");
 
       if (!token) {
