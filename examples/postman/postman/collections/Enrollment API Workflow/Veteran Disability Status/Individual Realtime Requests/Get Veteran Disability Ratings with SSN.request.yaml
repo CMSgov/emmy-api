@@ -1,22 +1,18 @@
 $kind: http-request
-name: Get Enrollments - enrolled, full time
-url: "{{api_base}}/education-enrollments"
+url: "{{api_base}}/veteran-disability-ratings"
 method: POST
 headers:
   Authorization: Bearer {{access_token}}
   Content-Type: application/json
 body:
-  type: json
+  type: text
   content: |
     {
-      "firstName": "Agnes",
-      "lastName": "Nelson",
-      "dateOfBirth": "1980-03-26"
+      "firstName": "Alfredo",
+      "lastName": "Armstrong",
+      "dateOfBirth": "1993-06-08",
+      "ssn": "796-01-2476"
     }
-auth:
-  type: bearer
-  credentials:
-    token: "{{access_token}}"
 scripts:
   - type: beforeRequest
     code: |
@@ -43,4 +39,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 3670992063874539
+order: 1780503157570

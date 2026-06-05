@@ -1,5 +1,5 @@
 $kind: http-request
-name: Get Veteran Disability Ratings
+name: Veteran not Found
 url: "{{api_base}}/veteran-disability-ratings"
 method: POST
 headers:
@@ -9,10 +9,10 @@ body:
   type: text
   content: |
     {
-      "firstName": "Alfredo",
-      "lastName": "Armstrong",
-      "dateOfBirth": "1993-06-08",
-      "ssn": "796-01-2476"
+      "firstName": "Sample",
+      "lastName": "Quincy",
+      "dateOfBirth": "1951-11-18",
+      "ssn": "123-23-1234"
     }
 scripts:
   - type: beforeRequest
@@ -40,4 +40,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 1780503157570
+order: 4485801760489846

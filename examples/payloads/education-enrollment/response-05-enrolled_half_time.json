@@ -1,0 +1,82 @@
+{
+    "enrollmentStatus": "HALF_TIME",
+    "enrollmentDetails": [
+        {
+            "schoolName": "WESTERN STATE COLORADO UNIVERSITY",
+            "termBeginDate": "2024-07-31",
+            "termEndDate": "2024-12-09",
+            "enrollmentStatus": "HALF_TIME"
+        }
+    ],
+    "rawData": {
+        "status": {
+            "code": "0",
+            "severity": "Info",
+            "message": "Successful"
+        },
+        "transactionDetails": {
+            "transactionId": "4001701814",
+            "orderId": "2002848451",
+            "transactionStatus": "CNF",
+            "transactionFee": "0.00",
+            "salesTax": "0.00",
+            "transactionTotal": "0.00",
+            "requestedBy": "CMS Contact",
+            "requestedDate": "2026-06-05 13:57:22.183",
+            "notifiedDate": "2026-06-05 13:57:22.183",
+            "nscHit": "Y"
+        },
+        "clientData": {
+            "accountId": "10053523"
+        },
+        "studentInfoProvided": {
+            "lastName": "Kaminsky",
+            "firstName": "Teresa",
+            "dateOfBirth": "1994-06-20"
+        },
+        "enrollmentDetails": [
+            {
+                "officialSchoolName": "WESTERN STATE COLORADO UNIVERSITY",
+                "schoolCode": "001372",
+                "branchCode": "00",
+                "nameOnSchoolRecord": {
+                    "firstName": "Teresa",
+                    "lastName": "Kaminsky"
+                },
+                "currentEnrollmentStatus": "CC",
+                "enrollmentData": [
+                    {
+                        "enrollmentStatus": "H",
+                        "termBeginDate": "2024-07-31",
+                        "termEndDate": "2024-12-09",
+                        "schoolCertifiedOnDate": "2024-08-09",
+                        "anticipatedGraduationDate": "2025-11-30",
+                        "majorCoursesOfStudy": [
+                            {
+                                "course": "American Literature (United States)",
+                                "ncesCIPCode": "231402"
+                            }
+                        ]
+                    }
+                ],
+                "studentAddress": {
+                    "address1": "1517 Gambler Lane",
+                    "city": "Houston",
+                    "state": "TX",
+                    "zipCode": "77006",
+                    "country": "US",
+                    "empty": false
+                }
+            }
+        ]
+    },
+    "dataSource": "NSC",
+    "metadata": {
+        "apiVersion": "1.3.0",
+        "environment": "development",
+        "requestTimestamp": "2026-06-05T17:57:22.536Z",
+        "responseTimestamp": "2026-06-05T17:57:22.536Z",
+        "transactionId": "3d0f10bf-a147-47b2-9f69-57e2198ca612",
+        "datasourceDurationMillis": 409
+    }
+}

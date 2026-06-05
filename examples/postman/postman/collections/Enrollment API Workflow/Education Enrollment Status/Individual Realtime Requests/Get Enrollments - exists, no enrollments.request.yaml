@@ -1,4 +1,5 @@
 $kind: http-request
+name: Get Enrollments - exists, no enrollments
 url: "{{api_base}}/education-enrollments"
 method: POST
 headers:
@@ -8,9 +9,10 @@ body:
   type: json
   content: |
     {
-      "firstName": "Ashley",
-      "lastName": "Borden",
-      "dateOfBirth": "1980-12-22"
+      "firstName": "Brad",
+      "lastName": "Russell",
+      "dateOfBirth": "1980-04-09",
+      "ssn": "421371396"
     }
 auth:
   type: bearer

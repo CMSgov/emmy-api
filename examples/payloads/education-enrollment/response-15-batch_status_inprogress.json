@@ -1,0 +1,10 @@
+{
+    "batch_job_id": "large-batch-470a275c-a7f6-4a33-b808-48f82fed33af",
+    "status": "PROCESSING",
+    "submitted_at": "2026-06-05T22:10:59.396Z",
+    "updated_at": "2026-06-05T22:11:49.697Z",
+    "total_records": 5000,
+    "processed_records": 4074,
+    "success_count": 0,
+    "failure_count": 4073
+}

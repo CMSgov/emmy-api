@@ -1,0 +1,10 @@
+{
+    "batch_job_id": "your-unique-batch-id-001",
+    "status": "QUEUED",
+    "submitted_at": "2026-06-05T18:43:20.658Z",
+    "updated_at": "2026-06-05T18:43:22.911Z",
+    "total_records": 2,
+    "processed_records": 0,
+    "success_count": 0,
+    "failure_count": 0
+}
