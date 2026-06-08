@@ -1,0 +1,40 @@
+{
+    "enrollmentStatus": "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING",
+    "enrollmentDetails": [],
+    "rawData": {
+        "status": {
+            "code": "0",
+            "severity": "Info",
+            "message": "Successful"
+        },
+        "transactionDetails": {
+            "transactionId": "4001701811",
+            "orderId": "2002848448",
+            "transactionStatus": "UCF",
+            "transactionFee": "0.00",
+            "salesTax": "0.00",
+            "transactionTotal": "0.00",
+            "requestedBy": "CMS Contact",
+            "requestedDate": "2026-06-05 13:33:05.711",
+            "notifiedDate": "2026-06-05 13:33:05.711",
+            "nscHit": "Y"
+        },
+        "clientData": {
+            "accountId": "10053523"
+        },
+        "studentInfoProvided": {
+            "lastName": "Russell",
+            "firstName": "Brad",
+            "dateOfBirth": "1980-04-09"
+        }
+    },
+    "dataSource": "NSC",
+    "metadata": {
+        "apiVersion": "1.3.0",
+        "environment": "development",
+        "requestTimestamp": "2026-06-05T17:33:06.063Z",
+        "responseTimestamp": "2026-06-05T17:33:06.063Z",
+        "transactionId": "d11e3f43-f299-4773-aeed-88cd00035d23",
+        "datasourceDurationMillis": 419
+    }
+}

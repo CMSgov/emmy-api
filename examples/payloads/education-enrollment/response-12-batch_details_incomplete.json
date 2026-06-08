@@ -1,0 +1,17 @@
+{
+    "batch_job_id": "your-unique-batch-id-001",
+    "results": [
+        {
+            "record_id": "your-recordid-001",
+            "status": "QUEUED",
+            "found_enrollment": false,
+            "results": null
+        },
+        {
+            "record_id": "your-recordid-002",
+            "status": "QUEUED",
+            "found_enrollment": false,
+            "results": null
+        }
+    ]
+}

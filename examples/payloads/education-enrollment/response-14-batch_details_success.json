@@ -1,0 +1,58 @@
+{
+    "batch_job_id": "your-unique-batch-id-001",
+    "results": [
+        {
+            "record_id": "your-recordid-001",
+            "status": "SUCCESS",
+            "found_enrollment": true,
+            "results": {
+                "rawData": {
+                    "status": {
+                        "code": "0",
+                        "message": "Successful",
+                        "severity": "Info"
+                    },
+                    "clientData": {
+                        "accountId": "10053523"
+                    },
+                    "transactionDetails": {
+                        "nscHit": "Y",
+                        "orderId": "2002848458",
+                        "salesTax": "0.00",
+                        "requestedBy": "CMS Contact",
+                        "notifiedDate": "2026-06-05 14:43:38.764",
+                        "requestedDate": "2026-06-05 14:43:38.764",
+                        "transactionId": "4001701841",
+                        "transactionFee": "0.00",
+                        "transactionTotal": "0.00",
+                        "transactionStatus": "UCF"
+                    },
+                    "studentInfoProvided": {
+                        "lastName": "Borden",
+                        "firstName": "Ashley",
+                        "dateOfBirth": "1980-12-22"
+                    }
+                },
+                "metadata": {
+                    "apiVersion": "1.3.0",
+                    "environment": "development",
+                    "transactionId": "f7dff8be-a5d7-4b72-8f03-800688794512",
+                    "requestTimestamp": "2026-06-05T18:43:39.067Z",
+                    "responseTimestamp": "2026-06-05T18:43:39.067Z",
+                    "datasourceDurationMillis": 369
+                },
+                "dataSource": "NSC",
+                "enrollmentStatus": "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING",
+                "enrollmentDetails": []
+            }
+        },
+        {
+            "record_id": "your-recordid-002",
+            "status": "NO_HIT",
+            "found_enrollment": false,
+            "results": {
+                "message": "No enrollment found"
+            }
+        }
+    ]
+}

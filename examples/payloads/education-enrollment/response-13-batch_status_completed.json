@@ -1,0 +1,10 @@
+{
+    "batch_job_id": "your-unique-batch-id-001",
+    "status": "COMPLETED",
+    "submitted_at": "2026-06-05T18:43:20.658Z",
+    "updated_at": "2026-06-05T18:55:23.759Z",
+    "total_records": 2,
+    "processed_records": 2,
+    "success_count": 1,
+    "failure_count": 0
+}

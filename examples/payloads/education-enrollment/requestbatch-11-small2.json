@@ -1,0 +1,11 @@
+{
+  "batchId": "your-unique-batchId-101",
+  "submittedBy": "your-specified-submitterid",
+  "students": [
+    { "recordId": "your-recordid-001", "firstName": "Ashley", "lastName": "Borden", "dateOfBirth": "1980-12-22" },
+    { "recordId": "your-recordid-002", "firstName": "Maria", "lastName": "Chen", "dateOfBirth": "1998-11-22", "ssn": "123-45-6789" },
+    { "recordId": "your-recordid-003", "firstName": "Johnson", "middleName": "Lookalike", "lastName": "White", "dateOfBirth": "1982-04-21", "ssn": "172-32-1176" },
+    { "recordId": "your-recordid-004", "firstName": "James", "lastName": "Whitfield", "dateOfBirth": "1975-03-14" },
+    { "recordId": "your-recordid-005", "firstName": "Priya", "lastName": "Nair", "dateOfBirth": "2001-07-09", "ssn": "234-56-7890" }
+  ]
+}

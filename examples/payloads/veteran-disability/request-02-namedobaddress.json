@@ -1,0 +1,12 @@
+{
+  "firstName": "Julio",
+  "lastName": "Jonesin",
+  "dateOfBirth": "1951-11-18",
+  "address": {
+    "street1": "111 SPRING ST",
+    "city": "HARNED",
+    "state": "KY",
+    "postalCode": "40144",
+    "country": "USA"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "batchId": "your-unique-batch-id-001",
+  "submittedBy": "your-specified-submitterid",
+  "callbackUrl": "https://your-system.example.com/webhooks/enrollment",
+  "students": [
+    {
+      "recordId": "your-recordid-001",
+      "firstName": "Ashley",
+      "lastName": "Borden",
+      "dateOfBirth": "1980-12-22"
+    },
+    {
+      "recordId": "your-recordid-002",
+      "firstName": "Maria",
+      "lastName": "Chen",
+      "dateOfBirth": "1998-11-22",
+      "ssn": "123-45-6789"
+    }
+  ]
+}
