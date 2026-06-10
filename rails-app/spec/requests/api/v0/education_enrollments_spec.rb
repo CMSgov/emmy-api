@@ -49,6 +49,7 @@ RSpec.describe 'api/v0/education_enrollments', type: :request do
           enrollmentDetails: [
             {
               schoolName: "University of Excellence",
+              schoolCode: "117100",
               termBeginDate: "2023-01-15",
               termEndDate: "2023-05-20",
               enrollmentStatus: "FULL_TIME"

@@ -16,6 +16,7 @@ module Education
 
           details << {
             schoolName: d["officialSchoolName"],
+            schoolCode: "%06d" % d["schoolCode"],
             termBeginDate: ed["termBeginDate"],
             termEndDate: ed["termEndDate"],
             enrollmentStatus: norm_status
