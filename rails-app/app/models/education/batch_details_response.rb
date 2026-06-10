@@ -37,6 +37,7 @@ module Education
                     type: :object,
                     properties: {
                       schoolName: { type: :string, example: "University of Excellence" },
+                      schoolCode: { type: :string, example: "001171" },
                       termBeginDate: { type: :string, example: "2023-01-15" },
                       termEndDate: { type: :string, example: "2023-05-20" },
                       enrollmentStatus: { type: :string, example: "FULL_TIME" }

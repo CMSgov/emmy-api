@@ -182,6 +182,9 @@ paths:
                               schoolName:
                                 type: string
                                 example: University of Excellence
+                              schoolCode:
+                                type: string
+                                example: '001171'
                               termBeginDate:
                                 type: string
                                 example: '2023-01-15'
@@ -210,6 +213,7 @@ paths:
                     enrollmentStatus: FULL_TIME
                     enrollmentDetails:
                     - schoolName: University of Excellence
+                      schoolCode: "001171"
                       termBeginDate: '2023-01-15'
                       termEndDate: '2023-05-20'
                       enrollmentStatus: FULL_TIME
@@ -238,6 +242,12 @@ paths:
                           type: string
                           description: Official name of the educational institution.
                           example: University of Excellence
+
+                        schoolCode:
+                          type: string
+                          description: Six digit School ID assigned by the Department of Education for the educational istitution.
+                          example: "001171"
+
                         termBeginDate:
                           type: string
                           description: Start date of the academic term (YYYY-MM-DD).
