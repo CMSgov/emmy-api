@@ -71,6 +71,7 @@ module Education
           enrollmentDetails: [ {
             currentEnrollmentStatus: 'CC',
             officialSchoolName: 'University A',
+            schoolCode: 001171,
             enrollmentData: [ { enrollmentStatus: 'H', termBeginDate: '2023-01-01', termEndDate: '2023-05-01' } ]
           } ]
         }.to_json)

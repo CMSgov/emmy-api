@@ -321,6 +321,7 @@
                             "enrollmentDetails": [
                               {
                                 "schoolName": "Trident University International",
+				                        "schoolCode": "001171",
                                 "termBeginDate": "2024-05-31",
                                 "termEndDate": "2024-11-19",
                                 "enrollmentStatus": "THREE_QUARTERS_TIME"
@@ -797,6 +798,7 @@
         "additionalProperties": false,
         "required": [
           "schoolName",
+	        "schoolCode",
           "termBeginDate",
           "termEndDate",
           "enrollmentStatus"
@@ -806,6 +808,11 @@
             "type": "string",
             "description": "Official name of the school.",
             "example": "Trident University International"
+          },
+          "schoolCode": {
+            "type": "string",
+            "description": "Six digit School ID assigned by the Department of Education for the educational istitution.",
+            "example": "001171"
           },
           "termBeginDate": {
             "type": "string",
@@ -1086,6 +1093,7 @@
           "enrollmentDetails": [
             {
               "schoolName": "Trident University International",
+	            "schoolCode": "001171",
               "termBeginDate": "2024-05-31",
               "termEndDate": "2024-11-19",
               "enrollmentStatus": "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"
@@ -1169,12 +1177,14 @@
           "enrollmentDetails": [
             {
               "schoolName": "University A",
+	            "schoolCode": "001171",
               "termBeginDate": "2023-01-01",
               "termEndDate": "2023-05-01",
               "enrollmentStatus": "HALF_TIME"
             },
             {
               "schoolName": "University B",
+	            "schoolCode": "001172",
               "termBeginDate": "2022-09-01",
               "termEndDate": "2022-12-31",
               "enrollmentStatus": "HALF_TIME"

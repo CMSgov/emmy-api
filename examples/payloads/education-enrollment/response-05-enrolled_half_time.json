@@ -3,6 +3,7 @@
     "enrollmentDetails": [
         {
             "schoolName": "WESTERN STATE COLORADO UNIVERSITY",
+	        "schoolCode": "001372",
             "termBeginDate": "2024-07-31",
             "termEndDate": "2024-12-09",
             "enrollmentStatus": "HALF_TIME"
