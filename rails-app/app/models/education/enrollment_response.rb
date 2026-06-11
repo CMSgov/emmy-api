@@ -26,7 +26,7 @@ module Education
               type: :object,
               properties: {
                 schoolName: { type: :string, description: "Official name of the educational institution.", example: "University of Excellence" },
-                schoolCode: { type: :string, description: "Six digit School ID assigned by the Department of Education for the educational istitution.", example: "001171"},
+                schoolCode: { type: :string, description: "Six digit School ID assigned by the Department of Education for the educational istitution.", example: "001171" },
                 termBeginDate: { type: :string, description: "Start date of the academic term (YYYY-MM-DD).", example: "2023-01-15" },
                 termEndDate: { type: :string, description: "End date of the academic term (YYYY-MM-DD).", example: "2023-05-20" },
                 enrollmentStatus: {
