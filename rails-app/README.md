@@ -21,7 +21,7 @@ Things you may want to cover:
 
 * ...
 
-# How to run the test suite
+## How to run the test suite
 
 There is a Docker compose setup for this Rails application. It should be
 possible to start the application with
