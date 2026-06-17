@@ -1,6 +1,6 @@
 module Education
   class EnrollmentRequestV1
-    attr_accessor :person_social_security_number, :person_given_name, :person_middle_name, :person_sur_name, :person_birth_date, :as_of_date, :previous_names
+    attr_accessor :person_social_security_number, :person_given_name, :person_middle_name, :person_sur_name, :person_birth_date, :as_of_date, :previous_names, :terms_accepted_indicator
 
     def initialize(params = {})
       @person_social_security_number = params[:personSocialSecurityNumber]
@@ -10,6 +10,7 @@ module Education
       @person_birth_date = params[:personBirthDate]
       @as_of_date = params[:asOfDate]
       @previous_names = params[:previousNames] || []
+      @terms_accepted_indicator = params[:termsAcceptedIndicator]
     end
 
     def correlation_id
@@ -25,7 +26,7 @@ module Education
         middleName: person_middle_name,
         ssn: person_social_security_number,
         endClient: "CMS",
-        terms: "y",
+        terms: terms_accepted_indicator ? "y" : "n",
         correlationId: correlation_id,
         asOfDate: as_of_date
       }

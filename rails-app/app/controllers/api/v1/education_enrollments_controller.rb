@@ -17,7 +17,7 @@ module Api
         end
 
         req_params = params.permit(
-          :personSocialSecurityNumber, :personGivenName, :personMiddleName, :personSurName, :personBirthDate, :asOfDate,
+          :personSocialSecurityNumber, :personGivenName, :personMiddleName, :personSurName, :personBirthDate, :asOfDate, :termsAcceptedIndicator,
           previousNames: [ :personGivenName, :personMiddleName, :personSurName ]
         ).to_h.deep_symbolize_keys
         enrollment_req = Education::EnrollmentRequestV1.new(req_params)

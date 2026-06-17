@@ -35,6 +35,7 @@ RSpec.describe 'api/v1/education_enrollments', type: :request do
                       personSurName: { type: :string },
                       personBirthDate: { type: :string },
                       asOfDate: { type: :string },
+                      termsAcceptedIndicator: { type: :boolean },
                       previousNames: {
                         type: :array,
                         items: {
@@ -68,7 +69,8 @@ RSpec.describe 'api/v1/education_enrollments', type: :request do
                 }
               ],
               personBirthDate: "1988-02-29",
-              asOfDate: "2026-01-01"
+              asOfDate: "2026-01-01",
+              termsAcceptedIndicator: true
             }
           end
 
