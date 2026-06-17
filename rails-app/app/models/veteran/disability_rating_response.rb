@@ -3,7 +3,7 @@ module Veteran
     attr_accessor :raw_data, :data_source, :metadata,
                   :total_disability_status, :total_disability_status_effective_date,
                   :combined_disability_rating, :combined_effective_date, :legal_effective_date,
-                  :earliest_rating_end_date
+                  :earliest_rating_end_date, :permanent_disability_status
 
     def initialize(params = {})
       @raw_data = params[:rawData]
@@ -15,12 +15,14 @@ module Veteran
       @combined_effective_date = params[:combinedEffectiveDate]
       @legal_effective_date = params[:legalEffectiveDate]
       @earliest_rating_end_date = params[:earliestRatingEndDate]
+      @permanent_disability_status = params[:permanentDisabilityStatus]
     end
 
     def self.to_swagger_schema
       {
         type: :object,
         properties: {
+          permanentDisabilityStatus: { type: :boolean, description: "Whether they have been awarded permanent disability status for work purposes", example: true },
           totalDisabilityStatus: { type: :boolean, description: "Whether the veteran is totally disabled.", example: true },
           totalDisabilityStatusEffectiveDate: { type: :string, description: "Effective date of total disability status (YYYY-MM-DD).", example: "2023-01-01" },
           combinedDisabilityRating: { type: :integer, description: "Combined disability rating percentage.", example: 100 },
@@ -51,6 +53,7 @@ module Veteran
         combinedEffectiveDate: combined_effective_date,
         legalEffectiveDate: legal_effective_date,
         earliestRatingEndDate: earliest_rating_end_date,
+        permanentDisabilityStatus: permanent_disability_status,
         dataSource: data_source,
         metadata: metadata,
         rawData: raw_data
