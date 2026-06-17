@@ -5,6 +5,7 @@ RSpec.describe 'api/v0/veteran_disability_ratings', type: :request do
     before do
       fake_result = Veteran::DisabilityRatingResponse.new(
         totalDisabilityStatus: true,
+        permanentDisabilityStatus: true,
         totalDisabilityStatusEffectiveDate: "2023-01-01",
         combinedDisabilityRating: 100,
         combinedEffectiveDate: "2023-01-01",
