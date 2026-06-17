@@ -11,6 +11,9 @@ module Veteran
           'total_disability' => {
             'status' => true,
             'effective_date' => '2023-01-01'
+          },
+          'permanent_and_total' => {
+            'service_connected_status' => true
           }
         }
       }
@@ -43,6 +46,7 @@ module Veteran
       it 'maps total disability fields correctly' do
         expect(subject.total_disability_status).to be true
         expect(subject.total_disability_status_effective_date).to eq('2023-01-01')
+        expect(subject.permanent_disability_status).to be true
       end
 
       it 'maps combined disability fields correctly' do

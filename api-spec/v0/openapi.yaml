@@ -532,6 +532,10 @@ components:
         - dataSource
         - metadata
       properties:
+        permanentDisabilityStatus:
+          type: boolean
+          description: Whether they have been awarded permanent disability status for work purposes.
+          example: true
         totalDisabilityStatus:
           type: boolean
           description: Whether the veteran is totally disabled.
@@ -751,6 +755,7 @@ components:
           country: USA
     VeteranDisabilityStatusResponseExample:
       value:
+        permanentDisabilityStatus: true
         totalDisabilityStatus: true
         totalDisabilityStatusEffectiveDate: "2023-01-01"
         combinedDisabilityRating: 40

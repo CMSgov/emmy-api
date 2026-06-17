@@ -9,10 +9,11 @@ module Veteran
                                             .reject { |d| d.blank? }
                                             .min
 
-      total_disability_data = total_disability_response.dig("data")
+      total_disability_data = total_disability_response.dig("data") || {}
       Veteran::DisabilityRatingResponse.new(
-        totalDisabilityStatus: total_disability_data["total_disability"]["status"],
-        totalDisabilityStatusEffectiveDate: total_disability_data["total_disability"]["effective_date"],
+        permanentDisabilityStatus: total_disability_data.dig("permanent_and_total", "service_connected_status"),
+        totalDisabilityStatus: total_disability_data.dig("total_disability", "status"),
+        totalDisabilityStatusEffectiveDate: total_disability_data.dig("total_disability", "effective_date"),
         combinedDisabilityRating: combined_data["combined_disability_rating"],
         combinedEffectiveDate: combined_data["combined_effective_date"],
         legalEffectiveDate: combined_data["legal_effective_date"],
