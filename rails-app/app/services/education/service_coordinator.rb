@@ -5,7 +5,7 @@ module Education
       @sqs_client = Aws::SQS::Client.new if ENV["BATCH_SQS_QUEUE_URL"].present?
     end
 
-    def lookup_enrollment_status(req_params)
+    def lookup_enrollment_status(enrollment_req)
       light = Stoplight("nsc-lookup-enrollment-status")
 
       # We don't want to trip the circuit for NotFoundError
@@ -14,7 +14,7 @@ module Education
       end
 
       light.run do
-        @client.lookup_enrollment_status(req_params)
+        @client.lookup_enrollment_status(enrollment_req)
       end
     end
 

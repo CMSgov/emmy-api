@@ -28,6 +28,8 @@ module Education
       }
     end
 
+    let(:enrollment_req) { Education::EnrollmentRequest.new(req_body) }
+
     def stub_nsc_requests(oauth_resp, submit_resp)
       http_mock_oauth = instance_double(Net::HTTP)
       allow(http_mock_oauth).to receive(:use_ssl=).with(true)
@@ -54,7 +56,7 @@ module Education
 
         stub_nsc_requests(oauth_response, submit_response)
 
-        result = client.lookup_enrollment_status(req_body).as_json
+        result = client.lookup_enrollment_status(enrollment_req).as_json
 
         expect(result[:enrollmentStatus]).to eq('ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING')
         expect(result[:dataSource]).to eq('NSC')
@@ -78,7 +80,7 @@ module Education
 
         stub_nsc_requests(oauth_response, submit_response)
 
-        result = client.lookup_enrollment_status(req_body).as_json
+        result = client.lookup_enrollment_status(enrollment_req).as_json
 
         expect(result[:enrollmentStatus]).to eq('HALF_TIME')
         expect(result[:enrollmentDetails].size).to eq(1)
@@ -99,7 +101,7 @@ module Education
         stub_nsc_requests(oauth_response, submit_response)
 
         expect {
-          client.lookup_enrollment_status(req_body)
+          client.lookup_enrollment_status(enrollment_req)
         }.to raise_error(Education::NotFoundError)
       end
 
@@ -116,7 +118,7 @@ module Education
         stub_nsc_requests(oauth_response, submit_response)
 
         expect {
-          client.lookup_enrollment_status(req_body)
+          client.lookup_enrollment_status(enrollment_req)
         }.to raise_error(Education::NotFoundError)
       end
 
@@ -131,7 +133,7 @@ module Education
         stub_nsc_requests(oauth_response, submit_response)
 
         expect {
-          client.lookup_enrollment_status(req_body)
+          client.lookup_enrollment_status(enrollment_req)
         }.to raise_error(StandardError, /NSC submit failed: status=502/)
       end
     end

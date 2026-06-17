@@ -97,6 +97,67 @@ paths:
                 notFound:
                   value:
                     error: "Not Found"
+  /api/v1/education-enrollments:
+    post:
+      tags:
+        - Education Verification
+      summary: Get education enrollment status (V1)
+      description: >
+        Returns the subject's current education enrollment status for the person
+        identified in the supplied identity object. This is the V1 version of the endpoint.
+      operationId: getEducationEnrollmentStatusV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetEducationEnrollmentRequestV1"
+            examples:
+              standard:
+                value:
+                  personSocialSecurityNumber: "123456789"
+                  personGivenName: "John"
+                  personMiddleName: "Joe"
+                  personSurName: "Doe"
+                  previousNames:
+                    - personGivenName: "John"
+                      personMiddleName: "Jacob"
+                      personSurName: "Smith"
+                    - personGivenName: "Richard"
+                      personSurName: "Roe"
+                  personBirthDate: "1988-02-29"
+                  asOfDate: "2026-01-01"
+      responses:
+        "200":
+          description: Education enrollment status retrieved successfully.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EducationEnrollmentResponse"
+              examples:
+                single:
+                  $ref: "#/components/examples/EducationEnrollmentResponseExample"
+        "400":
+          description: Invalid request.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Person not found.
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/X-Request-ID"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /api/v0/batch-education-enrollments:
     post:
       tags:
@@ -333,6 +394,45 @@ components:
   schemas:
     GetEducationEnrollmentRequest:
       $ref: ../../schema/v0/identity.schema.json
+    GetEducationEnrollmentRequestV1:
+      type: object
+      required:
+        - personGivenName
+        - personSurName
+        - personBirthDate
+      properties:
+        personSocialSecurityNumber:
+          type: string
+          pattern: '^\d{9}$'
+          example: "123456789"
+        personGivenName:
+          type: string
+          example: "John"
+        personMiddleName:
+          type: string
+          example: "Joe"
+        personSurName:
+          type: string
+          example: "Doe"
+        previousNames:
+          type: array
+          items:
+            type: object
+            properties:
+              personGivenName:
+                type: string
+              personMiddleName:
+                type: string
+              personSurName:
+                type: string
+        personBirthDate:
+          type: string
+          format: date
+          example: "1988-02-29"
+        asOfDate:
+          type: string
+          format: date
+          example: "2026-01-01"
     BatchEducationEnrollmentRequest:
       type: object
       additionalProperties: false
