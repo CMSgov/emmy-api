@@ -130,6 +130,101 @@
         }
       }
     },
+    "/api/v1/education-enrollments": {
+      "post": {
+        "tags": [
+          "Education Verification"
+        ],
+        "summary": "Get education enrollment status (V1)",
+        "description": "Returns the subject's current education enrollment status for the person identified in the supplied identity object. This is the V1 version of the endpoint.\n",
+        "operationId": "getEducationEnrollmentStatusV1",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetEducationEnrollmentRequestV1"
+              },
+              "examples": {
+                "standard": {
+                  "value": {
+                    "personSocialSecurityNumber": "123456789",
+                    "personGivenName": "John",
+                    "personMiddleName": "Joe",
+                    "personSurName": "Doe",
+                    "previousNames": [
+                      {
+                        "personGivenName": "John",
+                        "personMiddleName": "Jacob",
+                        "personSurName": "Smith"
+                      },
+                      {
+                        "personGivenName": "Richard",
+                        "personSurName": "Roe"
+                      }
+                    ],
+                    "personBirthDate": "1988-02-29",
+                    "asOfDate": "2026-01-01"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Education enrollment status retrieved successfully.",
+            "headers": {
+              "X-Request-ID": {
+                "$ref": "#/components/headers/X-Request-ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EducationEnrollmentResponse"
+                },
+                "examples": {
+                  "single": {
+                    "$ref": "#/components/examples/EducationEnrollmentResponseExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request.",
+            "headers": {
+              "X-Request-ID": {
+                "$ref": "#/components/headers/X-Request-ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Person not found.",
+            "headers": {
+              "X-Request-ID": {
+                "$ref": "#/components/headers/X-Request-ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v0/batch-education-enrollments": {
       "post": {
         "tags": [
@@ -321,7 +416,6 @@
                             "enrollmentDetails": [
                               {
                                 "schoolName": "Trident University International",
-				                        "schoolCode": "001171",
                                 "termBeginDate": "2024-05-31",
                                 "termEndDate": "2024-11-19",
                                 "enrollmentStatus": "THREE_QUARTERS_TIME"
@@ -485,6 +579,60 @@
     "schemas": {
       "GetEducationEnrollmentRequest": {
         "$ref": "#/components/schemas/identity.schema"
+      },
+      "GetEducationEnrollmentRequestV1": {
+        "type": "object",
+        "required": [
+          "personGivenName",
+          "personSurName",
+          "personBirthDate"
+        ],
+        "properties": {
+          "personSocialSecurityNumber": {
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "example": "123456789"
+          },
+          "personGivenName": {
+            "type": "string",
+            "example": "John"
+          },
+          "personMiddleName": {
+            "type": "string",
+            "example": "Joe"
+          },
+          "personSurName": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "previousNames": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "personGivenName": {
+                  "type": "string"
+                },
+                "personMiddleName": {
+                  "type": "string"
+                },
+                "personSurName": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "personBirthDate": {
+            "type": "string",
+            "format": "date",
+            "example": "1988-02-29"
+          },
+          "asOfDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-01-01"
+          }
+        }
       },
       "BatchEducationEnrollmentRequest": {
         "type": "object",
@@ -803,7 +951,6 @@
         "additionalProperties": false,
         "required": [
           "schoolName",
-	        "schoolCode",
           "termBeginDate",
           "termEndDate",
           "enrollmentStatus"
@@ -813,11 +960,6 @@
             "type": "string",
             "description": "Official name of the school.",
             "example": "Trident University International"
-          },
-          "schoolCode": {
-            "type": "string",
-            "description": "Six digit School ID assigned by the Department of Education for the educational istitution.",
-            "example": "001171"
           },
           "termBeginDate": {
             "type": "string",
@@ -1098,7 +1240,6 @@
           "enrollmentDetails": [
             {
               "schoolName": "Trident University International",
-	            "schoolCode": "001171",
               "termBeginDate": "2024-05-31",
               "termEndDate": "2024-11-19",
               "enrollmentStatus": "ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING"
@@ -1182,14 +1323,12 @@
           "enrollmentDetails": [
             {
               "schoolName": "University A",
-	            "schoolCode": "001171",
               "termBeginDate": "2023-01-01",
               "termEndDate": "2023-05-01",
               "enrollmentStatus": "HALF_TIME"
             },
             {
               "schoolName": "University B",
-	            "schoolCode": "001172",
               "termBeginDate": "2022-09-01",
               "termEndDate": "2022-12-31",
               "enrollmentStatus": "HALF_TIME"

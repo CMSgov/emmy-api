@@ -7,8 +7,7 @@ module Education
     def initialize
     end
 
-    def lookup_enrollment_status(req_params)
-      enrollment_req = Education::EnrollmentRequest.new(req_params)
+    def lookup_enrollment_status(enrollment_req)
       token = fetch_oauth_token
       nsc_payload = enrollment_req.to_nsc_payload(ENV["NSC_ACCOUNT_ID"])
 

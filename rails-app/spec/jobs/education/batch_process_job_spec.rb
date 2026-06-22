@@ -57,8 +57,15 @@ module Education
       it 'processes all students and updates batch status' do
         resp1 = Education::EnrollmentResponse.new(enrollmentStatus: 'FULL_TIME', dataSource: 'NSC')
 
-        expect(coordinator).to receive(:lookup_enrollment_status).with(hash_including(firstName: 'John')).and_return(resp1)
-        expect(coordinator).to receive(:lookup_enrollment_status).with(hash_including(firstName: 'Jane')).and_raise(::Education::NotFoundError)
+        expect(coordinator).to receive(:lookup_enrollment_status).with(kind_of(Education::EnrollmentRequest)).twice do |req|
+          if req.first_name == 'John'
+            resp1
+          elsif req.first_name == 'Jane'
+            raise ::Education::NotFoundError
+          else
+            raise "Unexpected student: #{req.first_name}"
+          end
+        end
 
         BatchProcessJob.new.perform(nil, body)
 
@@ -100,8 +107,10 @@ module Education
         resp = Education::EnrollmentResponse.new(enrollmentStatus: 'FULL_TIME', dataSource: 'NSC')
 
         # Should only call for student2
-        expect(coordinator).to receive(:lookup_enrollment_status).once.and_return(resp)
-        expect(coordinator).not_to receive(:lookup_enrollment_status).with(hash_including(firstName: 'John'))
+        expect(coordinator).to receive(:lookup_enrollment_status).once do |req|
+          expect(req.first_name).to eq('Jane')
+          resp
+        end
 
         BatchProcessJob.new.perform(nil, body)
 

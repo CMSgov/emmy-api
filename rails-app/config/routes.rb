@@ -16,6 +16,10 @@ Rails.application.routes.draw do
       get "batch-education-enrollments/:batchJobId/details", to: "batch_education_enrollments#details"
       post "veteran-disability-ratings", to: "veteran_disability_ratings#create"
     end
+
+    namespace :v1 do
+      post "education-enrollments", to: "education_enrollments#create"
+    end
   end
 
   # Defines the root path route ("/")

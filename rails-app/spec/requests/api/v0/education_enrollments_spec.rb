@@ -12,13 +12,7 @@ RSpec.describe 'api/v0/education_enrollments', type: :request do
       }
       coordinator_mock = instance_double(Education::ServiceCoordinator)
       expect(coordinator_mock).to receive(:lookup_enrollment_status)
-                                    .with(
-                                      {
-                                        firstName: "John",
-                                        lastName: "Doe",
-                                        dateOfBirth: "1990-01-01"
-                                      }
-                                    )
+                                    .with(kind_of(Education::EnrollmentRequest))
                                     .and_return(fake_result)
 
       allow(Education::ServiceCoordinator).to receive(:new).and_return(coordinator_mock)

@@ -40,9 +40,10 @@ module Education
         dateOfBirth: student.date_of_birth.to_s,
         ssn: student.ssn
       }
+      enrollment_req = Education::EnrollmentRequest.new(params)
 
       begin
-        response = coordinator.lookup_enrollment_status(params)
+        response = coordinator.lookup_enrollment_status(enrollment_req)
 
         Education::BatchStudentResult.create_or_find_by!(
           education_batch_student_id: student.id

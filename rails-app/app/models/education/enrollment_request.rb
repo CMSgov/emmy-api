@@ -12,7 +12,7 @@ module Education
     end
 
     def missing_required_field?
-      to_swagger_spec.any? { |field| field[:required] && field[:name].to_s.downcase.to_sym == :firstName && self.send(field[:name].to_s.downcase.to_sym).blank? }
+      first_name.blank? || last_name.blank? || date_of_birth.blank?
     end
 
     def self.to_swagger_schema
