@@ -55,9 +55,9 @@ module Education
 
     describe '#perform' do
       it 'processes all students and updates batch status' do
-        resp1 = Education::EnrollmentResponse.new(enrollmentStatus: 'FULL_TIME', dataSource: 'NSC')
+        resp1 = Education::EnrollmentResponseV0.new(enrollmentStatus: 'FULL_TIME', dataSource: 'NSC')
 
-        expect(coordinator).to receive(:lookup_enrollment_status).with(kind_of(Education::EnrollmentRequest)).twice do |req|
+        expect(coordinator).to receive(:lookup_enrollment_status).with(kind_of(Education::EnrollmentRequestV0)).twice do |req|
           if req.first_name == 'John'
             resp1
           elsif req.first_name == 'Jane'
@@ -104,7 +104,7 @@ module Education
         student1.status_success!
         student2.status_failed!
 
-        resp = Education::EnrollmentResponse.new(enrollmentStatus: 'FULL_TIME', dataSource: 'NSC')
+        resp = Education::EnrollmentResponseV0.new(enrollmentStatus: 'FULL_TIME', dataSource: 'NSC')
 
         # Should only call for student2
         expect(coordinator).to receive(:lookup_enrollment_status).once do |req|

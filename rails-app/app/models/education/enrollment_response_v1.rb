@@ -1,16 +1,13 @@
 module Education
   class EnrollmentResponseV1
-    attr_accessor :enrollment_status, :enrollment_details, :data_source, :metadata, :student_info_provided, :transaction_details
+    attr_accessor :enrollment_details, :student_info_provided, :transaction_details
 
     def initialize(params = {})
-      @enrollment_status = params[:enrollmentStatus]
       @enrollment_details = (params[:enrollmentDetails] || []).map do |detail|
         d = detail.dup
         d[:officialSchoolName] = d.delete(:schoolName) if d.key?(:schoolName)
         d
       end
-      @data_source = params[:dataSource]
-      @metadata = params[:metadata]
       @student_info_provided = params[:studentInfoProvided]
       @transaction_details = params[:transactionDetails]
     end
@@ -92,7 +89,6 @@ module Education
               nscHitIndicator: { type: :boolean }
             }
           },
-          dataSource: { type: :string, description: "The source of the enrollment data (e.g., NSC).", example: "NSC" },
           responseMetadata: {
             type: :object,
             properties: {
@@ -106,11 +102,9 @@ module Education
 
     def as_json(options = {})
       {
-        enrollmentStatus: enrollment_status,
         enrollmentDetails: enrollment_details,
         studentInfoProvided: student_info_provided,
         transactionDetails: self.class.map_transaction_details(transaction_details),
-        dataSource: data_source,
         responseMetadata: {
           responseCode: "MS000000",
           responseText: "Success"

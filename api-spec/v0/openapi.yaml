@@ -626,17 +626,10 @@ components:
       type: object
       additionalProperties: false
       required:
-        - enrollmentStatus
         - enrollmentDetails
         - studentInfoProvided
         - transactionDetails
-        - dataSource
-        - metadata
       properties:
-        enrollmentStatus:
-          $ref: ../../schema/v0/school_enrollment_status.schema.json
-          description: Current enrollment status for the identified person.
-          example: FULL_TIME
         enrollmentDetails:
           type: array
           description: List of enrollment details filtered from the raw data.
@@ -701,11 +694,6 @@ components:
             nscHitIndicator:
               type: boolean
               example: true
-        dataSource:
-          $ref: ../../schema/v0/data_source.schema.json
-          description: The source of the enrollment data.
-        metadata:
-          $ref: "#/components/schemas/Metadata"
         responseMetadata:
           type: object
           properties:
@@ -969,7 +957,6 @@ components:
           transaction-id: "123456"
     EducationEnrollmentResponseExampleV1:
       value:
-        enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
         enrollmentDetails:
           - officialSchoolName: "Trident University International"
             schoolCode: "001171"
@@ -1001,14 +988,6 @@ components:
           requestedDateTimeText: "2026-04-23 14:20:41.049"
           notifiedDateTimeText: "2026-04-23 14:20:41.049"
           nscHitIndicator: true
-        dataSource: National Student Clearinghouse
-        metadata:
-          apiVersion: 1.3.0
-          environment: prod
-          requestTimestamp: "2026-04-14T12:00:00.000Z"
-          responseTimestamp: "2026-04-14T12:00:00.217Z"
-          datasourceDurationMillis: 180
-          transaction-id: "123456"
         responseMetadata:
           responseCode: "MS000000"
           responseText: "Success"
@@ -1098,3 +1077,4 @@ components:
           responseTimestamp: "2026-04-14T12:00:00.217Z"
           datasourceDurationMillis: 180
           transaction-id: "123456"
+  # Add other examples here if needed

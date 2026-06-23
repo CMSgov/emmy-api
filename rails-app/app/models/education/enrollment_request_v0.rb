@@ -1,5 +1,5 @@
 module Education
-  class EnrollmentRequest
+  class EnrollmentRequestV0
     attr_accessor :first_name, :middle_name, :last_name, :date_of_birth, :ssn, :address
 
     def initialize(params = {})
