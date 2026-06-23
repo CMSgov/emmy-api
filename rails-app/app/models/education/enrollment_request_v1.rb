@@ -27,7 +27,8 @@ module Education
         ssn: person_social_security_number,
         endClient: "CMS",
         terms: terms_accepted_indicator ? "y" : "n",
-        correlationId: correlation_id
+        correlationId: correlation_id,
+      asOfDate: as_of_date
       }
 
       unless previous_names.empty?
