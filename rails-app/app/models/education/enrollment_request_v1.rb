@@ -40,7 +40,6 @@ module Education
         end
       end
 
-      puts "NSC Payload: #{out.compact.to_json}"
 
       out
     end

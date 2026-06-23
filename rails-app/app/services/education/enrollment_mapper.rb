@@ -8,8 +8,6 @@ module Education
       status = resolve_enrollment_status(nsc_resp)
       raise "NSC response missing enrollment status" unless status
 
-      puts "NSC response: #{nsc_resp.to_json}"
-
       if version == :v1
         map_v1(nsc_request, nsc_resp, status, duration)
       else
