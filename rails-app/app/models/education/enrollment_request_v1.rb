@@ -27,8 +27,7 @@ module Education
         ssn: person_social_security_number,
         endClient: "CMS",
         terms: terms_accepted_indicator ? "y" : "n",
-        correlationId: correlation_id,
-        asOfDate: as_of_date
+        correlationId: correlation_id
       }
 
       unless previous_names.empty?
@@ -40,6 +39,8 @@ module Education
           }
         end
       end
+
+      puts "NSC Payload: #{out.compact.to_json}"
 
       out
     end
