@@ -626,15 +626,10 @@ components:
       type: object
       additionalProperties: false
       required:
-        - enrollmentStatus
         - enrollmentDetails
         - studentInfoProvided
         - transactionDetails
       properties:
-        enrollmentStatus:
-          $ref: ../../schema/v0/school_enrollment_status.schema.json
-          description: Current enrollment status for the identified person.
-          example: FULL_TIME
         enrollmentDetails:
           type: array
           description: List of enrollment details filtered from the raw data.
@@ -962,7 +957,6 @@ components:
           transaction-id: "123456"
     EducationEnrollmentResponseExampleV1:
       value:
-        enrollmentStatus: ENROLLMENT_STATUS_UNKNOWN_CREDIT_TIMING
         enrollmentDetails:
           - officialSchoolName: "Trident University International"
             schoolCode: "001171"
