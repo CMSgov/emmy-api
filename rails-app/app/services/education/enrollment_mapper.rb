@@ -77,9 +77,7 @@ module Education
         enrollmentStatus: status,
         enrollmentDetails: details,
         studentInfoProvided: student_info,
-        transactionDetails: nsc_resp.dig("transactionDetails"),
-        dataSource: "NSC",
-        metadata: build_metadata(duration)
+        transactionDetails: nsc_resp.dig("transactionDetails")
       )
     end
 
