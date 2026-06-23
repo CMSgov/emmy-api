@@ -20,7 +20,7 @@ module Api
           :firstName, :lastName, :dateOfBirth, :ssn, :middleName,
           address: [ :street1, :street2, :street3, :city, :state, :postalCode, :country ]
         ).to_h.deep_symbolize_keys
-        enrollment_req = Education::EnrollmentRequest.new(req_params)
+        enrollment_req = Education::EnrollmentRequestV0.new(req_params)
 
         coordinator = Education::ServiceCoordinator.new
         begin

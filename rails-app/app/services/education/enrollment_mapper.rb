@@ -36,7 +36,7 @@ module Education
         end
       end
 
-      Education::EnrollmentResponse.new(
+      Education::EnrollmentResponseV0.new(
         enrollmentStatus: status,
         enrollmentDetails: details,
         rawData: nsc_resp,
@@ -74,7 +74,6 @@ module Education
       }
 
       Education::EnrollmentResponseV1.new(
-        enrollmentStatus: status,
         enrollmentDetails: details,
         studentInfoProvided: student_info,
         transactionDetails: nsc_resp.dig("transactionDetails")

@@ -28,7 +28,7 @@ module Education
       }
     end
 
-    let(:enrollment_req) { Education::EnrollmentRequest.new(req_body) }
+    let(:enrollment_req) { Education::EnrollmentRequestV0.new(req_body) }
 
     def stub_nsc_requests(oauth_resp, submit_resp)
       http_mock_oauth = instance_double(Net::HTTP)

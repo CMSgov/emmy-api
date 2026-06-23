@@ -12,7 +12,7 @@ RSpec.describe 'api/v0/education_enrollments', type: :request do
       }
       coordinator_mock = instance_double(Education::ServiceCoordinator)
       expect(coordinator_mock).to receive(:lookup_enrollment_status)
-                                    .with(kind_of(Education::EnrollmentRequest))
+                                    .with(kind_of(Education::EnrollmentRequestV0))
                                     .and_return(fake_result)
 
       allow(Education::ServiceCoordinator).to receive(:new).and_return(coordinator_mock)
@@ -25,10 +25,10 @@ RSpec.describe 'api/v0/education_enrollments', type: :request do
       produces 'application/json'
       parameter name: :education_enrollment,
                 in: :body,
-                schema: Education::EnrollmentRequest.to_swagger_schema
+                schema: Education::EnrollmentRequestV0.to_swagger_schema
 
       response(200, 'successful') do
-        schema Education::EnrollmentResponse.to_swagger_schema
+        schema Education::EnrollmentResponseV0.to_swagger_schema
 
         let(:education_enrollment) do
           {

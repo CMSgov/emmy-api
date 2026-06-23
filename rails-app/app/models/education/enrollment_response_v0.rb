@@ -1,5 +1,5 @@
 module Education
-  class EnrollmentResponse
+  class EnrollmentResponseV0
     attr_accessor :enrollment_status, :enrollment_details, :raw_data, :data_source, :metadata
 
     def initialize(params = {})

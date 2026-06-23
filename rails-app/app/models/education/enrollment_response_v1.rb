@@ -1,9 +1,8 @@
 module Education
   class EnrollmentResponseV1
-    attr_accessor :enrollment_status, :enrollment_details, :student_info_provided, :transaction_details
+    attr_accessor :enrollment_details, :student_info_provided, :transaction_details
 
     def initialize(params = {})
-      @enrollment_status = params[:enrollmentStatus]
       @enrollment_details = (params[:enrollmentDetails] || []).map do |detail|
         d = detail.dup
         d[:officialSchoolName] = d.delete(:schoolName) if d.key?(:schoolName)
@@ -103,7 +102,6 @@ module Education
 
     def as_json(options = {})
       {
-        enrollmentStatus: enrollment_status,
         enrollmentDetails: enrollment_details,
         studentInfoProvided: student_info_provided,
         transactionDetails: self.class.map_transaction_details(transaction_details),

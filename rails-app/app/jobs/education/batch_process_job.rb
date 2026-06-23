@@ -40,7 +40,7 @@ module Education
         dateOfBirth: student.date_of_birth.to_s,
         ssn: student.ssn
       }
-      enrollment_req = Education::EnrollmentRequest.new(params)
+      enrollment_req = Education::EnrollmentRequestV0.new(params)
 
       begin
         response = coordinator.lookup_enrollment_status(enrollment_req)
