@@ -28,7 +28,7 @@ module Education
         endClient: "CMS",
         terms: terms_accepted_indicator ? "y" : "n",
         correlationId: correlation_id,
-        asOfDate: as_of_date
+      asOfDate: as_of_date
       }
 
       unless previous_names.empty?
@@ -40,6 +40,7 @@ module Education
           }
         end
       end
+
 
       out
     end

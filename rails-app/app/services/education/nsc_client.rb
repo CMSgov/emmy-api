@@ -32,7 +32,8 @@ module Education
       end
 
       nsc_resp = JSON.parse(response.body)
-      Education::EnrollmentMapper.translate_nsc_response(nsc_resp, duration)
+      version = enrollment_req.is_a?(Education::EnrollmentRequestV1) ? :v1 : :v0
+      Education::EnrollmentMapper.translate_nsc_response(enrollment_req, nsc_resp, duration, version: version)
     end
 
     private

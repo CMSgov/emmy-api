@@ -1,13 +1,25 @@
 module Education
   class EnrollmentMapper
-    def self.translate_nsc_response(nsc_resp, duration)
-      if is_nsc_no_hit?(nsc_resp) || is_nsc_not_currently_enrolled?(nsc_resp)
+    def self.translate_nsc_response(nsc_request, nsc_resp, duration, version: :v0)
+      if version != :v1 && (is_nsc_no_hit?(nsc_resp) || is_nsc_not_currently_enrolled?(nsc_resp))
         raise Education::NotFoundError, "Not Found"
       end
 
       status = resolve_enrollment_status(nsc_resp)
-      raise "NSC response missing enrollment status" unless status
+      if version != :v1 && !status
+        raise "NSC response missing enrollment status"
+      end
 
+      if version == :v1
+        map_v1(nsc_request, nsc_resp, status, duration)
+      else
+        map_v0(nsc_request, nsc_resp, status, duration)
+      end
+    end
+
+    private
+
+    def self.map_v0(nsc_request, nsc_resp, status, duration)
       details = []
       (nsc_resp["enrollmentDetails"] || []).each do |d|
         (d["enrollmentData"] || []).each do |ed|
@@ -33,7 +45,43 @@ module Education
       )
     end
 
-    private
+    def self.map_v1(nsc_request, nsc_resp, status, duration)
+      details = []
+      (nsc_resp["enrollmentDetails"] || []).each do |d|
+        next_enrollment_detail = {
+          officialSchoolName: d["officialSchoolName"],
+          schoolCode: d["schoolCode"],
+          branchCode: d["branchCode"] || "00" # doesn't actually exist in NSC but supposedly well get once contract sign
+        }
+        enrollment_data = (d["enrollmentData"] || []).map do |ed|
+          {
+            termBeginDate: ed["termBeginDate"],
+            termEndDate: ed["termEndDate"],
+            enrollmentStatusCode: ed["enrollmentStatus"],
+            schoolCertifiedOnDate: ed["schoolCertifiedOnDate"],
+            anticipatedGraduationDate: ed["anticipatedGraduationDate"]
+          }
+        end
+        next_enrollment_detail[:enrollmentData] = enrollment_data
+        details << next_enrollment_detail
+      end
+
+      student_info = {
+        personGivenName: nsc_request.is_a?(Hash) ? nsc_request.dig("studentInfoProvided", "personGivenName") : nsc_request.person_given_name,
+        personSurName: nsc_request.is_a?(Hash) ? nsc_request.dig("studentInfoProvided", "personSurName") : nsc_request.person_sur_name,
+        previousNames: nsc_request.is_a?(Hash) ? (nsc_request.dig("studentInfoProvided", "previousNames") || []) : nsc_request.previous_names,
+        personBirthDate: nsc_request.is_a?(Hash) ? nsc_request.dig("studentInfoProvided", "personBirthDate") : nsc_request.person_birth_date
+      }
+
+      Education::EnrollmentResponseV1.new(
+        enrollmentStatus: status,
+        enrollmentDetails: details,
+        studentInfoProvided: student_info,
+        transactionDetails: nsc_resp.dig("transactionDetails"),
+        dataSource: "NSC",
+        metadata: build_metadata(duration)
+      )
+    end
 
     def self.build_metadata(duration)
       {

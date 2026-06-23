@@ -39,5 +39,13 @@ RSpec.describe Education::EnrollmentRequestV1, type: :model do
         expect(payload[:terms]).to eq('n')
       end
     end
+
+    context 'when asOfDate is provided' do
+      let(:terms_accepted) { true }
+
+      it 'includes asOfDate in the payload' do
+        expect(payload[:asOfDate]).to eq("2026-01-01")
+      end
+    end
   end
 end
