@@ -49,7 +49,7 @@ module Education
         next_enrollment_detail = {
           officialSchoolName: d["officialSchoolName"],
           schoolCode: d["schoolCode"],
-          branchCode: d["branchCode"] || '00' # doesnt actually exist in NSC but supposedly well get once contract sign
+          branchCode: d["branchCode"] || "00" # doesnt actually exist in NSC but supposedly well get once contract sign
         }
         enrollment_data = (d["enrollmentData"] || []).map do |ed|
           {
@@ -57,7 +57,7 @@ module Education
             termEndDate: ed["termEndDate"],
             enrollmentStatusCode: ed["enrollmentStatus"],
             schoolCertifiedOnDate: ed["schoolCertifiedOnDate"],
-            anticipatedGraduationDate: ed["anticipatedGraduationDate"],
+            anticipatedGraduationDate: ed["anticipatedGraduationDate"]
           }
         end
         next_enrollment_detail[:enrollmentData] = enrollment_data
@@ -94,7 +94,7 @@ module Education
 
     def self.is_nsc_no_hit?(resp)
       hit = resp.dig("transactionDetails", "nscHit").to_s.upcase.strip
-      ["N", "NO", "FALSE", "0"].include?(hit)
+      [ "N", "NO", "FALSE", "0" ].include?(hit)
     end
 
     def self.is_nsc_not_currently_enrolled?(resp)
@@ -131,7 +131,7 @@ module Education
 
     def self.is_nsc_positive_hit?(resp)
       hit = resp.dig("transactionDetails", "nscHit").to_s.upcase.strip
-      return true if ["Y", "YES", "TRUE", "1"].include?(hit)
+      return true if [ "Y", "YES", "TRUE", "1" ].include?(hit)
 
       resp.dig("status", "code").to_s.strip == "0"
     end
