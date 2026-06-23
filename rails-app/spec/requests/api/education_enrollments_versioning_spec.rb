@@ -14,14 +14,13 @@ RSpec.describe 'Education Enrollment Response Versioning', type: :request do
         "nscHit" => "Y",
         "transactionId" => "4001686568",
         "orderId" => "2002833179",
-        "transactionStatusCode" => "CNF",
+        "transactionStatus" => "CNF",
         "transactionFee" => "0.00",
         "salesTax" => "0.00",
         "transactionTotal" => "0.00",
         "requestedByText" => "Test Billing",
         "requestedDateTimeText" => "2026-04-23 14:20:41.049",
         "notifiedDateTimeText" => "2026-04-23 14:20:41.049",
-        "nscHitIndicator" => true
       },
       "enrollmentDetails" => [
         {
@@ -93,7 +92,7 @@ RSpec.describe 'Education Enrollment Response Versioning', type: :request do
       expect(json).to have_key(:transactionDetails)
       expect(json[:transactionDetails][:transactionId]).to eq("4001686568")
       expect(json[:transactionDetails][:transactionStatusCode]).to eq("CNF")
-      expect(json[:transactionDetails][:nscHitIndicator]).to eq(true)
+      expect(json[:transactionDetails][:nscHitIndicator]).to eq("Y")
     end
   end
 end
