@@ -16,14 +16,14 @@ module Education
       {
         transactionId: transaction_details["transactionId"],
         orderId: transaction_details["orderId"],
-        transactionStatusCode: transaction_details["transactionStatusCode"],
+        transactionStatusCode: transaction_details["transactionStatus"],
         transactionFee: transaction_details["transactionFee"],
         salesTax: transaction_details["salesTax"],
         transactionTotal: transaction_details["transactionTotal"],
-        requestedByText: transaction_details["requestedByText"],
-        requestedDateTimeText: transaction_details["requestedDateTimeText"],
-        notifiedDateTimeText: transaction_details["notifiedDateTimeText"],
-        nscHitIndicator: transaction_details["nscHitIndicator"]
+        requestedByText: transaction_details["requestedBy"],
+        requestedDateTimeText: transaction_details["requestedDate"],
+        notifiedDateTimeText: transaction_details["notifiedDate"],
+        nscHitIndicator: transaction_details["nscHit"]
       }
     end
 
@@ -39,6 +39,7 @@ module Education
                 officialSchoolName: { type: :string, description: "Official name of the educational institution.", example: "University of Excellence" },
                 schoolCode: { type: :string, description: "Six digit School ID assigned by the Department of Education for the educational istitution.", example: "001171" },
                 branchCode: { type: :string, description: "Branch code for the school.", example: "00" },
+                currentEnrollmentStatus: { type: :string, description: "The most recent enrollment status reported by the school.", example: "F" },
                 enrollmentData: {
                   type: :array,
                   items: {
@@ -98,6 +99,14 @@ module Education
           }
         }
       }
+    end
+
+    def no_hit?
+      return true if transaction_details&.dig(:nscHitIndicator) == false
+      return true if transaction_details&.dig(:transactionStatusCode) == "UCF"
+      return true if enrollment_details.blank?
+
+      false
     end
 
     def as_json(options = {})
