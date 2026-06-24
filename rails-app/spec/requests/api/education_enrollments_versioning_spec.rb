@@ -20,7 +20,7 @@ RSpec.describe 'Education Enrollment Response Versioning', type: :request do
         "transactionTotal" => "0.00",
         "requestedByText" => "Test Billing",
         "requestedDateTimeText" => "2026-04-23 14:20:41.049",
-        "notifiedDateTimeText" => "2026-04-23 14:20:41.049",
+        "notifiedDateTimeText" => "2026-04-23 14:20:41.049"
       },
       "enrollmentDetails" => [
         {
