@@ -1,17 +1,17 @@
 $kind: http-request
-name: Get Enrollments - enrolled, less than half time
-url: "{{api_base}}/education-enrollments"
+name: Get Enrollments - enrolled, full time
+url: "{{api_base}}{{api_version0}}/education-enrollments"
 method: POST
 headers:
   Authorization: Bearer {{access_token}}
   Content-Type: application/json
 body:
   type: json
-  content: |
+  content: |-
     {
-      "firstName": "Stacey",
-      "lastName": "Peacock",
-      "dateOfBirth": "1996-05-24"
+        "firstName": "Agnes",
+        "lastName": "Nelson",
+        "dateOfBirth": "1980-03-26"
     }
 auth:
   type: bearer
@@ -43,4 +43,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 4501099524633780
+order: 3670992063874539

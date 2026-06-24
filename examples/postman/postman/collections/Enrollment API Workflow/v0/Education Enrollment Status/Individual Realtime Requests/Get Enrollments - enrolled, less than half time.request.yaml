@@ -1,25 +1,22 @@
 $kind: http-request
-name: Get Veteran Disability Ratings with Address
-url: "{{api_base}}/veteran-disability-ratings"
+name: Get Enrollments - enrolled, less than half time
+url: "{{api_base}}{{api_version0}}/education-enrollments"
 method: POST
 headers:
   Authorization: Bearer {{access_token}}
   Content-Type: application/json
 body:
-  type: text
-  content: |
+  type: json
+  content: |-
     {
-      "firstName": "Julio",
-      "lastName": "Jonesin",
-      "dateOfBirth": "1951-11-18",
-      "address": {
-        "street1": "111 SPRING ST",
-        "city": "HARNED",
-        "state": "KY",
-        "postalCode": "40144",
-        "country": "USA"
-      }
+        "firstName": "Stacey",
+        "lastName": "Peacock",
+        "dateOfBirth": "1996-05-24"
     }
+auth:
+  type: bearer
+  credentials:
+    token: "{{access_token}}"
 scripts:
   - type: beforeRequest
     code: |
@@ -46,4 +43,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 4485137330557434
+order: 4501099524633780

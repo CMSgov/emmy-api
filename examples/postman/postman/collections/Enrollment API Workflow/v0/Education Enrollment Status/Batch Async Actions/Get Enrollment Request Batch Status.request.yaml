@@ -1,18 +1,10 @@
 $kind: http-request
-name: Get Enrollments - degree found, not enrolled
-url: "{{api_base}}/education-enrollments"
-method: POST
+name: Get Enrollment Request Batch Status
+url: "{{api_base}}{{api_version0}}/batch-education-enrollments/{{batchId}}"
+method: GET
 headers:
   Authorization: Bearer {{access_token}}
   Content-Type: application/json
-body:
-  type: json
-  content: |
-    {
-      "firstName": "Alexa",
-      "lastName": "Pinson",
-      "dateOfBirth": "1968-04-21"
-    }
 auth:
   type: bearer
   credentials:
@@ -43,4 +35,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 4501472158861135
+order: 2704891415818328

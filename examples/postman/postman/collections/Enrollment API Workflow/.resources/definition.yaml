@@ -1,12 +1,13 @@
 $kind: collection
 name: Enrollment API Workflow
 variables:
-  api_base: "{{base_url}}{{api_version}}"
+  api_base: "{{base_url}}api"
   auth_base: ""
   client_id: ""
   client_secret: ""
   access_token: ""
   token_expiry: ""
   base_url: ""
-  api_version: api/v0
+  api_version0: /v0
+  api_version1: /v1
   batchId: ""

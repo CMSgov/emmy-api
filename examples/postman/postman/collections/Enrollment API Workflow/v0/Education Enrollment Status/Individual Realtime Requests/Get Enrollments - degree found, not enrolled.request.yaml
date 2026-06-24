@@ -1,18 +1,17 @@
 $kind: http-request
-name: Get Enrollments - exists, no enrollments
-url: "{{api_base}}/education-enrollments"
+name: Get Enrollments - degree found, not enrolled
+url: "{{api_base}}{{api_version0}}/education-enrollments"
 method: POST
 headers:
   Authorization: Bearer {{access_token}}
   Content-Type: application/json
 body:
   type: json
-  content: |
+  content: |-
     {
-      "firstName": "Brad",
-      "lastName": "Russell",
-      "dateOfBirth": "1980-04-09",
-      "ssn": "421371396"
+        "firstName": "Alexa",
+        "lastName": "Pinson",
+        "dateOfBirth": "1968-04-21"
     }
 auth:
   type: bearer
@@ -44,4 +43,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 1780494285585
+order: 4501472158861135

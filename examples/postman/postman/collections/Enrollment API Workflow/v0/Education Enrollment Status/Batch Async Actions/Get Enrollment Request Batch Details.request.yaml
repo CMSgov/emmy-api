@@ -1,6 +1,6 @@
 $kind: http-request
 name: Get Enrollment Request Batch Details
-url: "{{api_base}}/batch-education-enrollments/{{batchId}}/details"
+url: "{{api_base}}{{api_version0}}/batch-education-enrollments/{{batchId}}/details"
 method: GET
 headers:
   Authorization: Bearer {{access_token}}

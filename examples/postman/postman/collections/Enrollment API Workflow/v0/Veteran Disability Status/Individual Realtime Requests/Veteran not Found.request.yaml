@@ -1,6 +1,6 @@
 $kind: http-request
 name: Veteran not Found
-url: "{{api_base}}/veteran-disability-ratings"
+url: "{{api_base}}{{api_version0}}/veteran-disability-ratings"
 method: POST
 headers:
   Authorization: Bearer {{access_token}}
