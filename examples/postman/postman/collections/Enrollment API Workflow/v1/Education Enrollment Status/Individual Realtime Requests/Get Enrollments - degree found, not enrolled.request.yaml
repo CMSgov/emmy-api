@@ -1,18 +1,23 @@
 $kind: http-request
-url: "{{api_base}}/veteran-disability-ratings"
+name: Get Enrollments - degree found, not enrolled
+url: "{{api_base}}{{api_version1}}/education-enrollments"
 method: POST
 headers:
   Authorization: Bearer {{access_token}}
   Content-Type: application/json
 body:
-  type: text
-  content: |
+  type: json
+  content: |-
     {
-      "firstName": "Alfredo",
-      "lastName": "Armstrong",
-      "dateOfBirth": "1993-06-08",
-      "ssn": "796-01-2476"
+        "termsAcceptedIndicator": true,
+        "personGivenName": "Alexa",
+        "personSurName": "Pinson",
+        "personBirthDate": "1968-04-21"
     }
+auth:
+  type: bearer
+  credentials:
+    token: "{{access_token}}"
 scripts:
   - type: beforeRequest
     code: |
@@ -39,4 +44,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 1780503157570
+order: 4501472158861135

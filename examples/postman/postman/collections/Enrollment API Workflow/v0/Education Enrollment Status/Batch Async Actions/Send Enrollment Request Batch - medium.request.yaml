@@ -1,6 +1,6 @@
 $kind: http-request
 name: Send Enrollment Request Batch - medium
-url: "{{api_base}}/batch-education-enrollments"
+url: "{{api_base}}{{api_version0}}/batch-education-enrollments"
 method: POST
 headers:
   Authorization: Bearer {{access_token}}
