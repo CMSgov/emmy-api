@@ -1,10 +1,29 @@
 # EnrollmentResponse V0 to V1 Transition Guide
 
-This guide provides a mapping and migration path for consumers transitioning from `EnrollmentResponseV0` to `EnrollmentResponseV1`.
+This guide provides a mapping and migration path for consumers transitioning from Enrollment V0 to V1 APIs.
+
+- [Request Field Mapping](#request-field-mapping)
+- [Response Field Mapping](#field-mapping)
 
 ## Why are we making these changes?
 
 To support transitioning to the hub API over time, we are introducing `EnrollmentResponseV1` to reflect the likely BSD changes that will be made in the near future. One of the perspectives of hub APIs is no inferred or guessed data.
+
+## Request Field Mapping
+
+The V1 request model (`EnrollmentRequestV1`) adopts a more descriptive naming convention and adds support for multiple names and point-in-time lookups.
+
+| V0 Field | V1 Field | Notes                                                                                                                                                                                                           |
+| :--- | :--- |:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `firstName` | `personGivenName` | Renamed.                                                                                                                                                                                                        |
+| `middleName` | `personMiddleName` | Renamed.                                                                                                                                                                                                        |
+| `lastName` | `personSurName` | Renamed.                                                                                                                                                                                                        |
+| `dateOfBirth` | `personBirthDate` | Renamed.                                                                                                                                                                                                        |
+| `ssn` | `personSocialSecurityNumber` | Renamed.                                                                                                                                                                                                        |
+| `address` | *None* | V1 relies on SSN and Name matching; physical address is not currently used. Please reach out to [emmy@cms.hhs.gov](mailto:emmy@cms.hhs.gov) if this is a concern.                                               |
+| *New* | `asOfDate` | Changes what the currentEnrollmentStatus is to reflect the asOfDate. Defaults to current time.                                                                                                                  |
+| *New* | `previousNames` | **Purpose**: An array of objects containing `personGivenName`, `personMiddleName`, and `personSurName`. Used to search for records if the student's name has changed (e.g., marriage), increasing the hit rate. |
+| *New* | `termsAcceptedIndicator` | Boolean. Explicitly confirms the student has consented to the data lookup. You must require as 'Yes'.                                                                                                           |
 
 ## Key Architectural Changes
 
