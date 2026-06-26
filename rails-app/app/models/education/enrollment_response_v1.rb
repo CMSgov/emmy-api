@@ -63,6 +63,7 @@ module Education
                 type: :object,
                 properties: {
                   personGivenName: { type: :string },
+                  personMiddleName: { type: :string },
                   personSurName: { type: :string },
                   previousNames: {
                     type: :array,

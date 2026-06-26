@@ -73,6 +73,7 @@ RSpec.describe 'Education Enrollment Response Versioning', type: :request do
             nscRequest: {
               personSocialSecurityNumber: "123456789",
               personGivenName: "John",
+              personMiddleName: "Quincy",
               personSurName: "Doe",
               personBirthDate: "1988-02-29"
             }
@@ -94,6 +95,7 @@ RSpec.describe 'Education Enrollment Response Versioning', type: :request do
           expect(nsc_resp).not_to have_key(:rawData)
       expect(nsc_resp).to have_key(:studentInfoProvided)
       expect(nsc_resp[:studentInfoProvided][:personGivenName]).to eq("John")
+      expect(nsc_resp[:studentInfoProvided][:personMiddleName]).to eq("Quincy")
       expect(nsc_resp[:studentInfoProvided][:personSurName]).to eq("Doe")
       expect(nsc_resp[:studentInfoProvided][:personBirthDate]).to eq("1988-02-29")
       expect(nsc_resp).to have_key(:transactionDetails)

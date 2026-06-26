@@ -657,6 +657,9 @@ components:
                 personGivenName:
                   type: string
                   example: "John"
+                personMiddleName:
+                  type: string
+                  example: "Quincy"
                 personSurName:
                   type: string
                   example: "Doe"
@@ -987,6 +990,7 @@ components:
           studentInfoProvided:
             personBirthDate: "1988-02-29"
             personGivenName: "John"
+            personMiddleName: "Quincy"
             personSurName: "Doe"
             previousNames:
               - personGivenName: "John"

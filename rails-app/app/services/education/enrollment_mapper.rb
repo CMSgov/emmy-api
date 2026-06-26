@@ -51,7 +51,7 @@ module Education
         next_enrollment_detail = {
           officialSchoolName: d["officialSchoolName"],
           schoolCode: d["schoolCode"],
-          branchCode: d["branchCode"] || "00", # doesn't actually exist in NSC but supposedly well get once contract sign
+          branchCode: d["branchCode"],
           currentEnrollmentStatusCode: d["currentEnrollmentStatus"]
         }
         enrollment_data = (d["enrollmentData"] || []).map do |ed|
@@ -69,6 +69,7 @@ module Education
 
       student_info = {
         personGivenName: nsc_request.is_a?(Hash) ? nsc_request.dig("studentInfoProvided", "personGivenName") : nsc_request.person_given_name,
+        personMiddleName: nsc_request.is_a?(Hash) ? nsc_request.dig("studentInfoProvided", "personMiddleName") : nsc_request.person_middle_name,
         personSurName: nsc_request.is_a?(Hash) ? nsc_request.dig("studentInfoProvided", "personSurName") : nsc_request.person_sur_name,
         previousNames: nsc_request.is_a?(Hash) ? (nsc_request.dig("studentInfoProvided", "previousNames") || []) : nsc_request.previous_names,
         personBirthDate: nsc_request.is_a?(Hash) ? nsc_request.dig("studentInfoProvided", "personBirthDate") : nsc_request.person_birth_date
