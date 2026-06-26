@@ -9,7 +9,7 @@ RSpec.describe Education::EnrollmentMapper do
       end
     end
   end
-  let(:nsc_request) { double("nsc_request", person_given_name: "John", person_sur_name: "Doe", previous_names: [], person_birth_date: "1988-02-29") }
+  let(:nsc_request) { double("nsc_request", person_given_name: "John", person_middle_name: "Q", person_sur_name: "Doe", previous_names: [], person_birth_date: "1988-02-29") }
   let(:duration) { 100 }
 
   describe '.translate_nsc_response' do
