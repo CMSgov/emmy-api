@@ -22,7 +22,6 @@ on:
       - "**/*.yaml"
       - "**/*.yml"
       - ".cspell.json"
-      - "Dockerfile"
       - "Makefile"
       - "README.md"
       - "SECURITY.md"
