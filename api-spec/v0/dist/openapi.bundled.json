@@ -148,23 +148,25 @@
               "examples": {
                 "standard": {
                   "value": {
-                    "personSocialSecurityNumber": "123456789",
-                    "personGivenName": "John",
-                    "personMiddleName": "Joe",
-                    "personSurName": "Doe",
-                    "previousNames": [
-                      {
-                        "personGivenName": "John",
-                        "personMiddleName": "Jacob",
-                        "personSurName": "Smith"
-                      },
-                      {
-                        "personGivenName": "Richard",
-                        "personSurName": "Roe"
-                      }
-                    ],
-                    "personBirthDate": "1988-02-29",
-                    "asOfDate": "2026-01-01"
+                    "nscRequest": {
+                      "personSocialSecurityNumber": "123456789",
+                      "personGivenName": "John",
+                      "personMiddleName": "Joe",
+                      "personSurName": "Doe",
+                      "previousNames": [
+                        {
+                          "personGivenName": "John",
+                          "personMiddleName": "Jacob",
+                          "personSurName": "Smith"
+                        },
+                        {
+                          "personGivenName": "Richard",
+                          "personSurName": "Roe"
+                        }
+                      ],
+                      "personBirthDate": "1988-02-29",
+                      "asOfDate": "2026-01-01"
+                    }
                   }
                 }
               }
@@ -583,58 +585,66 @@
       "GetEducationEnrollmentRequestV1": {
         "type": "object",
         "required": [
-          "personGivenName",
-          "personSurName",
-          "personBirthDate"
+          "nscRequest"
         ],
         "properties": {
-          "personSocialSecurityNumber": {
-            "type": "string",
-            "pattern": "^\\d{9}$",
-            "example": "123456789"
-          },
-          "personGivenName": {
-            "type": "string",
-            "example": "John"
-          },
-          "personMiddleName": {
-            "type": "string",
-            "example": "Joe"
-          },
-          "personSurName": {
-            "type": "string",
-            "example": "Doe"
-          },
-          "previousNames": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "personGivenName": {
-                  "type": "string"
-                },
-                "personMiddleName": {
-                  "type": "string"
-                },
-                "personSurName": {
-                  "type": "string"
+          "nscRequest": {
+            "type": "object",
+            "required": [
+              "personGivenName",
+              "personSurName",
+              "personBirthDate"
+            ],
+            "properties": {
+              "personSocialSecurityNumber": {
+                "type": "string",
+                "pattern": "^\\d{9}$",
+                "example": "123456789"
+              },
+              "personGivenName": {
+                "type": "string",
+                "example": "John"
+              },
+              "personMiddleName": {
+                "type": "string",
+                "example": "Joe"
+              },
+              "personSurName": {
+                "type": "string",
+                "example": "Doe"
+              },
+              "previousNames": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "personGivenName": {
+                      "type": "string"
+                    },
+                    "personMiddleName": {
+                      "type": "string"
+                    },
+                    "personSurName": {
+                      "type": "string"
+                    }
+                  }
                 }
+              },
+              "personBirthDate": {
+                "type": "string",
+                "format": "date",
+                "example": "1988-02-29"
+              },
+              "asOfDate": {
+                "type": "string",
+                "format": "date",
+                "example": "2026-01-01"
+              },
+              "termsAcceptedIndicator": {
+                "type": "boolean",
+                "example": true
               }
             }
-          },
-          "personBirthDate": {
-            "type": "string",
-            "format": "date",
-            "example": "1988-02-29"
-          },
-          "asOfDate": {
-            "type": "string",
-            "format": "date",
-            "example": "2026-01-01"
-          },
-          "termsAcceptedIndicator": {
-            "type": "boolean",
-            "example": true
           }
         }
       },
@@ -884,110 +894,122 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "enrollmentDetails",
-          "studentInfoProvided",
-          "transactionDetails"
+          "nscResponse"
         ],
         "properties": {
-          "enrollmentDetails": {
-            "type": "array",
-            "description": "List of enrollment details filtered from the raw data.",
-            "items": {
-              "$ref": "#/components/schemas/EnrollmentDetailV1"
-            }
-          },
-          "studentInfoProvided": {
+          "nscResponse": {
             "type": "object",
-            "description": "Student info provided as returned by the NSC.",
+            "required": [
+              "enrollmentDetails",
+              "studentInfoProvided",
+              "transactionDetails"
+            ],
             "properties": {
-              "personBirthDate": {
-                "type": "string",
-                "format": "date",
-                "example": "1988-02-29"
-              },
-              "personGivenName": {
-                "type": "string",
-                "example": "John"
-              },
-              "personSurName": {
-                "type": "string",
-                "example": "Doe"
-              },
-              "previousNames": {
+              "enrollmentDetails": {
                 "type": "array",
+                "description": "List of enrollment details filtered from the raw data.",
                 "items": {
-                  "type": "object",
-                  "properties": {
-                    "personGivenName": {
-                      "type": "string"
-                    },
-                    "personMiddleName": {
-                      "type": "string"
-                    },
-                    "personSurName": {
-                      "type": "string"
+                  "$ref": "#/components/schemas/EnrollmentDetailV1"
+                }
+              },
+              "studentInfoProvided": {
+                "type": "object",
+                "description": "Student info provided as returned by the NSC.",
+                "properties": {
+                  "personBirthDate": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "1988-02-29"
+                  },
+                  "personGivenName": {
+                    "type": "string",
+                    "example": "John"
+                  },
+                  "personMiddleName": {
+                    "type": "string",
+                    "example": "Quincy"
+                  },
+                  "personSurName": {
+                    "type": "string",
+                    "example": "Doe"
+                  },
+                  "previousNames": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "personGivenName": {
+                          "type": "string"
+                        },
+                        "personMiddleName": {
+                          "type": "string"
+                        },
+                        "personSurName": {
+                          "type": "string"
+                        }
+                      }
                     }
                   }
                 }
-              }
-            }
-          },
-          "transactionDetails": {
-            "type": "object",
-            "description": "Transaction details as returned by the NSC.",
-            "properties": {
-              "transactionId": {
-                "type": "string",
-                "example": "4001686568"
               },
-              "orderId": {
-                "type": "string",
-                "example": "2002833179"
+              "transactionDetails": {
+                "type": "object",
+                "description": "Transaction details as returned by the NSC.",
+                "properties": {
+                  "transactionId": {
+                    "type": "string",
+                    "example": "4001686568"
+                  },
+                  "orderId": {
+                    "type": "string",
+                    "example": "2002833179"
+                  },
+                  "transactionStatusCode": {
+                    "type": "string",
+                    "example": "CNF"
+                  },
+                  "transactionFee": {
+                    "type": "string",
+                    "example": "0.00"
+                  },
+                  "salesTax": {
+                    "type": "string",
+                    "example": "0.00"
+                  },
+                  "transactionTotal": {
+                    "type": "string",
+                    "example": "0.00"
+                  },
+                  "requestedByText": {
+                    "type": "string",
+                    "example": "Test Billing"
+                  },
+                  "requestedDateTimeText": {
+                    "type": "string",
+                    "example": "2026-04-23 14:20:41.049"
+                  },
+                  "notifiedDateTimeText": {
+                    "type": "string",
+                    "example": "2026-04-23 14:20:41.049"
+                  },
+                  "nscHitIndicator": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
               },
-              "transactionStatusCode": {
-                "type": "string",
-                "example": "CNF"
-              },
-              "transactionFee": {
-                "type": "string",
-                "example": "0.00"
-              },
-              "salesTax": {
-                "type": "string",
-                "example": "0.00"
-              },
-              "transactionTotal": {
-                "type": "string",
-                "example": "0.00"
-              },
-              "requestedByText": {
-                "type": "string",
-                "example": "Test Billing"
-              },
-              "requestedDateTimeText": {
-                "type": "string",
-                "example": "2026-04-23 14:20:41.049"
-              },
-              "notifiedDateTimeText": {
-                "type": "string",
-                "example": "2026-04-23 14:20:41.049"
-              },
-              "nscHitIndicator": {
-                "type": "boolean",
-                "example": true
-              }
-            }
-          },
-          "responseMetadata": {
-            "type": "object",
-            "properties": {
-              "responseCode": {
-                "type": "string",
-                "example": "MS000000"
-              },
-              "responseText": {
-                "type": "string",
-                "example": "Success"
+              "responseMetadata": {
+                "type": "object",
+                "properties": {
+                  "responseCode": {
+                    "type": "string",
+                    "example": "MS000000"
+                  },
+                  "responseText": {
+                    "type": "string",
+                    "example": "Success"
+                  }
+                }
               }
             }
           }
@@ -1118,6 +1140,11 @@
             "type": "string",
             "description": "Branch code for the school.",
             "example": "00"
+          },
+          "currentEnrollmentStatusCode": {
+            "type": "string",
+            "description": "The most recent enrollment status reported by the school.",
+            "example": "F"
           },
           "enrollmentData": {
             "type": "array",
@@ -1502,53 +1529,57 @@
       },
       "EducationEnrollmentResponseExampleV1": {
         "value": {
-          "enrollmentDetails": [
-            {
-              "officialSchoolName": "Trident University International",
-              "schoolCode": "001171",
-              "branchCode": "00",
-              "enrollmentData": [
+          "nscResponse": {
+            "enrollmentDetails": [
+              {
+                "officialSchoolName": "Trident University International",
+                "schoolCode": "001171",
+                "branchCode": "00",
+                "currentEnrollmentStatusCode": "F",
+                "enrollmentData": [
+                  {
+                    "termBeginDate": "2024-05-31",
+                    "termEndDate": "2024-11-19",
+                    "enrollmentStatusCode": "F",
+                    "schoolCertifiedOnDate": "2024-06-01",
+                    "anticipatedGraduationDate": "2026-05-20"
+                  }
+                ]
+              }
+            ],
+            "studentInfoProvided": {
+              "personBirthDate": "1988-02-29",
+              "personGivenName": "John",
+              "personMiddleName": "Quincy",
+              "personSurName": "Doe",
+              "previousNames": [
                 {
-                  "termBeginDate": "2024-05-31",
-                  "termEndDate": "2024-11-19",
-                  "enrollmentStatusCode": "F",
-                  "schoolCertifiedOnDate": "2024-06-01",
-                  "anticipatedGraduationDate": "2026-05-20"
+                  "personGivenName": "John",
+                  "personMiddleName": "Jacob",
+                  "personSurName": "Smith"
+                },
+                {
+                  "personGivenName": "Richard",
+                  "personSurName": "Roe"
                 }
               ]
+            },
+            "transactionDetails": {
+              "transactionId": "4001686568",
+              "orderId": "2002833179",
+              "transactionStatusCode": "CNF",
+              "transactionFee": "0.00",
+              "salesTax": "0.00",
+              "transactionTotal": "0.00",
+              "requestedByText": "Test Billing",
+              "requestedDateTimeText": "2026-04-23 14:20:41.049",
+              "notifiedDateTimeText": "2026-04-23 14:20:41.049",
+              "nscHitIndicator": true
+            },
+            "responseMetadata": {
+              "responseCode": "MS000000",
+              "responseText": "Success"
             }
-          ],
-          "studentInfoProvided": {
-            "personBirthDate": "1988-02-29",
-            "personGivenName": "John",
-            "personSurName": "Doe",
-            "previousNames": [
-              {
-                "personGivenName": "John",
-                "personMiddleName": "Jacob",
-                "personSurName": "Smith"
-              },
-              {
-                "personGivenName": "Richard",
-                "personSurName": "Roe"
-              }
-            ]
-          },
-          "transactionDetails": {
-            "transactionId": "4001686568",
-            "orderId": "2002833179",
-            "transactionStatusCode": "CNF",
-            "transactionFee": "0.00",
-            "salesTax": "0.00",
-            "transactionTotal": "0.00",
-            "requestedByText": "Test Billing",
-            "requestedDateTimeText": "2026-04-23 14:20:41.049",
-            "notifiedDateTimeText": "2026-04-23 14:20:41.049",
-            "nscHitIndicator": true
-          },
-          "responseMetadata": {
-            "responseCode": "MS000000",
-            "responseText": "Success"
           }
         }
       },

@@ -4,6 +4,18 @@ module Api
       def create
         reporter = Reporting::Reporter.new
 
+        if params[:nscRequest].blank?
+          reporter.report(Reporting::ReportData.new(
+            timestamp: Time.now,
+            endpoint: request.path,
+            data_source: "NSC",
+            client_id: client_id,
+            status_code: 400,
+            success: false
+          ))
+          return render json: { error: "missing required nscRequest object" }, status: :bad_request
+        end
+
         if missing_field = missing_education_identity_field
           reporter.report(Reporting::ReportData.new(
             timestamp: Time.now,
@@ -16,7 +28,7 @@ module Api
           return render json: { error: "missing required field: #{missing_field}" }, status: :bad_request
         end
 
-        req_params = params.permit(
+        req_params = params.require(:nscRequest).permit(
           :personSocialSecurityNumber, :personGivenName, :personMiddleName, :personSurName, :personBirthDate, :asOfDate, :termsAcceptedIndicator,
           previousNames: [ :personGivenName, :personMiddleName, :personSurName ]
         ).to_h.deep_symbolize_keys
@@ -62,9 +74,10 @@ module Api
       private
 
       def missing_education_identity_field
-        return "personGivenName" if params[:personGivenName].blank?
-        return "personSurName" if params[:personSurName].blank?
-        return "personBirthDate" if params[:personBirthDate].blank?
+        nsc_req = params[:nscRequest] || {}
+        return "personGivenName" if nsc_req[:personGivenName].blank?
+        return "personSurName" if nsc_req[:personSurName].blank?
+        return "personBirthDate" if nsc_req[:personBirthDate].blank?
         nil
       end
     end
