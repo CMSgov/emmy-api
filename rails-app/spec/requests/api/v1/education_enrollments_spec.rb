@@ -28,22 +28,29 @@ RSpec.describe 'api/v1/education_enrollments', type: :request do
                   in: :body,
                   schema: {
                     type: :object,
+                    required: [ :nscRequest ],
                     properties: {
-                      personSocialSecurityNumber: { type: :string },
-                      personGivenName: { type: :string },
-                      personMiddleName: { type: :string },
-                      personSurName: { type: :string },
-                      personBirthDate: { type: :string },
-                      asOfDate: { type: :string },
-                      termsAcceptedIndicator: { type: :boolean },
-                      previousNames: {
-                        type: :array,
-                        items: {
-                          type: :object,
-                          properties: {
-                            personGivenName: { type: :string },
-                            personMiddleName: { type: :string },
-                            personSurName: { type: :string }
+                      nscRequest: {
+                        type: :object,
+                        required: [ :personGivenName, :personSurName, :personBirthDate ],
+                        properties: {
+                          personSocialSecurityNumber: { type: :string },
+                          personGivenName: { type: :string },
+                          personMiddleName: { type: :string },
+                          personSurName: { type: :string },
+                          personBirthDate: { type: :string },
+                          asOfDate: { type: :string },
+                          termsAcceptedIndicator: { type: :boolean },
+                          previousNames: {
+                            type: :array,
+                            items: {
+                              type: :object,
+                              properties: {
+                                personGivenName: { type: :string },
+                                personMiddleName: { type: :string },
+                                personSurName: { type: :string }
+                              }
+                            }
                           }
                         }
                       }
@@ -53,24 +60,26 @@ RSpec.describe 'api/v1/education_enrollments', type: :request do
         response(200, 'successful with new format') do
           let(:education_enrollment) do
             {
-              personSocialSecurityNumber: "123456789",
-              personGivenName: "John",
-              personMiddleName: "Joe",
-              personSurName: "Doe",
-              previousNames: [
-                {
-                  personGivenName: "John",
-                  personMiddleName: "Jacob",
-                  personSurName: "Smith"
-                },
-                {
-                  personGivenName: "Richard",
-                  personSurName: "Roe"
-                }
-              ],
-              personBirthDate: "1988-02-29",
-              asOfDate: "2026-01-01",
-              termsAcceptedIndicator: true
+              nscRequest: {
+                personSocialSecurityNumber: "123456789",
+                personGivenName: "John",
+                personMiddleName: "Joe",
+                personSurName: "Doe",
+                previousNames: [
+                  {
+                    personGivenName: "John",
+                    personMiddleName: "Jacob",
+                    personSurName: "Smith"
+                  },
+                  {
+                    personGivenName: "Richard",
+                    personSurName: "Roe"
+                  }
+                ],
+                personBirthDate: "1988-02-29",
+                asOfDate: "2026-01-01",
+                termsAcceptedIndicator: true
+              }
             }
           end
 

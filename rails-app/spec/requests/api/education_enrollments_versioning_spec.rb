@@ -70,10 +70,12 @@ RSpec.describe 'Education Enrollment Response Versioning', type: :request do
       describe 'V1 Response' do
         it 'returns officialSchoolName in enrollmentDetails' do
           payload = {
-            personSocialSecurityNumber: "123456789",
-            personGivenName: "John",
-            personSurName: "Doe",
-            personBirthDate: "1988-02-29"
+            nscRequest: {
+              personSocialSecurityNumber: "123456789",
+              personGivenName: "John",
+              personSurName: "Doe",
+              personBirthDate: "1988-02-29"
+            }
           }
 
           post '/api/v1/education-enrollments', params: payload, as: :json

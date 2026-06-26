@@ -148,23 +148,25 @@
               "examples": {
                 "standard": {
                   "value": {
-                    "personSocialSecurityNumber": "123456789",
-                    "personGivenName": "John",
-                    "personMiddleName": "Joe",
-                    "personSurName": "Doe",
-                    "previousNames": [
-                      {
-                        "personGivenName": "John",
-                        "personMiddleName": "Jacob",
-                        "personSurName": "Smith"
-                      },
-                      {
-                        "personGivenName": "Richard",
-                        "personSurName": "Roe"
-                      }
-                    ],
-                    "personBirthDate": "1988-02-29",
-                    "asOfDate": "2026-01-01"
+                    "nscRequest": {
+                      "personSocialSecurityNumber": "123456789",
+                      "personGivenName": "John",
+                      "personMiddleName": "Joe",
+                      "personSurName": "Doe",
+                      "previousNames": [
+                        {
+                          "personGivenName": "John",
+                          "personMiddleName": "Jacob",
+                          "personSurName": "Smith"
+                        },
+                        {
+                          "personGivenName": "Richard",
+                          "personSurName": "Roe"
+                        }
+                      ],
+                      "personBirthDate": "1988-02-29",
+                      "asOfDate": "2026-01-01"
+                    }
                   }
                 }
               }
@@ -583,58 +585,66 @@
       "GetEducationEnrollmentRequestV1": {
         "type": "object",
         "required": [
-          "personGivenName",
-          "personSurName",
-          "personBirthDate"
+          "nscRequest"
         ],
         "properties": {
-          "personSocialSecurityNumber": {
-            "type": "string",
-            "pattern": "^\\d{9}$",
-            "example": "123456789"
-          },
-          "personGivenName": {
-            "type": "string",
-            "example": "John"
-          },
-          "personMiddleName": {
-            "type": "string",
-            "example": "Joe"
-          },
-          "personSurName": {
-            "type": "string",
-            "example": "Doe"
-          },
-          "previousNames": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "personGivenName": {
-                  "type": "string"
-                },
-                "personMiddleName": {
-                  "type": "string"
-                },
-                "personSurName": {
-                  "type": "string"
+          "nscRequest": {
+            "type": "object",
+            "required": [
+              "personGivenName",
+              "personSurName",
+              "personBirthDate"
+            ],
+            "properties": {
+              "personSocialSecurityNumber": {
+                "type": "string",
+                "pattern": "^\\d{9}$",
+                "example": "123456789"
+              },
+              "personGivenName": {
+                "type": "string",
+                "example": "John"
+              },
+              "personMiddleName": {
+                "type": "string",
+                "example": "Joe"
+              },
+              "personSurName": {
+                "type": "string",
+                "example": "Doe"
+              },
+              "previousNames": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "personGivenName": {
+                      "type": "string"
+                    },
+                    "personMiddleName": {
+                      "type": "string"
+                    },
+                    "personSurName": {
+                      "type": "string"
+                    }
+                  }
                 }
+              },
+              "personBirthDate": {
+                "type": "string",
+                "format": "date",
+                "example": "1988-02-29"
+              },
+              "asOfDate": {
+                "type": "string",
+                "format": "date",
+                "example": "2026-01-01"
+              },
+              "termsAcceptedIndicator": {
+                "type": "boolean",
+                "example": true
               }
             }
-          },
-          "personBirthDate": {
-            "type": "string",
-            "format": "date",
-            "example": "1988-02-29"
-          },
-          "asOfDate": {
-            "type": "string",
-            "format": "date",
-            "example": "2026-01-01"
-          },
-          "termsAcceptedIndicator": {
-            "type": "boolean",
-            "example": true
           }
         }
       },
