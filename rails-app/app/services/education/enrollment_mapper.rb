@@ -52,7 +52,7 @@ module Education
           officialSchoolName: d["officialSchoolName"],
           schoolCode: d["schoolCode"],
           branchCode: d["branchCode"] || "00", # doesn't actually exist in NSC but supposedly well get once contract sign
-          currentEnrollmentStatus: d["currentEnrollmentStatus"]
+          currentEnrollmentStatusCode: d["currentEnrollmentStatus"]
         }
         enrollment_data = (d["enrollmentData"] || []).map do |ed|
           {
