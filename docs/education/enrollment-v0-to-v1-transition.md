@@ -9,6 +9,13 @@ This guide provides a mapping and migration path for consumers transitioning fro
 
 To support transitioning to the hub API over time, we are introducing `EnrollmentResponseV1` to reflect the likely BSD changes that will be made in the near future. One of the perspectives of hub APIs is no inferred or guessed data.
 
+## What are the major changes when transitioning to the hub?
+
+- The oauth provider will be changing (moving from emmy), but the oauth mechanism will be remaining the same.
+- Bulk API support will not be supported in the initial hub specs. It is being considered at a later date, but not upon initial release.
+- Transaction data is exposed to support auditing.
+- UAT environments for Emmy will stay up to support initial testing, but production environments will be shut down and not available for January.
+
 ## Request Field Mapping
 
 The V1 request model (`EnrollmentRequestV1`) adopts a more descriptive naming convention and adds support for multiple names and point-in-time lookups.
