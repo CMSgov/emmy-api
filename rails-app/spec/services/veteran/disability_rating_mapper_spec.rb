@@ -40,7 +40,7 @@ module Veteran
       subject { described_class.map_response(total_disability_response, disability_score_response, datasource_duration, start_time) }
 
       it 'returns a Veteran::DisabilityRatingResponse' do
-        expect(subject).to be_a(Veteran::DisabilityRatingResponse)
+        expect(subject).to be_a(Veteran::DisabilityRatingResponseV0)
       end
 
       it 'maps total disability fields correctly' do

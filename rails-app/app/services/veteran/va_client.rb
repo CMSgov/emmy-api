@@ -25,7 +25,7 @@ module Veteran
       rating_req = if req_params.respond_to?(:to_va_payload)
                      req_params
                    else
-                     Veteran::DisabilityRatingRequest.new(req_params)
+                     Veteran::DisabilityRatingRequestV0.new(req_params)
                    end
 
       total_disability_response = get_total_disability_response(rating_req, token)

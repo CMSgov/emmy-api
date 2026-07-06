@@ -11,7 +11,7 @@ module Veteran
 
       total_disability_data = total_disability_response.dig("data") || {}
       if version == "V0"
-        Veteran::DisabilityRatingResponse.new(
+        Veteran::DisabilityRatingResponseV0.new(
           permanentDisabilityStatus: total_disability_data.dig("permanent_and_total", "service_connected_status"),
           totalDisabilityStatus: total_disability_data.dig("total_disability", "status"),
           totalDisabilityStatusEffectiveDate: total_disability_data.dig("total_disability", "effective_date"),
