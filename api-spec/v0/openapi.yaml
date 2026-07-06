@@ -805,14 +805,6 @@ components:
                 - M
                 - F
               example: "M"
-            asOfDate:
-              type: string
-              description: Point-in-time lookup date.
-              example: "2024-07-02"
-            termsAcceptedIndicator:
-              type: boolean
-              description: Explicitly confirms the veteran has consented to the data lookup.
-              example: true
             personContactInformation:
               type: object
               properties:
@@ -1305,8 +1297,6 @@ components:
           personBirthDate: "1990-01-01"
           personSocialSecurityNumber: "000-00-0000"
           personSexCode: M
-          asOfDate: "2024-07-02"
-          termsAcceptedIndicator: true
           personContactInformation:
             streetLineOneAddress: 123 Main St
             streetLineTwoAddress: Apt 4B

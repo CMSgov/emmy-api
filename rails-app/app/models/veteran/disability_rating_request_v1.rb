@@ -1,7 +1,7 @@
 module Veteran
   class DisabilityRatingRequestV1
     attr_accessor :person_social_security_number, :person_given_name, :person_middle_name, :person_sur_name,
-                  :person_birth_date, :person_sex_code, :as_of_date, :terms_accepted_indicator, :address
+                  :person_birth_date, :person_sex_code, :address
 
     def initialize(params = {})
       vadr = params[:vadrRequest] || {}
@@ -11,8 +11,6 @@ module Veteran
       @person_sur_name = vadr[:personSurName]
       @person_birth_date = vadr[:personBirthDate]
       @person_sex_code = vadr[:personSexCode]
-      @as_of_date = vadr[:asOfDate]
-      @terms_accepted_indicator = vadr[:termsAcceptedIndicator]
       @address = vadr[:personContactInformation] || {}
     end
 
@@ -34,8 +32,6 @@ module Veteran
               personBirthDate: { type: :string, description: "Date of birth of the veteran (YYYY-MM-DD).", example: "1990-01-01" },
               personSocialSecurityNumber: { type: :string, description: "Social Security Number of the veteran.", example: "000-00-0000" },
               personSexCode: { type: :string, description: "Gender of the veteran.", enum: %w[M F], example: "M" },
-              asOfDate: { type: :string, description: "Point-in-time lookup date.", example: "2024-07-02" },
-              termsAcceptedIndicator: { type: :boolean, description: "Explicitly confirms the veteran has consented to the data lookup.", example: true },
               personContactInformation: {
                 type: :object,
                 properties: {
