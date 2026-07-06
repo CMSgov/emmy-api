@@ -45,8 +45,8 @@ paths:
         '200':
           description: Education enrollment status retrieved successfully.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -59,8 +59,8 @@ paths:
         '400':
           description: Invalid request. Missing required fields or malformed JSON.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -72,8 +72,8 @@ paths:
         '404':
           description: Person not found.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -116,8 +116,8 @@ paths:
         '200':
           description: Education enrollment status retrieved successfully.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -128,8 +128,8 @@ paths:
         '400':
           description: Invalid request.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -137,8 +137,8 @@ paths:
         '404':
           description: Person not found.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -178,13 +178,13 @@ paths:
         '202':
           description: Batch registration accepted.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
         '400':
           description: Invalid request. Missing required fields or malformed JSON.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -208,8 +208,8 @@ paths:
         '200':
           description: Batch job status retrieved successfully.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -229,8 +229,8 @@ paths:
         '404':
           description: Batch job not found.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -258,8 +258,8 @@ paths:
         '200':
           description: Batch job details retrieved successfully.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -285,8 +285,8 @@ paths:
         '404':
           description: Batch job not found.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -316,8 +316,8 @@ paths:
         '200':
           description: Veteran disability status retrieved successfully.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -328,8 +328,8 @@ paths:
         '400':
           description: Invalid request. Missing required fields or malformed JSON.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -341,8 +341,8 @@ paths:
         '404':
           description: Person not found.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -372,8 +372,8 @@ paths:
         '200':
           description: Veteran disability status retrieved successfully.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -384,8 +384,8 @@ paths:
         '400':
           description: Invalid request.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -393,8 +393,8 @@ paths:
         '404':
           description: Person not found.
           headers:
-            X-Request-ID:
-              $ref: '#/components/headers/X-Request-ID'
+            messageId:
+              $ref: '#/components/headers/messageId'
           content:
             application/json:
               schema:
@@ -411,7 +411,7 @@ components:
           scopes:
             emmy-api/emmy-api-access: access the Emmy Verification Service API
   headers:
-    X-Request-ID:
+    messageId:
       description: |
         Unique identifier for the request, used for tracing and debugging. This ID is generated by the server and returned in the response.
       schema:
@@ -781,14 +781,6 @@ components:
                 - M
                 - F
               example: M
-            asOfDate:
-              type: string
-              description: Point-in-time lookup date.
-              example: '2024-07-02'
-            termsAcceptedIndicator:
-              type: boolean
-              description: Explicitly confirms the veteran has consented to the data lookup.
-              example: true
             personContactInformation:
               type: object
               properties:
@@ -1419,8 +1411,6 @@ components:
           personBirthDate: '1990-01-01'
           personSocialSecurityNumber: 000-00-0000
           personSexCode: M
-          asOfDate: '2024-07-02'
-          termsAcceptedIndicator: true
           personContactInformation:
             streetLineOneAddress: 123 Main St
             streetLineTwoAddress: Apt 4B
