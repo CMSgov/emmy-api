@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 module Veteran
-  RSpec.describe DisabilityRatingRequest, type: :model do
+  RSpec.describe DisabilityRatingRequestV0, type: :model do
     describe '#to_va_payload' do
       it 'maps fields correctly' do
         params = {
@@ -18,7 +18,7 @@ module Veteran
             country: 'USA'
           }
         }
-        req = DisabilityRatingRequest.new(params)
+        req = DisabilityRatingRequestV0.new(params)
         payload = req.to_va_payload
 
         expect(payload[:first_name]).to eq('John')
@@ -39,7 +39,7 @@ module Veteran
           lastName: 'Doe',
           dateOfBirth: '1990-01-01'
         }
-        req = DisabilityRatingRequest.new(params)
+        req = DisabilityRatingRequestV0.new(params)
         payload = req.to_va_payload
 
         expect(payload[:first_name]).to eq('John')
@@ -53,17 +53,17 @@ module Veteran
 
     describe '#can_use_restricted_endpoint?' do
       it 'returns true when ssn is present' do
-        req = DisabilityRatingRequest.new(ssn: '999999999')
+        req = DisabilityRatingRequestV0.new(ssn: '999999999')
         expect(req.can_use_restricted_endpoint?).to be true
       end
 
       it 'returns false when ssn is absent' do
-        req = DisabilityRatingRequest.new
+        req = DisabilityRatingRequestV0.new
         expect(req.can_use_restricted_endpoint?).to be false
       end
 
       it 'returns false when ssn is empty' do
-        req = DisabilityRatingRequest.new(ssn: '')
+        req = DisabilityRatingRequestV0.new(ssn: '')
         expect(req.can_use_restricted_endpoint?).to be false
       end
     end
