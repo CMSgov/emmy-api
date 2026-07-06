@@ -19,6 +19,7 @@ Rails.application.routes.draw do
 
     namespace :v1 do
       post "education-enrollments", to: "education_enrollments#create"
+      post "veteran-disability-ratings", to: "veteran_disability_ratings#create"
     end
   end
 

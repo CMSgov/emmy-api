@@ -17,17 +17,23 @@ module Veteran
     end
 
 
-    def lookup_disability_rating(req_params)
+    def lookup_disability_rating(req_params, version="V0")
       start_time = Time.now
       token = fetch_oauth_token
-      rating_req = Veteran::DisabilityRatingRequest.new(req_params)
+
+      # Ensure req_params is a request object
+      rating_req = if req_params.respond_to?(:to_va_payload)
+                     req_params
+                   else
+                     Veteran::DisabilityRatingRequest.new(req_params)
+                   end
 
       total_disability_response = get_total_disability_response(rating_req, token)
 
       disability_score_response = get_total_disability_response(rating_req, token, restricted_endpoint: RESTRICTED_DISABILITY_RATING_PATH, unrestricted_endpoint: DISABILITY_RATING_PATH)
       datasource_duration = (Time.now - start_time) * 1000
 
-      Veteran::DisabilityRatingMapper.map_response(JSON.parse(total_disability_response.body), JSON.parse(disability_score_response.body), datasource_duration, start_time)
+      Veteran::DisabilityRatingMapper.map_response(JSON.parse(total_disability_response.body), JSON.parse(disability_score_response.body), datasource_duration, start_time, version)
     end
 
     private
