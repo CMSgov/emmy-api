@@ -62,7 +62,6 @@ module Veteran
           country: address[:country]
         }.compact)
       end
-
       out
     end
   end
