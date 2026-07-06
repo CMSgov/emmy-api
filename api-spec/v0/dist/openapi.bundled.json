@@ -63,8 +63,8 @@
           "200": {
             "description": "Education enrollment status retrieved successfully.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -86,8 +86,8 @@
           "400": {
             "description": "Invalid request. Missing required fields or malformed JSON.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -108,8 +108,8 @@
           "404": {
             "description": "Person not found.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -177,8 +177,8 @@
           "200": {
             "description": "Education enrollment status retrieved successfully.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -197,8 +197,8 @@
           "400": {
             "description": "Invalid request.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -212,8 +212,8 @@
           "404": {
             "description": "Person not found.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -274,16 +274,16 @@
           "202": {
             "description": "Batch registration accepted.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             }
           },
           "400": {
             "description": "Invalid request. Missing required fields or malformed JSON.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -320,8 +320,8 @@
           "200": {
             "description": "Batch job status retrieved successfully.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -350,8 +350,8 @@
           "404": {
             "description": "Batch job not found.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -395,8 +395,8 @@
           "200": {
             "description": "Batch job details retrieved successfully.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -440,8 +440,8 @@
           "404": {
             "description": "Batch job not found.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -489,8 +489,8 @@
           "200": {
             "description": "Veteran disability status retrieved successfully.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -509,8 +509,8 @@
           "400": {
             "description": "Invalid request. Missing required fields or malformed JSON.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -531,8 +531,8 @@
           "404": {
             "description": "Person not found.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -580,8 +580,8 @@
           "200": {
             "description": "Veteran disability status retrieved successfully.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -600,8 +600,8 @@
           "400": {
             "description": "Invalid request.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -615,8 +615,8 @@
           "404": {
             "description": "Person not found.",
             "headers": {
-              "X-Request-ID": {
-                "$ref": "#/components/headers/X-Request-ID"
+              "messageId": {
+                "$ref": "#/components/headers/messageId"
               }
             },
             "content": {
@@ -647,7 +647,7 @@
       }
     },
     "headers": {
-      "X-Request-ID": {
+      "messageId": {
         "description": "Unique identifier for the request, used for tracing and debugging. This ID is generated by the server and returned in the response.\n",
         "schema": {
           "type": "string",

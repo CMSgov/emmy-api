@@ -39,6 +39,9 @@ module RailsApp
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
+    # Use messageId instead of X-Request-Id for request tracing
+    config.action_dispatch.request_id_header = "messageId"
+
     # Active Record Encryption
     config.active_record.encryption.primary_key = ENV["ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY"]
     config.active_record.encryption.deterministic_key = ENV["ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY"]
