@@ -1,5 +1,5 @@
 module Veteran
-  class DisabilityRatingResponse
+  class DisabilityRatingResponseV0
     attr_accessor :raw_data, :data_source, :metadata,
                   :total_disability_status, :total_disability_status_effective_date,
                   :combined_disability_rating, :combined_effective_date, :legal_effective_date,

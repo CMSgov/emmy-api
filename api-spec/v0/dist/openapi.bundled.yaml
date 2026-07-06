@@ -82,6 +82,67 @@ paths:
                 notFound:
                   value:
                     error: Not Found
+  /api/v1/education-enrollments:
+    post:
+      tags:
+        - Education Verification
+      summary: Get education enrollment status (V1)
+      description: |
+        Returns the subject's current education enrollment status for the person identified in the supplied identity object. This is the V1 version of the endpoint.
+      operationId: getEducationEnrollmentStatusV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetEducationEnrollmentRequestV1'
+            examples:
+              standard:
+                value:
+                  nscRequest:
+                    personSocialSecurityNumber: '123456789'
+                    personGivenName: John
+                    personMiddleName: Joe
+                    personSurName: Doe
+                    previousNames:
+                      - personGivenName: John
+                        personMiddleName: Jacob
+                        personSurName: Smith
+                      - personGivenName: Richard
+                        personSurName: Roe
+                    personBirthDate: '1988-02-29'
+                    asOfDate: '2026-01-01'
+      responses:
+        '200':
+          description: Education enrollment status retrieved successfully.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EducationEnrollmentResponseV1'
+              examples:
+                single:
+                  $ref: '#/components/examples/EducationEnrollmentResponseExampleV1'
+        '400':
+          description: Invalid request.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Person not found.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /api/v0/batch-education-enrollments:
     post:
       tags:
@@ -290,6 +351,54 @@ paths:
                 notFound:
                   value:
                     error: Not Found
+  /api/v1/veteran-disability-ratings:
+    post:
+      tags:
+        - Veteran Verification
+      summary: Get veteran disability status (V1)
+      description: |
+        Returns the subject's veteran combined disability rating for the person identified in the supplied identity object. This is the V1 version of the endpoint.
+      operationId: getVeteranDisabilityStatusV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetVeteranDisabilityStatusRequestV1'
+            examples:
+              standard:
+                $ref: '#/components/examples/GetVeteranDisabilityStatusRequestExampleV1'
+      responses:
+        '200':
+          description: Veteran disability status retrieved successfully.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeteranDisabilityStatusResponseV1'
+              examples:
+                rated:
+                  $ref: '#/components/examples/VeteranDisabilityStatusResponseExampleV1'
+        '400':
+          description: Invalid request.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Person not found.
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/X-Request-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   securitySchemes:
     OAuth2ClientCredentials:
@@ -311,6 +420,53 @@ components:
   schemas:
     GetEducationEnrollmentRequest:
       $ref: '#/components/schemas/identity.schema'
+    GetEducationEnrollmentRequestV1:
+      type: object
+      required:
+        - nscRequest
+      properties:
+        nscRequest:
+          type: object
+          required:
+            - personGivenName
+            - personSurName
+            - personBirthDate
+          properties:
+            personSocialSecurityNumber:
+              type: string
+              pattern: ^\d{9}$
+              example: '123456789'
+            personGivenName:
+              type: string
+              example: John
+            personMiddleName:
+              type: string
+              example: Joe
+            personSurName:
+              type: string
+              example: Doe
+            previousNames:
+              type: array
+              items:
+                type: object
+                properties:
+                  personGivenName:
+                    type: string
+                  personMiddleName:
+                    type: string
+                  personSurName:
+                    type: string
+            personBirthDate:
+              type: string
+              format: date
+              example: '1988-02-29'
+            asOfDate:
+              type: string
+              format: date
+              example: '2026-01-01'
+            termsAcceptedIndicator:
+              type: boolean
+              example: true
     BatchEducationEnrollmentRequest:
       type: object
       additionalProperties: false
@@ -497,8 +653,166 @@ components:
           description: The source of the enrollment data.
         metadata:
           $ref: '#/components/schemas/Metadata'
+    EducationEnrollmentResponseV1:
+      type: object
+      additionalProperties: false
+      required:
+        - nscResponse
+      properties:
+        nscResponse:
+          type: object
+          required:
+            - enrollmentDetails
+            - studentInfoProvided
+            - transactionDetails
+          properties:
+            enrollmentDetails:
+              type: array
+              description: List of enrollment details filtered from the raw data.
+              items:
+                $ref: '#/components/schemas/EnrollmentDetailV1'
+            studentInfoProvided:
+              type: object
+              description: Student info provided as returned by the NSC.
+              properties:
+                personBirthDate:
+                  type: string
+                  format: date
+                  example: '1988-02-29'
+                personGivenName:
+                  type: string
+                  example: John
+                personMiddleName:
+                  type: string
+                  example: Quincy
+                personSurName:
+                  type: string
+                  example: Doe
+                previousNames:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      personGivenName:
+                        type: string
+                      personMiddleName:
+                        type: string
+                      personSurName:
+                        type: string
+            transactionDetails:
+              type: object
+              description: Transaction details as returned by the NSC.
+              properties:
+                transactionId:
+                  type: string
+                  example: '4001686568'
+                orderId:
+                  type: string
+                  example: '2002833179'
+                transactionStatusCode:
+                  type: string
+                  example: CNF
+                transactionFee:
+                  type: string
+                  example: '0.00'
+                salesTax:
+                  type: string
+                  example: '0.00'
+                transactionTotal:
+                  type: string
+                  example: '0.00'
+                requestedByText:
+                  type: string
+                  example: Test Billing
+                requestedDateTimeText:
+                  type: string
+                  example: '2026-04-23 14:20:41.049'
+                notifiedDateTimeText:
+                  type: string
+                  example: '2026-04-23 14:20:41.049'
+                nscHitIndicator:
+                  type: boolean
+                  example: true
+            responseMetadata:
+              type: object
+              properties:
+                responseCode:
+                  type: string
+                  example: MS000000
+                responseText:
+                  type: string
+                  example: Success
     GetVeteranDisabilityStatusRequest:
       $ref: '#/components/schemas/identity.schema'
+    GetVeteranDisabilityStatusRequestV1:
+      type: object
+      properties:
+        vadrRequest:
+          type: object
+          required:
+            - personGivenName
+            - personSurName
+            - personBirthDate
+          properties:
+            personGivenName:
+              type: string
+              description: First name of the veteran.
+              example: John
+            personMiddleName:
+              type: string
+              description: Middle name of the veteran.
+              example: Quincy
+            personSurName:
+              type: string
+              description: Last name of the veteran.
+              example: Doe
+            personBirthDate:
+              type: string
+              description: Date of birth of the veteran (YYYY-MM-DD).
+              example: '1990-01-01'
+            personSocialSecurityNumber:
+              type: string
+              description: Social Security Number of the veteran.
+              example: 000-00-0000
+            personSexCode:
+              type: string
+              description: Gender of the veteran.
+              enum:
+                - M
+                - F
+              example: M
+            asOfDate:
+              type: string
+              description: Point-in-time lookup date.
+              example: '2024-07-02'
+            termsAcceptedIndicator:
+              type: boolean
+              description: Explicitly confirms the veteran has consented to the data lookup.
+              example: true
+            personContactInformation:
+              type: object
+              properties:
+                streetLineOneAddress:
+                  type: string
+                  example: 123 Main St
+                streetLineTwoAddress:
+                  type: string
+                  example: Apt 4B
+                cityName:
+                  type: string
+                  example: Arlington
+                stateText:
+                  type: string
+                  example: VA
+                zipCode:
+                  type: string
+                  example: '22202'
+                countryText:
+                  type: string
+                  example: USA
+                telephoneNumber:
+                  type: string
+                  example: 555-555-5555
     VeteranDisabilityStatusResponse:
       type: object
       additionalProperties: false
@@ -510,6 +824,10 @@ components:
         - dataSource
         - metadata
       properties:
+        permanentDisabilityStatus:
+          type: boolean
+          description: Whether they have been awarded permanent disability status for work purposes.
+          example: true
         totalDisabilityStatus:
           type: boolean
           description: Whether the veteran is totally disabled.
@@ -549,6 +867,86 @@ components:
           description: The source of the disability rating data.
         metadata:
           $ref: '#/components/schemas/Metadata'
+    VeteranDisabilityStatusResponseV1:
+      type: object
+      additionalProperties: false
+      required:
+        - vadrResponse
+      properties:
+        vadrResponse:
+          type: object
+          properties:
+            ptdrInformation:
+              type: object
+              properties:
+                serviceConnectedStatusIndicator:
+                  type: boolean
+                  example: true
+                pensionAwardStatusIndicator:
+                  type: boolean
+                  example: false
+                totalDisabilityStatusIndicator:
+                  type: boolean
+                  example: true
+                totalDisabilityEffectiveDate:
+                  type: string
+                  example: '2023-01-01'
+                responseMetadata:
+                  type: object
+                  properties:
+                    responseCode:
+                      type: string
+                      example: MS000000
+                    responseText:
+                      type: string
+                      example: Success
+            sdrInformation:
+              type: object
+              properties:
+                combinedDisabilityRatingPercentage:
+                  type: integer
+                  example: 100
+                combinedEffectiveDate:
+                  type: string
+                  example: '2023-01-01'
+                legalEffectiveDate:
+                  type: string
+                  example: '2023-01-01'
+                individualRatings:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      decisionText:
+                        type: string
+                        example: Service Connection
+                      ratingEffectiveDate:
+                        type: string
+                        example: '2023-01-01'
+                      ratingEndDate:
+                        type: string
+                        example: '2024-01-01'
+                      ratingPercentage:
+                        type: integer
+                        example: 50
+                      disabilityRatingId:
+                        type: string
+                        example: '12345'
+                      staticIndicator:
+                        type: boolean
+                        example: true
+                responseMetadata:
+                  type: object
+                  properties:
+                    responseCode:
+                      type: string
+                      example: MS000000
+                    responseText:
+                      type: string
+                      example: Success
+            earliestRatingEndDate:
+              type: string
+              example: '2024-06-01'
     EnrollmentDetail:
       type: object
       additionalProperties: false
@@ -573,6 +971,60 @@ components:
         enrollmentStatus:
           $ref: '#/components/schemas/school_enrollment_status.schema'
           description: Enrollment status for this specific term.
+    EnrollmentDetailV1:
+      type: object
+      additionalProperties: false
+      required:
+        - officialSchoolName
+        - schoolCode
+        - branchCode
+        - enrollmentData
+      properties:
+        officialSchoolName:
+          type: string
+          description: Official name of the school.
+          example: Trident University International
+        schoolCode:
+          type: string
+          description: Six digit School ID assigned by the Department of Education.
+          example: '001171'
+        branchCode:
+          type: string
+          description: Branch code for the school.
+          example: '00'
+        currentEnrollmentStatusCode:
+          type: string
+          description: The most recent enrollment status reported by the school.
+          example: F
+        enrollmentData:
+          type: array
+          items:
+            type: object
+            required:
+              - termBeginDate
+              - termEndDate
+              - enrollmentStatusCode
+            properties:
+              termBeginDate:
+                type: string
+                description: The date when the enrollment term began.
+                example: '2024-05-31'
+              termEndDate:
+                type: string
+                description: The date when the enrollment term ended.
+                example: '2024-11-19'
+              enrollmentStatusCode:
+                type: string
+                description: Enrollment status code for this specific term.
+                example: F
+              schoolCertifiedOnDate:
+                type: string
+                description: The date when the school certified the enrollment.
+                example: '2024-06-01'
+              anticipatedGraduationDate:
+                type: string
+                description: The anticipated graduation date.
+                example: '2026-05-20'
     Metadata:
       type: object
       additionalProperties: false
@@ -781,6 +1233,7 @@ components:
             caseReferenceId: ''
             contactEmail: ''
             organizationName: ''
+            organizationType: ''
           identityDetails: null
           status:
             code: '0'
@@ -832,6 +1285,45 @@ components:
           responseTimestamp: '2026-04-14T12:00:00.217Z'
           datasourceDurationMillis: 180
           transaction-id: '123456'
+    EducationEnrollmentResponseExampleV1:
+      value:
+        nscResponse:
+          enrollmentDetails:
+            - officialSchoolName: Trident University International
+              schoolCode: '001171'
+              branchCode: '00'
+              currentEnrollmentStatusCode: F
+              enrollmentData:
+                - termBeginDate: '2024-05-31'
+                  termEndDate: '2024-11-19'
+                  enrollmentStatusCode: F
+                  schoolCertifiedOnDate: '2024-06-01'
+                  anticipatedGraduationDate: '2026-05-20'
+          studentInfoProvided:
+            personBirthDate: '1988-02-29'
+            personGivenName: John
+            personMiddleName: Quincy
+            personSurName: Doe
+            previousNames:
+              - personGivenName: John
+                personMiddleName: Jacob
+                personSurName: Smith
+              - personGivenName: Richard
+                personSurName: Roe
+          transactionDetails:
+            transactionId: '4001686568'
+            orderId: '2002833179'
+            transactionStatusCode: CNF
+            transactionFee: '0.00'
+            salesTax: '0.00'
+            transactionTotal: '0.00'
+            requestedByText: Test Billing
+            requestedDateTimeText: '2026-04-23 14:20:41.049'
+            notifiedDateTimeText: '2026-04-23 14:20:41.049'
+            nscHitIndicator: true
+          responseMetadata:
+            responseCode: MS000000
+            responseText: Success
     EducationEnrollmentMultipleResponseExample:
       value:
         enrollmentStatus: HALF_TIME
@@ -867,6 +1359,7 @@ components:
           country: USA
     VeteranDisabilityStatusResponseExample:
       value:
+        permanentDisabilityStatus: true
         totalDisabilityStatus: true
         totalDisabilityStatusEffectiveDate: '2023-01-01'
         combinedDisabilityRating: 40
@@ -917,3 +1410,48 @@ components:
           responseTimestamp: '2026-04-14T12:00:00.217Z'
           datasourceDurationMillis: 180
           transaction-id: '123456'
+    GetVeteranDisabilityStatusRequestExampleV1:
+      value:
+        vadrRequest:
+          personGivenName: John
+          personMiddleName: Quincy
+          personSurName: Doe
+          personBirthDate: '1990-01-01'
+          personSocialSecurityNumber: 000-00-0000
+          personSexCode: M
+          asOfDate: '2024-07-02'
+          termsAcceptedIndicator: true
+          personContactInformation:
+            streetLineOneAddress: 123 Main St
+            streetLineTwoAddress: Apt 4B
+            cityName: Arlington
+            stateText: VA
+            zipCode: '22202'
+            countryText: USA
+            telephoneNumber: 555-555-5555
+    VeteranDisabilityStatusResponseExampleV1:
+      value:
+        vadrResponse:
+          ptdrInformation:
+            serviceConnectedStatusIndicator: true
+            pensionAwardStatusIndicator: false
+            totalDisabilityStatusIndicator: true
+            totalDisabilityEffectiveDate: '2023-01-01'
+            responseMetadata:
+              responseCode: MS000000
+              responseText: Success
+          sdrInformation:
+            combinedDisabilityRatingPercentage: 100
+            combinedEffectiveDate: '2023-01-01'
+            legalEffectiveDate: '2023-01-01'
+            individualRatings:
+              - decisionText: Service Connection
+                ratingEffectiveDate: '2023-01-01'
+                ratingEndDate: '2024-01-01'
+                ratingPercentage: 50
+                disabilityRatingId: '12345'
+                staticIndicator: true
+            responseMetadata:
+              responseCode: MS000000
+              responseText: Success
+          earliestRatingEndDate: '2024-06-01'

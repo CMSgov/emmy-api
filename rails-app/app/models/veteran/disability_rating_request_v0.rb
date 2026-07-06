@@ -1,5 +1,5 @@
 module Veteran
-  class DisabilityRatingRequest
+  class DisabilityRatingRequestV0
     attr_accessor :first_name, :middle_name, :last_name, :date_of_birth, :ssn, :address
 
     def initialize(params = {})
@@ -62,7 +62,6 @@ module Veteran
           country: address[:country]
         }.compact)
       end
-
       out
     end
   end

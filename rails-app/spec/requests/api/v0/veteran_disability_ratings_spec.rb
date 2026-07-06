@@ -3,7 +3,7 @@ require 'swagger_helper'
 RSpec.describe 'api/v0/veteran_disability_ratings', type: :request do
   path '/api/v0/veteran-disability-ratings' do
     before do
-      fake_result = Veteran::DisabilityRatingResponse.new(
+      fake_result = Veteran::DisabilityRatingResponseV0.new(
         totalDisabilityStatus: true,
         permanentDisabilityStatus: true,
         totalDisabilityStatusEffectiveDate: "2023-01-01",
@@ -38,10 +38,10 @@ RSpec.describe 'api/v0/veteran_disability_ratings', type: :request do
       produces 'application/json'
       parameter name: :veteran_disability_rating,
                 in: :body,
-                schema: Veteran::DisabilityRatingRequest.to_swagger_schema
+                schema: Veteran::DisabilityRatingRequestV0.to_swagger_schema
 
       response(200, 'successful') do
-        schema Veteran::DisabilityRatingResponse.to_swagger_schema
+        schema Veteran::DisabilityRatingResponseV0.to_swagger_schema
 
         let(:veteran_disability_rating) do
           {
