@@ -1,6 +1,6 @@
 module Veteran
   class DisabilityRatingMapper
-    def self.map_response(total_disability_response, disability_score_response, datasource_duration, start_time, version="V0")
+    def self.map_response(total_disability_response, disability_score_response, datasource_duration, start_time, version = "V0")
       response_timestamp = Time.now
       combined_data = disability_score_response.dig("data", "attributes") || {}
 

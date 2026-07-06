@@ -17,16 +17,16 @@ module Veteran
     end
 
 
-    def lookup_disability_rating(req_params, version="V0")
+    def lookup_disability_rating(req_params, version = "V0")
       start_time = Time.now
       token = fetch_oauth_token
 
       # Ensure req_params is a request object
       rating_req = if req_params.respond_to?(:to_va_payload)
                      req_params
-                   else
+      else
                      Veteran::DisabilityRatingRequestV0.new(req_params)
-                   end
+      end
 
       total_disability_response = get_total_disability_response(rating_req, token)
 
