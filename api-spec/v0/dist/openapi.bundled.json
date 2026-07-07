@@ -676,18 +676,28 @@
               "personSocialSecurityNumber": {
                 "type": "string",
                 "pattern": "^\\d{9}$",
+                "description": "Student's Social Security Number.",
                 "example": "123456789"
               },
               "personGivenName": {
                 "type": "string",
+                "minLength": 1,
+                "maxLength": 50,
+                "description": "Student's first name.",
                 "example": "John"
               },
               "personMiddleName": {
                 "type": "string",
+                "minLength": 1,
+                "maxLength": 50,
+                "description": "Student's middle name.",
                 "example": "Joe"
               },
               "personSurName": {
                 "type": "string",
+                "minLength": 1,
+                "maxLength": 50,
+                "description": "Student's last name.",
                 "example": "Doe"
               },
               "previousNames": {
@@ -696,13 +706,19 @@
                   "type": "object",
                   "properties": {
                     "personGivenName": {
-                      "type": "string"
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 50
                     },
                     "personMiddleName": {
-                      "type": "string"
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 50
                     },
                     "personSurName": {
-                      "type": "string"
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 50
                     }
                   }
                 }
@@ -778,11 +794,15 @@
           },
           "firstName": {
             "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
             "description": "Student's first name.",
             "example": "Alfredo"
           },
           "lastName": {
             "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
             "description": "Student's last name.",
             "example": "Armstrong"
           },
@@ -794,9 +814,9 @@
           },
           "ssn": {
             "type": "string",
-            "pattern": "^\\d{3}-\\d{2}-\\d{4}$",
+            "pattern": "^\\d{9}$",
             "description": "Student's Social Security Number.",
-            "example": "796-01-2476"
+            "example": "796012476"
           }
         }
       },
@@ -1016,13 +1036,19 @@
                       "type": "object",
                       "properties": {
                         "personGivenName": {
-                          "type": "string"
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 50
                         },
                         "personMiddleName": {
-                          "type": "string"
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 50
                         },
                         "personSurName": {
-                          "type": "string"
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 50
                         }
                       }
                     }
@@ -1108,35 +1134,45 @@
             "properties": {
               "personGivenName": {
                 "type": "string",
+                "minLength": 1,
+                "maxLength": 50,
                 "description": "First name of the veteran.",
                 "example": "John"
               },
               "personMiddleName": {
                 "type": "string",
+                "minLength": 1,
+                "maxLength": 50,
                 "description": "Middle name of the veteran.",
                 "example": "Quincy"
               },
               "personSurName": {
                 "type": "string",
+                "minLength": 1,
+                "maxLength": 50,
                 "description": "Last name of the veteran.",
                 "example": "Doe"
               },
               "personBirthDate": {
                 "type": "string",
+                "format": "date",
                 "description": "Date of birth of the veteran (YYYY-MM-DD).",
                 "example": "1990-01-01"
               },
               "personSocialSecurityNumber": {
                 "type": "string",
+                "pattern": "^\\d{9}$",
                 "description": "Social Security Number of the veteran.",
-                "example": "000-00-0000"
+                "example": "000112222"
               },
               "personSexCode": {
                 "type": "string",
                 "description": "Gender of the veteran.",
                 "enum": [
                   "M",
-                  "F"
+                  "F",
+                  "m",
+                  "f"
                 ],
                 "example": "M"
               },
@@ -1145,30 +1181,44 @@
                 "properties": {
                   "streetLineOneAddress": {
                     "type": "string",
+                    "minLength": 3,
+                    "maxLength": 35,
                     "example": "123 Main St"
                   },
                   "streetLineTwoAddress": {
                     "type": "string",
+                    "minLength": 3,
+                    "maxLength": 35,
                     "example": "Apt 4B"
                   },
                   "cityName": {
                     "type": "string",
+                    "minLength": 1,
+                    "maxLength": 38,
                     "example": "Arlington"
                   },
                   "stateText": {
                     "type": "string",
+                    "minLength": 2,
+                    "maxLength": 50,
                     "example": "VA"
                   },
                   "zipCode": {
                     "type": "string",
+                    "minLength": 1,
+                    "maxLength": 16,
                     "example": "22202"
                   },
                   "countryText": {
                     "type": "string",
+                    "minLength": 3,
+                    "maxLength": 35,
                     "example": "USA"
                   },
                   "telephoneNumber": {
                     "type": "string",
+                    "minLength": 7,
+                    "maxLength": 25,
                     "example": "555-555-5555"
                   }
                 }
@@ -1973,7 +2023,7 @@
             "personMiddleName": "Quincy",
             "personSurName": "Doe",
             "personBirthDate": "1990-01-01",
-            "personSocialSecurityNumber": "000-00-0000",
+            "personSocialSecurityNumber": "000112222",
             "personSexCode": "M",
             "personContactInformation": {
               "streetLineOneAddress": "123 Main St",

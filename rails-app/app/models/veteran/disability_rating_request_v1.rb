@@ -26,22 +26,22 @@ module Veteran
             type: :object,
             required: %i[personGivenName personSurName personBirthDate],
             properties: {
-              personGivenName: { type: :string, description: "First name of the veteran.", example: "John" },
-              personMiddleName: { type: :string, description: "Middle name of the veteran.", example: "Quincy" },
-              personSurName: { type: :string, description: "Last name of the veteran.", example: "Doe" },
-              personBirthDate: { type: :string, description: "Date of birth of the veteran (YYYY-MM-DD).", example: "1990-01-01" },
-              personSocialSecurityNumber: { type: :string, description: "Social Security Number of the veteran.", example: "000-00-0000" },
-              personSexCode: { type: :string, description: "Gender of the veteran.", enum: %w[M F], example: "M" },
+              personGivenName: { type: :string, minLength: 1, maxLength: 50, description: "First name of the veteran.", example: "John" },
+              personMiddleName: { type: :string, minLength: 1, maxLength: 50, description: "Middle name of the veteran.", example: "Quincy" },
+              personSurName: { type: :string, minLength: 1, maxLength: 50, description: "Last name of the veteran.", example: "Doe" },
+              personBirthDate: { type: :string, format: :date, description: "Date of birth of the veteran (YYYY-MM-DD).", example: "1990-01-01" },
+              personSocialSecurityNumber: { type: :string, pattern: '^\d{9}$', description: "Social Security Number of the veteran.", example: "000112222" },
+              personSexCode: { type: :string, description: "Gender of the veteran.", enum: %w[M F m f], example: "M" },
               personContactInformation: {
                 type: :object,
                 properties: {
-                  streetLineOneAddress: { type: :string, example: "123 Main St" },
-                  streetLineTwoAddress: { type: :string, example: "Apt 4B" },
-                  cityName: { type: :string, example: "Arlington" },
-                  stateText: { type: :string, example: "VA" },
-                  zipCode: { type: :string, example: "22202" },
-                  countryText: { type: :string, example: "USA" },
-                  telephoneNumber: { type: :string, example: "555-555-5555" }
+                  streetLineOneAddress: { type: :string, minLength: 3, maxLength: 35, example: "123 Main St" },
+                  streetLineTwoAddress: { type: :string, minLength: 3, maxLength: 35, example: "Apt 4B" },
+                  cityName: { type: :string, minLength: 1, maxLength: 38, example: "Arlington" },
+                  stateText: { type: :string, minLength: 2, maxLength: 50, example: "VA" },
+                  zipCode: { type: :string, minLength: 1, maxLength: 16, example: "22202" },
+                  countryText: { type: :string, minLength: 3, maxLength: 35, example: "USA" },
+                  telephoneNumber: { type: :string, minLength: 7, maxLength: 25, example: "555-555-5555" }
                 }
               }
             }
