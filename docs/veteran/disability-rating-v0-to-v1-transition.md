@@ -35,7 +35,7 @@ The V1 request model (`DisabilityRatingRequestV1`) wraps all properties inside a
 | `address.state` | `personContactInformation.stateText` | Grouped and renamed. |
 | `address.postalCode` | `personContactInformation.zipCode` | Grouped and renamed. |
 | `address.country` | `personContactInformation.countryText` | Grouped and renamed. |
-| *New* | `personSexCode` | Optional ("M", "F"). |
+| *New* | `personSexCode` | Optional ("M", "F", "m", "f"). |
 
 ---
 
