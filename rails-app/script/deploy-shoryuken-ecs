@@ -97,6 +97,7 @@ jq \
   | .containerDefinitions |= map(
       if .name == $container_name then
         .image = $image_uri
+        | del(.repositoryCredentials)
       else
         .
       end

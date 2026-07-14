@@ -11,7 +11,7 @@ We use a "One-Off Task" strategy for migrations. Instead of running migrations a
 1. **Migration Binary**: A Go CLI tool located in `cmd/migrate` that uses `golang-migrate`.
 2. **Container Image**: The standard API Docker image includes the `migrate` binary and the `migrations/` SQL files.
 3. **ECS Task Definition**: The same task definition used by the API service, but we override the `command` when running it for migrations.
-4. **IAM Permissions**: The ECS Task Execution Role and Task Role must have permissions to access RDS (via IAM Auth if enabled) and pull the image from Artifactory/ECR.
+4. **IAM Permissions**: The ECS Task Execution Role and Task Role must have permissions to access RDS (via IAM Auth if enabled) and pull the image from ECR.
 
 ## Terraform Suggestions
 

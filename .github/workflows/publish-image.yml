@@ -9,6 +9,19 @@ on:
       - "rails-app/**"
       - "public.jwk"
   workflow_dispatch:
+    inputs:
+      deploy_environment:
+        description: Environment to deploy after publishing the image
+        required: true
+        default: dev
+        type: choice
+        options:
+          - dev
+          - test
+          - sandbox
+          - demo
+          - uat
+          - prod
 
 concurrency:
   group: publish-image-${{ github.ref }}
@@ -19,14 +32,14 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
-  CONTAINER_NAME: ${{ vars.ECS_CONTAINER_NAME || 'emmy-api' }}
-  IMAGE_REPOSITORY: ${{ vars.EMMY_IMAGE_REPO || 'artifactory.cloud.cms.gov/emmy-docker/emmy-api' }}
+  API_CONTAINER_NAME: ${{ vars.ECS_CONTAINER_NAME || 'emmy-api' }}
+  IMAGE_REPOSITORY: ${{ vars.EMMY_IMAGE_REPO }}
   PLATFORMS: ${{ vars.DOCKER_PLATFORMS || 'linux/amd64' }}
 
 jobs:
   publish:
     name: push image
-    runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
@@ -38,11 +51,22 @@ jobs:
       - name: Fetch Repository
         uses: actions/checkout@v6
 
+      - name: Validate workflow configuration
+        shell: bash
+        run: |
+          if [[ -z "${IMAGE_REPOSITORY:-}" ]]; then
+            echo "error: required Actions variable EMMY_IMAGE_REPO is not set" >&2
+            exit 1
+          fi
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME || format('arn:aws:iam::{0}:role/{1}', vars.AWS_ACCOUNT_ID, vars.AWS_ROLE_NAME) }}
+
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Set up Docker Buildx
         id: buildx
@@ -50,10 +74,6 @@ jobs:
         with:
           name: cms-builder-${{ github.run_id }}
           driver: docker-container
-          driver-opts: |
-            network=host
-            env.NO_PROXY=artifactory.cloud.cms.gov
-            env.no_proxy=artifactory.cloud.cms.gov
 
       - name: Derive image metadata
         id: image-metadata
@@ -65,66 +85,10 @@ jobs:
             echo "latest_image_uri=${IMAGE_REPOSITORY}:latest"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Fetch Artifactory credentials
-        id: artifactory-credentials
-        env:
-          ARTIFACTORY_SECRET_ARN: ${{ vars.ARTIFACTORY_SECRET_ARN }}
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if [[ -z "${ARTIFACTORY_SECRET_ARN:-}" ]]; then
-            echo "error: required Actions variable ARTIFACTORY_SECRET_ARN is not set" >&2
-            exit 1
-          fi
-
-          secret_string="$(aws secretsmanager get-secret-value --secret-id "$ARTIFACTORY_SECRET_ARN" --query 'SecretString' --output text)"
-
-          if [[ -z "${secret_string:-}" || "$secret_string" == "None" ]]; then
-            echo "error: secret $ARTIFACTORY_SECRET_ARN does not contain a SecretString payload" >&2
-            exit 1
-          fi
-
-          if ! jq -e . >/dev/null 2>&1 <<<"$secret_string"; then
-            echo "error: secret $ARTIFACTORY_SECRET_ARN payload is not valid JSON" >&2
-            exit 1
-          fi
-
-          get_secret_field() {
-            local key="$1"
-            local value
-
-            if ! value="$(jq -er --arg key "$key" '.[$key] | select(type == "string" and length > 0)' <<<"$secret_string" 2>/dev/null)"; then
-              echo "error: secret $ARTIFACTORY_SECRET_ARN payload must include a non-empty '$key' field" >&2
-              exit 1
-            fi
-
-            printf '%s\n' "$value"
-          }
-
-          username="$(get_secret_field username)"
-          password="$(get_secret_field password)"
-
-          printf '::add-mask::%s\n' "$username"
-          printf '::add-mask::%s\n' "$password"
-
-          {
-            printf 'username<<EOF\n%s\nEOF\n' "$username"
-            printf 'password<<EOF\n%s\nEOF\n' "$password"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Log in to Artifactory
-        uses: docker/login-action@v3
-        with:
-          registry: artifactory.cloud.cms.gov
-          username: ${{ steps.artifactory-credentials.outputs.username }}
-          password: ${{ steps.artifactory-credentials.outputs.password }}
-
       - name: Build and push
         env:
           IMAGE_URI: ${{ steps.image-metadata.outputs.image_uri }}
           LATEST_IMAGE_URI: ${{ steps.image-metadata.outputs.latest_image_uri }}
-          NO_PROXY: artifactory.cloud.cms.gov,.cloud.cms.gov,10.0.0.0/8,169.254.169.254,169.254.170.2
         run: |
           docker buildx build \
             --builder "${{ steps.buildx.outputs.name }}" \
@@ -134,19 +98,15 @@ jobs:
             --push rails-app
 
   deploy:
-    name: deploy ${{ matrix.env_name }}
+    name: deploy ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_environment || 'dev' }}
     needs: publish
-    runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"
-    environment: ${{ matrix.env_name }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_environment || 'dev' }}
     permissions:
       contents: read
       id-token: write
-    strategy:
-      fail-fast: false
-      matrix:
-        env_name:
-          - dev
-          # - test
+    env:
+      DEPLOY_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_environment || 'dev' }}
     steps:
       - name: Fetch Repository
         uses: actions/checkout@v6
@@ -157,27 +117,61 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME || format('arn:aws:iam::{0}:role/{1}', vars.AWS_ACCOUNT_ID, vars.AWS_ROLE_NAME) }}
 
-      - name: Fetch current task definition
+      - name: Fetch and sanitize API task definition
         env:
-          TASK_FAMILY: emmy-${{ matrix.env_name }}-api
-        run: aws ecs describe-task-definition --task-definition "$TASK_FAMILY" --query taskDefinition --output json > task-definition.json
+          TASK_FAMILY: emmy-${{ env.DEPLOY_ENV }}-api
+        shell: bash
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "$TASK_FAMILY" \
+            --query taskDefinition \
+            --output json > api-task-definition.json
+          jq --arg container "$API_CONTAINER_NAME" \
+            '(.containerDefinitions[] | select(.name == $container)) |= del(.repositoryCredentials)' \
+            api-task-definition.json > api-task-definition.sanitized.json
 
-      - name: Render updated task definition
-        id: render-task-definition
+      - name: Render updated API task definition
+        id: render-api-task-definition
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: task-definition.json
-          container-name: ${{ env.CONTAINER_NAME }}
+          task-definition: api-task-definition.sanitized.json
+          container-name: ${{ env.API_CONTAINER_NAME }}
           image: ${{ needs.publish.outputs.image_uri }}
 
-      - name: Deploy updated task definition
+      - name: Deploy API task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        env:
-          ECS_CLUSTER: emmy-${{ matrix.env_name }}
-          ECS_SERVICE: emmy-${{ matrix.env_name }}-api
         with:
-          task-definition: ${{ steps.render-task-definition.outputs.task-definition }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          service: ${{ env.ECS_SERVICE }}
+          task-definition: ${{ steps.render-api-task-definition.outputs.task-definition }}
+          cluster: emmy-${{ env.DEPLOY_ENV }}
+          service: emmy-${{ env.DEPLOY_ENV }}-api
+          force-new-deployment: true
+          wait-for-service-stability: true
+
+      - name: Fetch and sanitize Shoryuken task definition
+        env:
+          TASK_FAMILY: emmy-${{ env.DEPLOY_ENV }}-shoryuken
+        shell: bash
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "$TASK_FAMILY" \
+            --query taskDefinition \
+            --output json > shoryuken-task-definition.json
+          jq '(.containerDefinitions[] | select(.name == "shoryuken")) |= del(.repositoryCredentials)' \
+            shoryuken-task-definition.json > shoryuken-task-definition.sanitized.json
+
+      - name: Render updated Shoryuken task definition
+        id: render-shoryuken-task-definition
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: shoryuken-task-definition.sanitized.json
+          container-name: shoryuken
+          image: ${{ needs.publish.outputs.image_uri }}
+
+      - name: Deploy Shoryuken task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-shoryuken-task-definition.outputs.task-definition }}
+          cluster: emmy-${{ env.DEPLOY_ENV }}
+          service: emmy-${{ env.DEPLOY_ENV }}-shoryuken
           force-new-deployment: true
           wait-for-service-stability: true

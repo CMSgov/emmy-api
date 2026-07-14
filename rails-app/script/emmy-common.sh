@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly EMMY_IMAGE_REPO="${EMMY_IMAGE_REPO:-artifactory.cloud.cms.gov/emmy-docker/emmy-api}"
+readonly EMMY_IMAGE_REPO="${EMMY_IMAGE_REPO:-}"
 readonly EMMY_VALID_ENVS=("dev" "test" "demo" "uat" "sandbox" "prod")
 
 emmy_repo_root() {
@@ -42,6 +42,12 @@ emmy_image_tag() {
 
 emmy_image_uri() {
   local tag="${1:-$(emmy_image_tag)}"
+
+  if [[ -z "$EMMY_IMAGE_REPO" ]]; then
+    echo "error: EMMY_IMAGE_REPO must be set to the ECR repository URI" >&2
+    exit 1
+  fi
+
   printf '%s:%s\n' "$EMMY_IMAGE_REPO" "$tag"
 }
 

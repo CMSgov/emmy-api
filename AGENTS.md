@@ -79,7 +79,8 @@ Do not modify these without an explicit task and approval:
 - Allowed: review security, auth, secret-scanning, and CI/workflow files; edit them only when explicitly asked
 - Forbidden: make unapproved changes to auth, secrets policy, workflow policy, or sensitive root files
 - Escalate when: any requested change touches security posture, scanning rules, or workflow enforcement
-- When editing `.github/workflows/*.yml`, require the exact runner label `runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"` for every job that declares `runs-on`; do not swap in GitHub-hosted runner labels
+- When editing `.github/workflows/publish-image.yml`, use the GitHub-hosted `ubuntu-latest` runner for its direct jobs
+- For every other workflow job that declares `runs-on`, retain the exact runner label `runs-on: "codebuild-emmy-github-runner-emmy-api-${{ github.run_id }}-${{ github.run_attempt }}"` unless a separate runner-migration task explicitly changes that workflow
 - Reusable workflow-call jobs that use top-level `uses:` cannot declare `runs-on`; if you convert one into a direct job or add a new direct job, add the required runner label
 - Decision authority: review by default; edit only with explicit approval
 
@@ -128,7 +129,7 @@ Data privacy:
 Deployment restrictions:
 
 - Do not claim full cloud topology, account layout, or approval policy unless it is observable in the current branch
-- The repo does include deployment automation artifacts: ECS deployment helpers under `scripts/`, an Artifactory image default in `scripts/emmy-common.sh`, and CI workflow definitions under `.github/workflows/`
+- The repo does include deployment automation artifacts: ECS deployment helpers under `rails-app/script/`, a required ECR repository input in the image helpers, and CI workflow definitions under `.github/workflows/`
 - Treat environment names and deploy script behavior as source-of-truth only for what the scripts actually encode
 
 Approval required before changing:
