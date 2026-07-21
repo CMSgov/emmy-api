@@ -75,6 +75,8 @@ module Api
 
       def missing_education_identity_field
         nsc_req = params[:nscRequest] || {}
+        return nil if nsc_req[:personSocialSecurityNumber].present?
+
         return "personGivenName" if nsc_req[:personGivenName].blank?
         return "personSurName" if nsc_req[:personSurName].blank?
         return "personBirthDate" if nsc_req[:personBirthDate].blank?

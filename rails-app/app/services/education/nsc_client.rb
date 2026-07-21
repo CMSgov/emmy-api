@@ -8,8 +8,11 @@ module Education
     end
 
     def lookup_enrollment_status(enrollment_req)
-      token = fetch_oauth_token
-      nsc_payload = enrollment_req.to_nsc_payload(ENV["NSC_ACCOUNT_ID"])
+      ssn_only = enrollment_req.respond_to?(:ssn_only?) && enrollment_req.ssn_only?
+      account_id = ssn_only ? ENV["NSC_SSN_ONLY_ACCOUNT_ID"] : ENV["NSC_ACCOUNT_ID"]
+
+      token = fetch_oauth_token(ssn_only: ssn_only)
+      nsc_payload = enrollment_req.to_nsc_payload(account_id)
 
       uri = URI(ENV["NSC_SUBMIT_URL"])
       http = Net::HTTP.new(uri.host, uri.port)
@@ -38,13 +41,16 @@ module Education
 
     private
 
-    def fetch_oauth_token
+    def fetch_oauth_token(ssn_only: false)
+      client_id = ssn_only ? ENV["NSC_SSN_ONLY_OAUTH_CLIENT_ID"] : ENV["NSC_CLIENT_ID"]
+      client_secret = ssn_only ? ENV["NSC_SSN_ONLY_OAUTH_CLIENT_SECRET"] : ENV["NSC_CLIENT_SECRET"]
+
       uri = URI(ENV["NSC_TOKEN_URL"])
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = (uri.scheme == "https")
 
       request = Net::HTTP::Post.new(uri.path)
-      request.basic_auth(ENV["NSC_CLIENT_ID"], ENV["NSC_CLIENT_SECRET"])
+      request.basic_auth(client_id, client_secret)
       request.set_form_data({
         grant_type: "client_credentials",
         scope: "vs.api.insights"

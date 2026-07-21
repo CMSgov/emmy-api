@@ -17,6 +17,13 @@ module Education
       @correlation_id ||= SecureRandom.uuid
     end
 
+    def ssn_only?
+      person_social_security_number.present? &&
+        person_given_name.blank? &&
+        person_sur_name.blank? &&
+        person_birth_date.blank?
+    end
+
     def to_nsc_payload(account_id)
       out = {
         accountId: account_id,
