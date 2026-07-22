@@ -1,18 +1,20 @@
 $kind: http-request
 name: Get Veteran Disability Ratings with SSN
-url: "{{api_base}}{{api_version0}}/veteran-disability-ratings"
+url: "{{api_base}}{{api_version1}}/veteran-disability-ratings"
 method: POST
 headers:
   Authorization: Bearer {{access_token}}
   Content-Type: application/json
 body:
   type: text
-  content: |
+  content: |-
     {
-      "firstName": "Alfredo",
-      "lastName": "Armstrong",
-      "dateOfBirth": "1993-06-08",
-      "ssn": "796-01-2476"
+      "vadrRequest": {
+        "personGivenName": "Alfredo",
+        "personSurName": "Armstrong",
+        "personBirthDate": "1993-06-08",
+        "personSocialSecurityNumber": "796-01-2476"
+      }
     }
 scripts:
   - type: beforeRequest
@@ -40,4 +42,4 @@ scripts:
           pm.expect(body).to.exist;
       });
     language: text/javascript
-order: 516228903122879
+order: 1784749183084
