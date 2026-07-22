@@ -9,7 +9,10 @@ module Education
         'NSC_ACCOUNT_ID' => '12345',
         'NSC_CLIENT_ID' => 'client-id',
         'NSC_CLIENT_SECRET' => 'client-secret',
-        'NSC_TOKEN_URL' => 'https://example.test/token'
+        'NSC_TOKEN_URL' => 'https://example.test/token',
+        'NSC_SSN_ONLY_ACCOUNT_ID' => 'ssn-only-account',
+        'NSC_SSN_ONLY_OAUTH_CLIENT_ID' => 'ssn-only-client-id',
+        'NSC_SSN_ONLY_OAUTH_CLIENT_SECRET' => 'ssn-only-client-secret'
       }
     end
 
@@ -135,6 +138,58 @@ module Education
         expect {
           client.lookup_enrollment_status(enrollment_req)
         }.to raise_error(StandardError, /NSC submit failed: status=502/)
+      end
+
+      context 'with SSN-only request' do
+        let(:ssn_only_req) { Education::EnrollmentRequestV1.new(personSocialSecurityNumber: '999887777') }
+
+        it 'uses SSN-only credentials and account ID' do
+          oauth_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
+          allow(oauth_response).to receive(:body).and_return({ access_token: 'ssn-only-token' }.to_json)
+
+          submit_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
+          allow(submit_response).to receive(:body).and_return({
+            transactionDetails: { nscHit: 'Y' },
+            enrollmentDetails: [ { currentEnrollmentStatus: 'CC' } ]
+          }.to_json)
+
+          # Verify OAuth call uses SSN-only credentials
+          http_mock_oauth = instance_double(Net::HTTP)
+          allow(http_mock_oauth).to receive(:use_ssl=).with(true)
+
+          # Verify submit call uses SSN-only account ID
+          http_mock_submit = instance_double(Net::HTTP)
+          allow(http_mock_submit).to receive(:use_ssl=).with(true)
+
+          expect(Net::HTTP::Post).to receive(:new).with('/token').and_call_original
+          expect(Net::HTTP::Post).to receive(:new).with('/submit', anything).and_call_original
+
+          expect_any_instance_of(Net::HTTP::Post).to receive(:basic_auth).with('ssn-only-client-id', 'ssn-only-client-secret')
+
+          # Use a block to capture the request and body in the http mock instead of any_instance
+          allow(http_mock_oauth).to receive(:request) do |req|
+            if req.path == '/token'
+              oauth_response
+            else
+              raise "Unexpected path #{req.path}"
+            end
+          end
+
+          allow(http_mock_submit).to receive(:request) do |req|
+            if req.path == '/submit'
+              payload = JSON.parse(req.body)
+              expect(payload['accountId']).to eq('ssn-only-account')
+              expect(payload['ssn']).to eq('999887777')
+              submit_response
+            else
+              raise "Unexpected path #{req.path}"
+            end
+          end
+
+          expect(Net::HTTP).to receive(:new).and_return(http_mock_oauth, http_mock_submit)
+
+          client.lookup_enrollment_status(ssn_only_req)
+        end
       end
     end
   end
