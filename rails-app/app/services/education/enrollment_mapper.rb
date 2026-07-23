@@ -1,7 +1,7 @@
 module Education
   class EnrollmentMapper
     def self.translate_nsc_response(nsc_request, nsc_resp, duration, version: :v0)
-      if version != :v1 && (is_nsc_no_hit?(nsc_resp) || is_nsc_not_currently_enrolled?(nsc_resp))
+      if version != :v1 && is_nsc_no_hit?(nsc_resp)
         raise Education::NotFoundError, "Not Found"
       end
 
@@ -98,12 +98,6 @@ module Education
       [ "N", "NO", "FALSE", "0" ].include?(hit)
     end
 
-    def self.is_nsc_not_currently_enrolled?(resp)
-      details = resp["enrollmentDetails"] || []
-      return false if details.empty?
-
-      details.any? { |d| d["currentEnrollmentStatus"].to_s.strip.casecmp?("CN") }
-    end
 
     def self.resolve_enrollment_status(resp)
       best = nil
