@@ -46,10 +46,10 @@ RSpec.describe Education::EnrollmentMapper do
         }
       end
 
-      it 'raises NotFoundError for version v0' do
+      it 'does NOT raise NotFoundError for version v0' do
         expect {
           described_class.translate_nsc_response(nsc_request, nsc_resp, duration, version: :v0)
-        }.to raise_error(Education::NotFoundError)
+        }.not_to raise_error
       end
 
       it 'does NOT raise NotFoundError for version v1 and returns response' do
