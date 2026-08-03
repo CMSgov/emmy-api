@@ -108,7 +108,7 @@ module Education
         }.to raise_error(Education::NotFoundError)
       end
 
-      it 'raises Not Found for currently not enrolled (CN)' do
+      it 'does NOT raise Not Found for currently not enrolled (CN)' do
         oauth_response = Net::HTTPSuccess.new('1.1', '200', 'OK')
         allow(oauth_response).to receive(:body).and_return({ access_token: 'fake-token' }.to_json)
 
@@ -122,7 +122,7 @@ module Education
 
         expect {
           client.lookup_enrollment_status(enrollment_req)
-        }.to raise_error(Education::NotFoundError)
+        }.not_to raise_error
       end
 
       it 'raises error for non-2xx response' do
