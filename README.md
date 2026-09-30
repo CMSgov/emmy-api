@@ -1,5 +1,12 @@
 # Eligibility Made Easy (Emmy) API Verification Service
 
+NOTE: This repository is no longer actively maintained, and has been deprecated as part of a consolidation of services into the Federal Data Services Hub.
+
+Please see the following documents for details on how to perform the transition.
+
+- [https://github.com/CMSgov/emmy-api/blob/main/docs/education/enrollment-v0-to-v1-transition.md](https://github.com/CMSgov/emmy-api/blob/main/docs/education/enrollment-v0-to-v1-transition.md)
+- [https://github.com/CMSgov/emmy-api/blob/main/docs/veteran/disability-rating-v0-to-v1-transition.md](https://github.com/CMSgov/emmy-api/blob/main/docs/veteran/disability-rating-v0-to-v1-transition.md)
+
 The Emmy API is a backend data service that connects to federal and commercial data sources to facilitate eligibility determination for state agencies.
 
 ## Quick Links
