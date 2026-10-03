@@ -1,0 +1,20 @@
+# Default ownership for repository-wide changes.
+* @CMSgov/emmy-devs
+
+# Application runtime and service code.
+/api/ @CMSgov/emmy-api
+/pkg/ @CMSgov/emmy-api
+/main.go @CMSgov/emmy-api
+/main_test.go @CMSgov/emmy-api
+
+# API contracts and schemas.
+/api-spec/ @CMSgov/emmy-data-standard
+/schema/ @CMSgov/emmy-data-standard
+
+# CI/CD, deployment, and repository automation.
+/.github/workflows/ @CMSgov/emmy-devops
+/scripts/ @CMSgov/emmy-devops
+/Dockerfile @CMSgov/emmy-devops
+/docker-compose.yml @CMSgov/emmy-devops
+/otel-collector-config.yml @CMSgov/emmy-devops
+/prometheus.yml @CMSgov/emmy-devops
