@@ -35,7 +35,7 @@
     "@cspell/dict-software-terms": "^5.2.2",
     "@cspell/dict-sql": "^2.2.1",
     "@cspell/dict-typescript": "^3.2.3",
-    "@redocly/cli": "^2.30.3",
+    "@redocly/cli": "^2.33.2",
     "@stoplight/spectral-cli": "^6.15.0",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
